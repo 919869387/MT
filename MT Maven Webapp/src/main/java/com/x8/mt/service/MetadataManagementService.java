@@ -143,7 +143,7 @@ public class MetadataManagementService {
 	 * 
 	 */
 	public List<Object> getFieldMetadata(int tableMetadataId) {
-		List<Object> metadataList = new ArrayList<>();
+		List<Object> metadataList = new ArrayList<Object>();
 		List<Metadata> fieldMetadatas= metadataManagementDao.getFieldMetadata(tableMetadataId);
 		for(int i = 0 ; i < fieldMetadatas.size() ; i++) {
 			Metadata metadata= (Metadata)fieldMetadatas.get(i);
