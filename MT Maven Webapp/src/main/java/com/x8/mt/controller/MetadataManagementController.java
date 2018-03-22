@@ -16,8 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import com.sun.xml.internal.ws.api.addressing.WSEndpointReference.Metadata;
 import com.x8.mt.common.GlobalMethodAndParams;
 import com.x8.mt.common.Log;
 import com.x8.mt.service.MetadataManagementService;
@@ -64,7 +62,7 @@ public class MetadataManagementController {
 		} catch (Exception e) {
 		}
 		
-		List<Metadata> fieldMetadatas= metadataManagementService.getFieldMetadata(tableMetadataId);
+		List<Object> fieldMetadatas= metadataManagementService.getFieldMetadata(tableMetadataId);
 		
 		responsejson.put("result", true);
 		responsejson.put("data", fieldMetadatas);

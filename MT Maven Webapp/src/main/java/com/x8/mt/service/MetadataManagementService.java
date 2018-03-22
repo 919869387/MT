@@ -13,9 +13,10 @@ import net.sf.json.JSONObject;
 
 import org.springframework.stereotype.Service;
 
-import com.sun.xml.internal.ws.api.addressing.WSEndpointReference.Metadata;
 import com.x8.mt.common.GlobalMethodAndParams;
+import com.x8.mt.common.TransformMetadata;
 import com.x8.mt.dao.IMetadataManagementDao;
+import com.x8.mt.entity.Metadata;
 /**
  * 作者： Administrator
  * 时间：2018年3月15日
@@ -24,8 +25,8 @@ import com.x8.mt.dao.IMetadataManagementDao;
 @Service
 public class MetadataManagementService {
 	@Resource
-    IMetadataManagementDao metadataManagementDao;	
-	
+	IMetadataManagementDao metadataManagementDao;	
+
 	/**
 	 * 
 	 * 作者:allen
@@ -43,14 +44,14 @@ public class MetadataManagementService {
 			if(package_ids.contains(package_id)){//如果这个包已经出现过，那么在metadataViewTree的最后一个JSONObject就是相同的package_id,并且package_id下面都有元数据
 				JSONObject samePackage_idJSON = (JSONObject) metadataViewTree.get(metadataViewTree.size()-1);
 				JSONArray children = (JSONArray) samePackage_idJSON.get(GlobalMethodAndParams.MetadataViewTree_children);
-				
+
 				String metadata_id = map.get(GlobalMethodAndParams.Metadata_metadata_id).toString();
 				String metadata_name = map.get(GlobalMethodAndParams.Metadata_metadata_name).toString();
 				String metadata_metamodelid = map.get(GlobalMethodAndParams.Metadata_metadata_metamodelid).toString();
 				children.add(getMetadataViewTreeChildExceptFieldMetadata(metadata_id,metadata_name,metadata_metamodelid));
-				
+
 				samePackage_idJSON.put(GlobalMethodAndParams.MetadataViewTree_children, children);
-				
+
 				metadataViewTree.remove(metadataViewTree.size()-1);
 				metadataViewTree.add(samePackage_idJSON);
 			}else{//如果这个包没有出现过
@@ -62,10 +63,10 @@ public class MetadataManagementService {
 					String metadata_id = map.get(GlobalMethodAndParams.Metadata_metadata_id).toString();
 					String metadata_name = map.get(GlobalMethodAndParams.Metadata_metadata_name).toString();
 					String metadata_metamodelid = map.get(GlobalMethodAndParams.Metadata_metadata_metamodelid).toString();
-					
+
 					JSONArray metadataViewTreeChild = new JSONArray();
 					metadataViewTreeChild.add(getMetadataViewTreeChildExceptFieldMetadata(metadata_id,metadata_name,metadata_metamodelid));
-					
+
 					metadataViewTreeNode.put(GlobalMethodAndParams.MetadataViewTree_children, metadataViewTreeChild);
 				}
 
@@ -89,7 +90,7 @@ public class MetadataManagementService {
 	public List<Map<Object, Object>> getMetadataViewFirstLevel(int viewID){
 		return metadataManagementDao.getMetadataViewFirstLevel(viewID);
 	}
-	
+
 	/**
 	 * 
 	 * 作者:allen
@@ -138,11 +139,17 @@ public class MetadataManagementService {
 	 * 
 	 * 作者:allen
 	 * 时间:2017年3月19日
-	 * 作用:获取字段元数据
+	 * 作用:获取字段元数据,要将元数据的attributes属性展开
 	 * 
 	 */
-	public List<Metadata> getFieldMetadata(int tableMetadataId) {
+	public List<Object> getFieldMetadata(int tableMetadataId) {
+		List<Object> metadataList = new ArrayList<>();
 		List<Metadata> fieldMetadatas= metadataManagementDao.getFieldMetadata(tableMetadataId);
-		return fieldMetadatas;
+		for(int i = 0 ; i < fieldMetadatas.size() ; i++) {
+			Metadata metadata= (Metadata)fieldMetadatas.get(i);
+			Object metadataMap = TransformMetadata.transformMetadataToMap(metadata);
+			metadataList.add(metadataMap);
+		}
+		return metadataList;
 	}
 }

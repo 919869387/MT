@@ -4,7 +4,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Repository;
 
-import com.sun.xml.internal.ws.api.addressing.WSEndpointReference.Metadata;
+import com.x8.mt.entity.Metadata;
 /**
  * 作者： Administrator
  * 时间：2018年3月15日
