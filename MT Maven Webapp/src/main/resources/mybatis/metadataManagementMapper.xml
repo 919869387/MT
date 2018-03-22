@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.x8.mt.dao.IMetadataManagementDao">
+
+	<!-- allen -->
+	<select id="getMetadataViewFirstLevel" parameterType="int"
+		resultType="java.util.Map">
+		select
+		t4.package_id,t4.package_name,t4.metadata_id,t4.metadata_name,t4.metadata_metamodelid
+		from
+		(select t2.id as package_id,t2.name as package_name,t3.id as
+		metadata_id,t3.name as metadata_name,t3.metamodelid as
+		metadata_metamodelid from metadata as t3 RIGHT JOIN
+		(select
+		t1.id,t1.name,t1.childmetamodelid from metadata_view_node as
+		t1
+		where
+		t1.viewid=#{viewID}) as t2
+		ON
+		t3.metamodelid =
+		t2.childmetamodelid) as t4
+		where t4.metadata_id not in (select
+		t5.relatedmetadataid from
+		metadata_relation as t5 where
+		t4.metadata_id=t5.relatedmetadataid and
+		t5.type='COMPOSITION') order by
+		t4.package_id asc;
+	</select>
+
+	<!-- allen -->
+	<select id="getSonMetadata" resultType="java.util.Map">
+		select t1.id as
+		metadata_id,t1.name as metadata_name,t1.metamodelid as
+		metadata_metamodelid from metadata as t1 where t1.id in (select
+		relatedmetadataid from metadata_relation where
+		metadataid=#{metadata_id})
+	</select>
+
+	<!-- allen -->
+	<select id="getFieldMetadata" resultType="com.x8.mt.entity.Metadata">
+		select * from metadata
+		where id in (select relatedmetadataid from metadata_relation where
+		metadataid=#{tableMetadataId} and type='COMPOSITION');
+	</select>
+</mapper>
