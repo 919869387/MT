@@ -20,7 +20,7 @@ import com.x8.mt.common.GlobalMethodAndParams;
 import com.x8.mt.common.Log;
 import com.x8.mt.service.MetadataManagementService;
 /**
- * 作者： Administrator
+ * 作者： allen
  * 时间：2018年3月15日
  * 作用：
  */
