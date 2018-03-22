@@ -32,7 +32,7 @@ public class SystemLogAspect {
 
 	private  static  final Logger logger = LoggerFactory.getLogger(SystemLogAspect. class);  
 
-	//Controller层切点  
+	//Controller层切点 --
 	@Pointcut("execution (* com.x8.mt.controller..*.*(..))")  
 	public void controllerAspect() {  
 	}  
