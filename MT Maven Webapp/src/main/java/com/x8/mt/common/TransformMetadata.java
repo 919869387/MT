@@ -14,9 +14,9 @@ import net.sf.json.JSONObject;
 import com.x8.mt.entity.Metadata;
 
 /**
- * 作者： allen
- * 时间：2018年3月22日
- * 作用：Metadata与map相互转换
+ * 作者:allen
+ * 时间:2018年3月22日
+ * 作用:Metadata与map相互转换
  */
 public class TransformMetadata {
 
