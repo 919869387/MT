@@ -6,7 +6,7 @@ import java.lang.annotation.*;
  * 
  * 作者:allen
  * 时间:2017年11月24日
- * 作用:自定义注解
+ * 作用:自定义注解---
  */
 @Target({ElementType.PARAMETER, ElementType.METHOD})  
 @Retention(RetentionPolicy.RUNTIME)  
