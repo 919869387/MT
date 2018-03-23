@@ -109,58 +109,6 @@ public class Datasource_connectinfoController {
 		return responsejson;
 	}
 	
-//	/**
-//	 * 
-//	 * 作者:GodDispose
-//	 * 时间:2018年3月14日
-//	 * 作用:根据系统ID获取所属数据源
-//	 * 参数：id
-//	 */
-//	@RequestMapping(value = "/getConnectinfoBySystem",method=RequestMethod.POST)
-//	@ResponseBody
-//	@Log(operationType="connectinfo",operationDesc="根据系统ID获取所属数据源")
-//	public JSONObject getConnectinfoBySystem(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map){
-//		JSONObject responsejson = new JSONObject();
-//
-////		if(!GlobalMethodAndParams.checkLogin()){
-////			responsejson.put("result", false);
-////			responsejson.put("count",0);
-////			return responsejson;
-////		}
-//		GlobalMethodAndParams.setHttpServletResponse(request, response);
-//		
-//		//检查传参是否正确
-//		if(!map.containsKey("id")){
-//			responsejson.put("result", false);
-//			responsejson.put("count",0);
-//			return responsejson;
-//		}
-//
-//		String idStr = map.get("id").toString();
-//		int id = 0;
-//		try {
-//			id = Integer.parseInt(idStr);		
-//			JSONArray data = new JSONArray();
-//			List<Connectinfo> connectinfoList = connectinfoService.getConnectinfoListByparentid(id);
-//			
-//			for(Connectinfo connectinfo : connectinfoList){
-//				JSONObject node = new JSONObject();
-//				node.put("id",connectinfo.getId());
-//				node.put("name", connectinfo.getName());
-//				data.add(node);
-//			}	
-//			
-//			responsejson.put("result", true);
-//			responsejson.put("data", data);
-//			//获取记录数，为日志所用
-//			responsejson.put("count", data.size());
-//		} catch (Exception e) {
-//			responsejson.put("result", false);
-//			responsejson.put("count", 0);
-//		}		
-//		
-//		return responsejson;
-//	}
 	
 	
 	/**

@@ -1,10 +1,8 @@
 package com.x8.mt.controller;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -205,18 +203,15 @@ public class KettleMetadataCollectController {
 			data.put("元数据id", metaData.getId());
 			data.put("元数据名称", metaData.getName());
 			data.put("元数据业务说明", metaData.getDescription());
-			data.put("元数据入库时间", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-			.format(metaData.getCreateTime()));
-			data.put("元数据修改时间", 	new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-			.format(metaData.getUpdateTime()));
+			data.put("元数据入库时间", metaData.getCreateTime());
+			data.put("元数据修改时间", metaData.getUpdateTime());
 			data.put("元数据的版本号", metaData.getVersion());
 			data.put("采集元数据的编号", metaData.getCollectJobId());
 			data.put("审核状态", metaData.getCheckStatus());
 			data.put("所属元模型id", metaData.getMetaModelId());
 			for(Metamodel_datatype pri : privateMetaModels){
 				data.put(pri.getDesribe(), json.get(pri.getName()));
-			}
-			
+			}			
 			
 			responsejson.put("result", true);
 			responsejson.put("data", data);
@@ -517,5 +512,44 @@ public class KettleMetadataCollectController {
 		return responsejson;
 	}
 
+	
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年3月23日
+	 * 作用:获取数据库元数据
+	 * 
+	 */
+	@RequestMapping(value = "/getDatabaseMetadata",method=RequestMethod.GET)
+	@ResponseBody
+	@Log(operationType="metadata",operationDesc="获取数据库元数据")
+	public JSONObject getDatabaseMetadata(HttpServletRequest request,HttpServletResponse response) {
+		JSONObject responsejson = new JSONObject();
+
+//		if(!GlobalMethodAndParams.checkLogin()){
+//			responsejson.put("result", false);
+//			responsejson.put("count",0);
+//			return responsejson;
+//		}
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
+	
+		try{
+			List<Metadata> metadatas = metaDataService.getMetadataByMetaModelId(10);
+			JSONArray data = new JSONArray();
+			for(Metadata metadata : metadatas){
+				JSONObject node = new JSONObject();
+				node.put("id", metadata.getId());
+				node.put("label", metadata.getName());
+				data.add(node);
+			}
+			responsejson.put("result", true);
+			responsejson.put("data",data);
+			responsejson.put("count",data.size());
+		} catch (Exception e) {
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+		}
+		return responsejson;
+	}
 		
 }
