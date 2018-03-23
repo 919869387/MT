@@ -121,12 +121,12 @@ public class GlobalMethodAndParams {
 	/**
 	 * 自定义元模型包数据库id
 	 */
-	public static final int selfMetamodelPackageId = 20;
+	public static final int selfMetamodelPackageId = 1000;
 	
 	/**
 	 * 系统元模型包数据库id
 	 */
-	public static final int systemMetamodelPackageId = 9;
+	public static final int systemMetamodelPackageId = 1;
 	
 	/**
 	 * 表输入名称

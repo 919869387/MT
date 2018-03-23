@@ -94,25 +94,6 @@ public class Metamodel_hierarchyService {
 		}
 	}
 
-	/**
-	 * 
-	 * 作者:allen
-	 * 时间:2017年11月17日
-	 * 作用:删除一条Metamodel_hierarchy包记录[只有包下面没有元模型时，包才可以删除](已经废弃)
-	 */
-	public boolean deleteMetamodel_hierarchy_PACKAGE(int id) {
-		//只有包下面没有元模型时，包才可以删除
-		if(iMetamodel_hierarchyDao.packageIshavaSon(id)==0){
-			try {
-				return iMetamodel_hierarchyDao.delete_PACKAGE(id)>0 ? true:false;
-			} catch (Exception e) {
-				return false;
-			}
-		}else{
-			return false;
-		}
-	}
-	
 	
 	/**
 	 * 
