@@ -34,6 +34,19 @@ public class MetadataManagementTest {
 	MetadataManagementController metadataManagementController;
 	
 	@Test
+	public void addMetadataStepTwo(){
+		HttpServletRequest request = null;
+		HttpServletResponse response = null;
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("metamodelId", 31);
+		map.put("parentMetadataId", 1239);
+		map.put("NAME", "table111");
+		map.put("DESRIBE", "测试元数据添加");
+		map.put("tablename", "table111");
+		metadataManagementController.addMetadataStepTwo(request, response, map);
+	}
+	
+	@Test
 	public void addMetadataStepOne(){
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;

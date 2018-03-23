@@ -4,6 +4,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.x8.mt.dao.IMetadataManagementDao">
 
+	<insert id="insertMetadata" useGeneratedKeys="true" keyProperty="id"
+		parameterType="com.x8.mt.entity.Metadata">
+		insert into
+		metadata(name,collectjobid,description,metamodelid,createtime,updatetime,checkstatus,attributes,version)
+		values(#{name},NULL,#{description},#{metaModelId},#{createTime},#{updateTime},#{checkStatus},#{attributes},#{version})
+	</insert>
+
 	<!-- allen -->
 	<select id="getMetadata" resultType="com.x8.mt.entity.Metadata">
 		select * from metadata

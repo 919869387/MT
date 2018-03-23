@@ -22,9 +22,8 @@ import com.x8.mt.entity.Metadata;
 import com.x8.mt.entity.Metamodel_datatype;
 import com.x8.mt.entity.Metamodel_hierarchy;
 /**
- * 作者： Administrator
+ * 作者： allen
  * 时间：2018年3月15日
- * 作用：
  */
 @Service
 public class MetadataManagementService {
@@ -44,7 +43,7 @@ public class MetadataManagementService {
 	 *  	2.加入metadata_relation表
 	 *  	3.加入metadata_tank表
 	 */
-	public boolean addMetadata(Map<Object,Object> map){
+	public boolean addMetadata(Map<String,Object> map){
 		
 		String parentMetadataIdStr = map.get("parentMetadataId").toString();
 		String metamodelIdStr = map.get("metamodelId").toString();
@@ -64,6 +63,12 @@ public class MetadataManagementService {
 		map.remove("NAME");
 		map.remove("DESRIBE");
 		map.remove("parentMetadataIdStr");
+		
+		metadata.setAttributes(JSONObject.fromObject(map).toString());
+		
+		int metadataId = imetadataManagementDao.insertMetadata(metadata);
+		
+		System.out.println(metadataId);
 		return false;
 	}
 

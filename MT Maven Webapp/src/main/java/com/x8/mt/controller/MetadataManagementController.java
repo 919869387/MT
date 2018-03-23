@@ -1,7 +1,5 @@
 package com.x8.mt.controller;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +20,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.x8.mt.common.GlobalMethodAndParams;
 import com.x8.mt.common.Log;
-import com.x8.mt.entity.Metadata;
 import com.x8.mt.service.MetadataManagementService;
 /**
  * 作者： allen
@@ -56,7 +53,7 @@ public class MetadataManagementController {
 			HttpServletResponse response,@RequestBody Map<String, Object> map){
 		JSONObject responsejson = new JSONObject();
 
-		GlobalMethodAndParams.setHttpServletResponse(request, response);
+		//GlobalMethodAndParams.setHttpServletResponse(request, response);
 
 		//检查传参是否正确
 		if(!(map.containsKey("metamodelId")&&map.containsKey("parentMetadataId"))){
@@ -64,13 +61,13 @@ public class MetadataManagementController {
 			responsejson.put("count",0);
 			return responsejson;
 		}
-		
-		
 
-		
+		metadataManagementService.addMetadata(map);
+
+
 		return responsejson;
 	}
-	
+
 	/**
 	 * 
 	 * 作者:allen
@@ -107,9 +104,9 @@ public class MetadataManagementController {
 			responsejson.put("count",0);
 			return responsejson;
 		}
-		
+
 		JSONObject metamodelInfos =  new JSONObject();
-		
+
 		Iterator iterator = metamodelNames.keys();  
 		while(iterator.hasNext()){  
 			String metamodelid = (String) iterator.next();
@@ -215,47 +212,23 @@ public class MetadataManagementController {
 	 * 
 	 * 参数：viewid [系统默认视图的viewid=1]
 	 */
-	//	@RequestMapping(value = "/getMetadataViewTree", method = RequestMethod.POST)
-	//	@ResponseBody
-	//	@Log(operationType="metadata",operationDesc="查找元数据视图树")
-	//	public JSONObject getMetadataViewTree(HttpServletRequest request,
-	//			HttpServletResponse response,@RequestBody Map<String, Object> map){
-	//		JSONObject responsejson = new JSONObject();
-	//
-	//		GlobalMethodAndParams.setHttpServletResponse(request, response);
-	//
-	//		//检查传参是否正确
-	//		if(!map.containsKey("viewid")){
-	//			responsejson.put("result", false);
-	//			responsejson.put("count",0);
-	//			return responsejson;
-	//		}
-	//
-	//		String viewidStr = map.get("viewid").toString();
-	//		int viewid = 0;
-	//		try {
-	//			viewid = Integer.parseInt(viewidStr);
-	//		} catch (Exception e) {
-	//		}
-	//		
-	//		JSONArray metadataViewTree= metadataManagementService.getMetadataViewTree(viewid);
-	//		
-	//		responsejson.put("result", true);
-	//		responsejson.put("data", metadataViewTree);
-	//		responsejson.put("count", 1);
-	//		return responsejson;
-	//	}
-
-	@RequestMapping(value = "/getMetadataViewTree", method = RequestMethod.GET)
+	@RequestMapping(value = "/getMetadataViewTree", method = RequestMethod.POST)
 	@ResponseBody
 	@Log(operationType="metadata",operationDesc="查找元数据视图树")
 	public JSONObject getMetadataViewTree(HttpServletRequest request,
-			HttpServletResponse response){
+			HttpServletResponse response,@RequestBody Map<String, Object> map){
 		JSONObject responsejson = new JSONObject();
 
 		GlobalMethodAndParams.setHttpServletResponse(request, response);
 
-		String viewidStr = "1";
+		//检查传参是否正确
+		if(!map.containsKey("viewid")){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}
+
+		String viewidStr = map.get("viewid").toString();
 		int viewid = 0;
 		try {
 			viewid = Integer.parseInt(viewidStr);
@@ -269,5 +242,29 @@ public class MetadataManagementController {
 		responsejson.put("count", 1);
 		return responsejson;
 	}
+
+//	@RequestMapping(value = "/getMetadataViewTree", method = RequestMethod.GET)
+//	@ResponseBody
+//	@Log(operationType="metadata",operationDesc="查找元数据视图树")
+//	public JSONObject getMetadataViewTree(HttpServletRequest request,
+//			HttpServletResponse response){
+//		JSONObject responsejson = new JSONObject();
+//
+//		GlobalMethodAndParams.setHttpServletResponse(request, response);
+//
+//		String viewidStr = "1";
+//		int viewid = 0;
+//		try {
+//			viewid = Integer.parseInt(viewidStr);
+//		} catch (Exception e) {
+//		}
+//
+//		JSONArray metadataViewTree= metadataManagementService.getMetadataViewTree(viewid);
+//
+//		responsejson.put("result", true);
+//		responsejson.put("data", metadataViewTree);
+//		responsejson.put("count", 1);
+//		return responsejson;
+//	}
 
 }

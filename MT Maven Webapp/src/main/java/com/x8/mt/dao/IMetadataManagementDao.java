@@ -43,4 +43,12 @@ public interface IMetadataManagementDao {
 	 * 作用:获取某一个元数据
 	 */
 	Metadata getMetadata(String metadataId);
+
+	/**
+	 * 
+	 * 作者:allen 
+	 * 时间:2017年3月23日 
+	 * 作用:向metadata表插入一条数据
+	 */
+	int insertMetadata(Metadata metadata);
 }

@@ -254,50 +254,6 @@ public class Metamodel_hierarchyController {
         return responsejson;
 	}
 	
-	
-	/**
-	 * 
-	 * 作者:allen
-	 * 时间:2017年11月17日
-	 * 作用:删除元模型[只有元模型下面没有数据项时，才可以删除]
-	 * 参数：删除元模型的id(已经废弃)
-	 */
-	@RequestMapping(value = "/deleteMetamodel_hierarchy_METAMODEL",method=RequestMethod.POST)
-	@Log(operationType="metamodel_hierarchy",operationDesc="根据元模型id,删除元模型")
-	@ResponseBody
-	public JSONObject deleteMetamodel_hierarchy_METAMODEL(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map){
-		JSONObject responsejson = new JSONObject();
-		
-//		if(!GlobalMethodAndParams.checkLogin()){
-//			responsejson.put("result", false);
-//			responsejson.put("count",0);
-//			return responsejson;
-//		}
-		GlobalMethodAndParams.setHttpServletResponse(request, response);
-		
-		//检查传参是否正确
-		if(!map.containsKey("id")){
-			responsejson.put("result", false);
-			responsejson.put("count",0);
-	        return responsejson;
-		}
-		
-		String idStr = map.get("id").toString();
-		int id = 0;
-		try {
-			id = Integer.parseInt(idStr);
-		} catch (Exception e) {
-		}
-		boolean result = metamodel_hierarchyService.deleteMetamodel_hierarchy_METAMODEL(id);
-		responsejson.put("result",result);
-		if(result){
-			responsejson.put("count",1);
-		}else{
-			responsejson.put("count",0);
-		}
-        return responsejson;
-	}
-	
 	/**
 	 * 
 	 * 作者:allen
