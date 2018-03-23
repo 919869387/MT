@@ -112,25 +112,6 @@ public class Metamodel_hierarchyService {
 			return false;
 		}
 	}
-
-	/**
-	 * 
-	 * 作者:allen
-	 * 时间:2017年11月17日
-	 * 作用:删除元模型[只有元模型下面没有元数据时，元模型才可以删除](已经废弃)
-	 */
-	public boolean deleteMetamodel_hierarchy_METAMODEL(int id) {
-		//只有元模型下面没有元数据时，元模型才可以删除
-		if(iMetamodel_datatypeDao.getMetamodel_datatype(id).size()==0){
-			try {
-				return iMetamodel_hierarchyDao.delete_METAMODEL(id)>0 ? true:false;
-			} catch (Exception e) {
-				return false;
-			}
-		}else{
-			return false;
-		}
-	}
 	
 	
 	/**

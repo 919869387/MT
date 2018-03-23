@@ -5,6 +5,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 <mapper namespace="com.x8.mt.dao.IMetadataManagementDao">
 
 	<!-- allen -->
+	<select id="getMetadata" resultType="com.x8.mt.entity.Metadata">
+		select * from metadata
+		where
+		id=#{metadataId};
+	</select>
+
+	<!-- allen -->
 	<select id="getMetadataViewFirstLevel" parameterType="int"
 		resultType="java.util.Map">
 		select

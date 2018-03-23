@@ -32,7 +32,26 @@ public class MetadataManagementTest {
 	MetadataManagementService metadataManagementService;
 	@Autowired
 	MetadataManagementController metadataManagementController;
-
+	
+	@Test
+	public void addMetadataStepOne(){
+		HttpServletRequest request = null;
+		HttpServletResponse response = null;
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("metamodelId", 10);
+		System.out.println(metadataManagementController.addMetadataStepOne(request, response, map));
+	}
+	
+	
+	@Test
+	public void getMetadata(){
+		HttpServletRequest request = null;
+		HttpServletResponse response = null;
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("metadataId", 1248);
+		map.put("metamodelId", 31);
+		System.out.println(metadataManagementController.getMetadataInfo(request,response,map));
+	}
 	
 	@Test
 	public void getFieldMetadata(){

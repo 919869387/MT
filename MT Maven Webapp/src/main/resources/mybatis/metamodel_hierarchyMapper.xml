@@ -54,4 +54,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		select id,name from metamodel_hierarchy where mountnode = 1
 	</select>
 	
+	<!-- allen -->
+	<select id="getCOMPOSITIONMetamodel" resultType="com.x8.mt.entity.Metamodel_hierarchy">
+		select * from metamodel_hierarchy where id in (select relatedmetamodelid from metamodel_relation where metamodelid=#{metamodelId} and type='COMPOSITION');
+	</select>
+	
 </mapper>

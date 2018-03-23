@@ -3,8 +3,10 @@
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.x8.mt.dao.IMetamodel_datatypeDao">
-	<select id="getMetamodel_datatype" parameterType="int" resultType="com.x8.mt.entity.Metamodel_datatype">
-		select * from metamodel_datatype where metamodelid=#{id}
+
+	<!-- allen -->
+	<select id="getMetamodelDatatype_PublicAndAttributes" parameterType="java.util.Map" resultType="com.x8.mt.entity.Metamodel_datatype">
+		select * from metamodel_datatype where metamodelid in (#{public_metamodelid},#{attribute_metamodelid})
 	</select>
 	
 	<select id="getMetamodel_datatypeByMetaModelId" parameterType="int" resultType="com.x8.mt.entity.Metamodel_datatype">
