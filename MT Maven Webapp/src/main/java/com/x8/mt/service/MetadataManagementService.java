@@ -1,8 +1,8 @@
-/**
- * 
- */
 package com.x8.mt.service;
+
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,7 +16,11 @@ import org.springframework.stereotype.Service;
 import com.x8.mt.common.GlobalMethodAndParams;
 import com.x8.mt.common.TransformMetadata;
 import com.x8.mt.dao.IMetadataManagementDao;
+import com.x8.mt.dao.IMetamodel_datatypeDao;
+import com.x8.mt.dao.IMetamodel_hierarchyDao;
 import com.x8.mt.entity.Metadata;
+import com.x8.mt.entity.Metamodel_datatype;
+import com.x8.mt.entity.Metamodel_hierarchy;
 /**
  * 作者： Administrator
  * 时间：2018年3月15日
@@ -25,7 +29,110 @@ import com.x8.mt.entity.Metadata;
 @Service
 public class MetadataManagementService {
 	@Resource
-	IMetadataManagementDao metadataManagementDao;	
+	IMetadataManagementDao imetadataManagementDao;	
+	@Resource
+	IMetamodel_datatypeDao iMetamodel_datatypeDao;
+	@Resource
+	IMetamodel_hierarchyDao iMetamodel_hierarchyDao;
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2017年3月23日
+	 * 作用:insert元数据,插入实际元数据
+	 *  	1.将元数据加入到metadata表
+	 *  	2.加入metadata_relation表
+	 *  	3.加入metadata_tank表
+	 */
+	public boolean addMetadata(Map<Object,Object> map){
+		
+		String parentMetadataIdStr = map.get("parentMetadataId").toString();
+		String metamodelIdStr = map.get("metamodelId").toString();
+		Date dataTime = new Date();
+		
+		//1.将元数据加入到metadata表
+		Metadata metadata = new Metadata();
+		metadata.setMetaModelId(Integer.parseInt(metamodelIdStr));
+		metadata.setName(map.get("NAME").toString());
+		metadata.setDescription(map.get("DESRIBE").toString());
+		metadata.setCheckStatus("1");
+		metadata.setCreateTime(dataTime);
+		metadata.setUpdateTime(dataTime);
+		metadata.setVersion(1);
+		
+		map.remove("metamodelId");
+		map.remove("NAME");
+		map.remove("DESRIBE");
+		map.remove("parentMetadataIdStr");
+		return false;
+	}
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2017年3月16日
+	 * 作用:查询得到元数据对应的元模型信息,这个方法显示全部元模型的信息
+	 * 
+	 */
+	public JSONObject getMetamodelInfoForAddMetadata(String metamodelid){
+
+		JSONObject metamodelInfo = getMetamodelInfo(metamodelid);
+
+		metamodelInfo.remove(GlobalMethodAndParams.Public_Metamodel_ATTRIBUTES);
+		metamodelInfo.remove(GlobalMethodAndParams.Public_Metamodel_COLLECTJOBID);
+		metamodelInfo.remove(GlobalMethodAndParams.Public_Metamodel_METAMODELID);
+		metamodelInfo.remove(GlobalMethodAndParams.Public_Metamodel_CHECKSTATUS);
+		metamodelInfo.remove(GlobalMethodAndParams.Public_Metamodel_VERSION);
+		metamodelInfo.remove(GlobalMethodAndParams.Public_Metamodel_UPDATETIME);
+		metamodelInfo.remove(GlobalMethodAndParams.Public_Metamodel_CREATETIME);
+		metamodelInfo.remove(GlobalMethodAndParams.Public_Metamodel_ID);
+
+		return metamodelInfo;
+	}
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2017年3月16日
+	 * 作用:查询得到COMPOSITION类型的儿子元模型
+	 * 
+	 */
+	public JSONObject getCOMPOSITIONMetamodel(String metamodelId){
+		List<Metamodel_hierarchy> metamodel_hierarchys = iMetamodel_hierarchyDao.getCOMPOSITIONMetamodel(metamodelId);
+		if(metamodel_hierarchys.size()==0){
+			return null;
+		}else{
+			JSONObject metamodels = new JSONObject();
+			for(int i=0;i<metamodel_hierarchys.size();i++){
+				Metamodel_hierarchy metamodel_hierarchy = metamodel_hierarchys.get(i);
+				metamodels.put(metamodel_hierarchy.getId(), metamodel_hierarchy.getName());
+			}
+			return metamodels;
+		}
+	}
+
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2017年3月16日
+	 * 作用:查询得到元数据对应的元模型信息,这个方法显示全部元模型的信息
+	 * 
+	 */
+	public JSONObject getMetamodelInfo(Object attribute_metamodelid){
+		Map<Object,Object> metamodelidSelectMap = new HashMap<Object,Object>();
+		metamodelidSelectMap.put(GlobalMethodAndParams.Public_metamodelid_Name, GlobalMethodAndParams.PublicMetamodelId);
+		metamodelidSelectMap.put(GlobalMethodAndParams.Attribute_metamodelid_Name, attribute_metamodelid);
+		List<Metamodel_datatype> metamodel_datatypes = iMetamodel_datatypeDao.getMetamodelDatatype_PublicAndAttributes(metamodelidSelectMap);
+
+		JSONObject metamodelInfo = new JSONObject();
+		for(int i=0;i<metamodel_datatypes.size();i++){
+			Metamodel_datatype metamodel_datatype= metamodel_datatypes.get(i);
+			metamodelInfo.put(metamodel_datatype.getName(), metamodel_datatype.getDesribe());
+		}
+		metamodelInfo.remove(GlobalMethodAndParams.Public_Metamodel_ATTRIBUTES);
+		return metamodelInfo;
+	}
 
 	/**
 	 * 
@@ -88,7 +195,7 @@ public class MetadataManagementService {
 	 * 
 	 */
 	public List<Map<Object, Object>> getMetadataViewFirstLevel(int viewID){
-		return metadataManagementDao.getMetadataViewFirstLevel(viewID);
+		return imetadataManagementDao.getMetadataViewFirstLevel(viewID);
 	}
 
 	/**
@@ -99,7 +206,7 @@ public class MetadataManagementService {
 	 * 
 	 */
 	public JSONObject getMetadataViewTreeChildExceptFieldMetadata(String metadata_id,String metadata_name,String metadata_metamodelid){
-		List<Map<Object, Object>> sonMetadata= metadataManagementDao.getSonMetadata(metadata_id);
+		List<Map<Object, Object>> sonMetadata= imetadataManagementDao.getSonMetadata(metadata_id);
 		if(sonMetadata.size()==0){
 			JSONObject tagTree = new JSONObject();
 			tagTree.put(GlobalMethodAndParams.MetadataViewTree_id, metadata_id);
@@ -144,12 +251,24 @@ public class MetadataManagementService {
 	 */
 	public List<Object> getFieldMetadata(int tableMetadataId) {
 		List<Object> metadataList = new ArrayList<Object>();
-		List<Metadata> fieldMetadatas= metadataManagementDao.getFieldMetadata(tableMetadataId);
+		List<Metadata> fieldMetadatas= imetadataManagementDao.getFieldMetadata(tableMetadataId);
 		for(int i = 0 ; i < fieldMetadatas.size() ; i++) {
 			Metadata metadata= (Metadata)fieldMetadatas.get(i);
 			Object metadataMap = TransformMetadata.transformMetadataToMap(metadata);
 			metadataList.add(metadataMap);
 		}
 		return metadataList;
+	}
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2017年3月19日
+	 * 作用:根据元数据id,获取某一个元数据
+	 */
+	public Object getMetadata(String metadataId) {
+		Metadata metadata= imetadataManagementDao.getMetadata(metadataId);
+		Object metadataMap = TransformMetadata.transformMetadataToMap(metadata);
+		return metadataMap;
 	}
 }

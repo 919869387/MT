@@ -28,16 +28,6 @@ public class Metamodel_datatypeService {
 			return null;
 		}
 	}
-
-	/**
-	 * 
-	 * 作者:allen
-	 * 时间:2017年11月17日
-	 * 作用:通过元模型id,得到元模型的所有数据项
-	 */
-	public List<Metamodel_datatype> getMetamodel_datatype(int id) {
-		return iMetamodel_datatypeDao.getMetamodel_datatype(id);
-	}
 	
 	/**
 	 * 

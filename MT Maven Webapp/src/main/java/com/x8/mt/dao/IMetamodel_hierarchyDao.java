@@ -93,4 +93,11 @@ public interface IMetamodel_hierarchyDao {
 	 * @return 查询所有能被悬挂的元模型
 	 */
 	List<Metamodel_hierarchy> getMetaModelByMountNode();
+	
+	/**
+	 * 作者:allen
+	 * 时间:2018年3月14日
+	 * 作用:查询所有组合关系的下层元模型
+	 */
+	List<Metamodel_hierarchy> getCOMPOSITIONMetamodel(String metamodelId);
 }

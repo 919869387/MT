@@ -4,15 +4,50 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class GlobalMethodAndParams {
-	/**
-	 * 
-	 */
-	public static final String Metadata_Attributes= "attributes";
 	
 	/**
-	 * 数据库中表元模型id
+	 * 公共元模型的属性名
+	 */
+	public static final String Public_Metamodel_ATTRIBUTES= "ATTRIBUTES";
+	public static final String Public_Metamodel_COLLECTJOBID= "COLLECTJOBID";
+	public static final String Public_Metamodel_METAMODELID= "METAMODELID";
+	public static final String Public_Metamodel_CHECKSTATUS= "CHECKSTATUS";
+	public static final String Public_Metamodel_VERSION= "VERSION";
+	public static final String Public_Metamodel_UPDATETIME= "UPDATETIME";
+	public static final String Public_Metamodel_CREATETIME= "CREATETIME";
+	public static final String Public_Metamodel_DESRIBE= "DESRIBE";
+	public static final String Public_Metamodel_NAME= "NAME";
+	public static final String Public_Metamodel_ID= "ID";
+	
+	/**
+	 * 私有元模型SQL字段名
+	 */
+	public static final String Attribute_metamodelid_Name= "attribute_metamodelid";
+	
+	/**
+	 * 公共元模型SQL字段名
+	 */
+	public static final String Public_metamodelid_Name= "public_metamodelid";
+	
+	/**
+	 * 公共元模型,metamodelid
+	 */
+	public static final String PublicMetamodelId= "2";
+	
+	/**
+	 * 表元模型id
 	 */
 	public static final String TableMedamodelId_InDatabase= "31";
+	
+	/**
+	 * 字段元模型id
+	 */
+	public static final String FieldMetamodelId= "32";
+	
+	/**
+	 * 元数据特有数据项字段名
+	 */
+	public static final String Metadata_Attributes= "attributes";
 	
 	/**
 	 * 获取元数据视图树所需要的数据库表字段名

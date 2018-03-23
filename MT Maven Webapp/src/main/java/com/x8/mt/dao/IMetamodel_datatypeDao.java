@@ -1,11 +1,11 @@
 package com.x8.mt.dao;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Repository;
 
 import com.x8.mt.entity.Metamodel_datatype;
-import com.x8.mt.entity.Metamodel_hierarchy;
 
 @Repository
 public interface IMetamodel_datatypeDao {
@@ -21,10 +21,10 @@ public interface IMetamodel_datatypeDao {
 	/**
 	 * 
 	 * 作者:allen 
-	 * 时间:2017年11月17日 
-	 * 作用:通过元模型id,得到元模型的所有数据项
+	 * 时间:2018年3月23日 
+	 * 作用:通过元模型id,得到元模型的所有数据项,包括公共与特殊的
 	 */
-	List<Metamodel_datatype> getMetamodel_datatype(int id);
+	List<Metamodel_datatype> getMetamodelDatatype_PublicAndAttributes(Map<Object,Object> map);
 	
 	/**
 	 * 
