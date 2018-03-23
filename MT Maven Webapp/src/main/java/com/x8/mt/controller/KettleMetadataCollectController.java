@@ -270,8 +270,7 @@ public class KettleMetadataCollectController {
 		}
 
 		Datasource_connectinfo datasource_connectinfo = datasource_connectinfoService.getDatasource_connectinfoListByparentid(id);		
-		
-		//将采集任务结果插入到数据库中		
+			
 		//获取数据源编号
 		int connectinfoid = id;
 		//获取采集方式

@@ -8,7 +8,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</delete>
 	
 	<update id="updateMetadataDescribeById" parameterType="com.x8.mt.entity.Metadata" >
-		update metadata set desribe = #{description} where id = #{id}
+		update metadata set description = #{description} where id = #{id}
 	</update>
 	
 	<insert id="insertMetadata" parameterType="com.x8.mt.entity.Metadata" 

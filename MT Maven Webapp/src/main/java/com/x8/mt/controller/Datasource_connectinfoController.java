@@ -23,10 +23,12 @@ import com.x8.mt.entity.CollectJob;
 import com.x8.mt.entity.Connectinfo;
 import com.x8.mt.entity.Datasource_connectinfo;
 import com.x8.mt.entity.Metadata;
+import com.x8.mt.entity.Metamodel_datatype;
 import com.x8.mt.service.CollectJobService;
 import com.x8.mt.service.ConnectinfoService;
 import com.x8.mt.service.Datasource_connectinfoService;
 import com.x8.mt.service.MetaDataService;
+import com.x8.mt.service.Metamodel_datatypeService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)//解决跨域请求的注解
 @Controller
@@ -39,7 +41,9 @@ public class Datasource_connectinfoController {
 	@Resource
 	CollectJobService collectJobService;
 	@Resource
-	MetaDataService metaDataService;	
+	MetaDataService metaDataService;
+	@Resource
+	Metamodel_datatypeService metamodel_datatypeService;
 	/**
 	 * 
 	 * 作者:GodDispose
@@ -115,12 +119,12 @@ public class Datasource_connectinfoController {
 	 * 
 	 * 作者:GodDispose
 	 * 时间:2018年3月14日
-	 * 作用:根据数据源ID获取所用数据源连接信息
+	 * 作用:根据数据库元数据ID获取所用数据源连接信息
 	 * 参数：id
 	 */
 	@RequestMapping(value = "/getDataSource_Connectinfo",method=RequestMethod.POST)
 	@ResponseBody
-	@Log(operationType="datasource_connectinfo",operationDesc="根据数据源ID获取所用数据源连接信息")
+	@Log(operationType="metadata",operationDesc="根据数据库元数据ID获取所用数据源连接信息")
 	public JSONObject getDataSource_Connectinfo(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map){
 		JSONObject responsejson = new JSONObject();
 
@@ -146,42 +150,51 @@ public class Datasource_connectinfoController {
 		}
 		
 		JSONArray data = new JSONArray();
-		Datasource_connectinfo datasource_connectinfo = datasource_connectinfoService.getDatasource_connectinfoListByparentid(id);
-		
-		JSONObject datasource_connectinfoId = new JSONObject();
-		datasource_connectinfoId.put("key","ID");
-		datasource_connectinfoId.put("value", datasource_connectinfo.getParentid());
-		data.add(datasource_connectinfoId);
-		
-		JSONObject url = new JSONObject();
-		url.put("key","主机名");
-		url.put("value", datasource_connectinfo.getUrl());
-		data.add(url);
-		
-		JSONObject port = new JSONObject();
-		port.put("key","端口号");
-		port.put("value", datasource_connectinfo.getPort());
-		data.add(port);
-		
-		JSONObject name = new JSONObject();
-		name.put("key","数据库名称");
-		name.put("value", datasource_connectinfo.getDatabasename());
-		data.add(name);
-		
-		JSONObject type = new JSONObject();
-		type.put("key","数据库类型");
-		type.put("value", datasource_connectinfo.getDatabasetype());
-		data.add(type);
-		
-		JSONObject userName = new JSONObject();
-		userName.put("key","数据库用户名");
-		userName.put("value", datasource_connectinfo.getUsername());
-		data.add(userName);
-		
-		JSONObject userPassword = new JSONObject();
-		userPassword.put("key","数据库密码");
-		userPassword.put("value", datasource_connectinfo.getPassword());
-		data.add(userPassword);
+		Metadata metaData = metaDataService.getMetadataById(id);
+		JSONObject json = JSONObject.fromObject(metaData.getAttributes());
+		List<Metamodel_datatype> privateMetaModels = metamodel_datatypeService.getMetamodel_datatypeByMetaModelId(metaData.getMetaModelId());
+		for(Metamodel_datatype pri : privateMetaModels){
+			JSONObject node = new JSONObject();
+			node.put("key", pri.getDesribe());
+			node.put("value", json.get(pri.getName()));
+			data.add(node);
+		}	
+//		Datasource_connectinfo datasource_connectinfo = datasource_connectinfoService.getDatasource_connectinfoListByparentid(id);
+//		
+//		JSONObject datasource_connectinfoId = new JSONObject();
+//		datasource_connectinfoId.put("key","ID");
+//		datasource_connectinfoId.put("value", datasource_connectinfo.getParentid());
+//		data.add(datasource_connectinfoId);
+//		
+//		JSONObject url = new JSONObject();
+//		url.put("key","主机名");
+//		url.put("value", datasource_connectinfo.getUrl());
+//		data.add(url);
+//		
+//		JSONObject port = new JSONObject();
+//		port.put("key","端口号");
+//		port.put("value", datasource_connectinfo.getPort());
+//		data.add(port);
+//		
+//		JSONObject name = new JSONObject();
+//		name.put("key","数据库名称");
+//		name.put("value", datasource_connectinfo.getDatabasename());
+//		data.add(name);
+//		
+//		JSONObject type = new JSONObject();
+//		type.put("key","数据库类型");
+//		type.put("value", datasource_connectinfo.getDatabasetype());
+//		data.add(type);
+//		
+//		JSONObject userName = new JSONObject();
+//		userName.put("key","数据库用户名");
+//		userName.put("value", datasource_connectinfo.getUsername());
+//		data.add(userName);
+//		
+//		JSONObject userPassword = new JSONObject();
+//		userPassword.put("key","数据库密码");
+//		userPassword.put("value", datasource_connectinfo.getPassword());
+//		data.add(userPassword);
 		
 		responsejson.put("result", true);
 		responsejson.put("data", data);
