@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.x8.mt.dao.IMetaDataRelationDao">	
+	
+	<insert id="insertMetaDataRelation" parameterType="com.x8.mt.entity.MetaDataRelation"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into 
+		metadata_relation (metadataid,relatedmetadataid,type)
+		values(#{metaDataId},#{relateMetaDataId},#{type})
+	</insert>
+	
+</mapper>
+
+

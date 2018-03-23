@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.x8.mt.dao.IMetaDataDao">	
+	<delete id="deleteMetadataById" parameterType="int">
+		delete from metadata where id = #{id}
+	</delete>
+	
+	<update id="updateMetadataDescribeById" parameterType="com.x8.mt.entity.Metadata" >
+		update metadata set desribe = #{description} where id = #{id}
+	</update>
+	
+	<insert id="insertMetadata" parameterType="com.x8.mt.entity.Metadata" 
+	useGeneratedKeys="true" keyProperty="id">
+		insert into metadata values(
+		#{id},#{name},#{collectJobId},#{description},#{metaModelId},
+		#{createTime},#{updateTime},#{checkStatus},#{attributes},#{version})
+	</insert>
+	
+	<select id="getMetadataByMetaModelId" resultType="com.x8.mt.entity.Metadata">
+		select * from metadata where metamodelid=#{metaModelId}
+	</select>
+	
+	<select id="getMetadataById" resultType="com.x8.mt.entity.Metadata">
+		select * from metadata where id=#{id}
+	</select>
+	
+</mapper>

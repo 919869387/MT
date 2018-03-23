@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.x8.mt.dao.IDatasource_connectinfoDao">
+	
+	<select id="getDatasource_connectinfoByid" resultType="com.x8.mt.entity.Datasource_connectinfo">
+		select * from datasource_connectinfo where id=#{id}
+	</select>
+	
+	<select id="getDatasource_connectinfo" resultType="com.x8.mt.entity.Datasource_connectinfo">
+		select * from datasource_connectinfo
+	</select>
+	
+	<insert id="insert" parameterType="com.x8.mt.entity.Datasource_connectinfo"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into
+		datasource_connectinfo(url, port, username,
+		password,databasename,databasetype,parentid)
+		values(#{url}, #{port},
+		#{username},
+		#{password},
+		#{databasename},#{databasetype}, #{parentid})
+	</insert>
+	
+	<select id="getDatasource_connectinfoListByparentid" resultType="com.x8.mt.entity.Datasource_connectinfo">
+		select * from datasource_connectinfo where parentid=#{parentid}
+	</select>
+
+	<delete id="delete" parameterType="int">
+		delete from
+		datasource_connectinfo where id=#{id}
+	</delete>
+
+	<update id="update" parameterType="com.x8.mt.entity.Datasource_connectinfo">
+		update datasource_connectinfo
+		<trim prefix="set" suffixOverrides=",">
+			<if test="url!=null">url=#{url},</if>
+			<if test="port!=null">port=#{port},</if>
+			<if test="username!=null">username=#{username},</if>
+			<if test="password!=null">password=#{password},</if>
+			<if test="databasename!=null">databasename=#{databasename},</if>
+			<if test="databasetype!=null">databasetype=#{databasetype},</if>
+		</trim>
+		where parentid=#{parentid}
+	</update>
+</mapper>

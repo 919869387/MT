@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.x8.mt.dao.IConnectinfoDao">
+	
+	<!-- <insert id="insert" parameterType="com.x8.mt.entity.Connectinfo">
+		insert into connectinfo values(#{id},#{name},#{type},#{parentid},#{describe})
+	</insert> -->
+	
+	<select id="getConnectinfoListByparentid" parameterType="int" resultType="com.x8.mt.entity.Connectinfo">
+		select * from connectinfo where parentid = #{parentid}
+	</select>
+	
+	<select id="getConnectinfoByid" parameterType="int" resultType="com.x8.mt.entity.Connectinfo">
+		select * from connectinfo where id = #{id}
+	</select>
+	
+	<select id="getConnectinfo" resultType="com.x8.mt.entity.Connectinfo">
+		select * from connectinfo 
+	</select>
+	
+	<delete id="deleteConnectInfoById" parameterType="int">
+		delete from
+		connectinfo where id=#{id}
+	</delete>
+	
+	<update id="updateConnectinfoNameOrDescriptionById" parameterType="com.x8.mt.entity.Connectinfo">
+		update connectinfo
+		<trim prefix="set" suffixOverrides=",">
+			<if test="name!=null">name=#{name},</if>
+			<if test="describe!=null">desribe=#{describe},</if>
+		</trim>
+		where id=#{id}
+	</update>
+	
+	<insert id="insert" parameterType="com.x8.mt.entity.Connectinfo"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into
+		connectinfo (name, type,desribe,mountmetadataid,needcheck)
+		values (#{name}, #{type},#{description},#{mountMetaDataId},#{needCheck})
+	</insert>
+	
+</mapper>

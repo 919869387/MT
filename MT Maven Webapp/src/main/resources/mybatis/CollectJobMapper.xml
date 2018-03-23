@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.x8.mt.dao.ICollectJobDao">
+
+	
+	<select id="getCollectJobByDate" resultType="com.x8.mt.entity.CollectJob">
+		select * from collectjob 
+		<where>
+			<if test="startdate!=null">and createdate >= #{startdate} </if>
+			<if test="enddate!=null">and #{enddate} >= createdate</if>
+		</where>
+	</select>
+
+	<select id="getCollectJobById" parameterType="int" resultType="com.x8.mt.entity.CollectJob">
+		select * from collectjob where id = #{id}
+	</select>
+	
+	<select id="getCollectJobByConnectinfoId" parameterType="int" resultType="com.x8.mt.entity.CollectJob">
+		select * from collectjob where connectinfoid = #{id}
+	</select>
+
+	<insert id="insert" parameterType="com.x8.mt.entity.CollectJob"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into
+		collectjob(name,connectinfoid,mode,checkresult,	createdate,creater)
+		values(#{name}, #{connectinfoId},#{mode},#{checkResult},#{createDate},#{creater})
+	</insert>
+	
+	<delete id="delete" parameterType="int">
+		delete from
+		collectjob where id=#{id}
+	</delete>
+</mapper>
