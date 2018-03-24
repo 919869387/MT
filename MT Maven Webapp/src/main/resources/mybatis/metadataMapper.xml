@@ -14,8 +14,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<insert id="insertMetadata" parameterType="com.x8.mt.entity.Metadata" 
 	useGeneratedKeys="true" keyProperty="id">
 		insert into metadata values(
-		#{id},#{name},#{collectJobId},#{description},#{metaModelId},
-		#{createTime},#{updateTime},#{checkStatus},#{attributes},#{version})
+		#{id},#{name},#{collectJobId},#{metaModelId},#{createTime},#{updateTime}
+		,#{checkStatus},#{attributes},#{version},#{description})
 	</insert>
 	
 	<select id="getMetadataByMetaModelId" resultType="com.x8.mt.entity.Metadata">

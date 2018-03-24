@@ -37,7 +37,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<insert id="insert" parameterType="com.x8.mt.entity.Connectinfo"
 		useGeneratedKeys="true" keyProperty="id">
 		insert into
-		connectinfo (name, type,desribe,mountmetadataid,needcheck)
+		connectinfo (name, type,description,mountmetadataid,needcheck)
 		values (#{name}, #{type},#{description},#{mountMetaDataId},#{needCheck})
 	</insert>
 	
