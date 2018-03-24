@@ -150,51 +150,51 @@ public class Datasource_connectinfoController {
 		}
 		
 		JSONArray data = new JSONArray();
-		Metadata metaData = metaDataService.getMetadataById(id);
-		JSONObject json = JSONObject.fromObject(metaData.getAttributes());
-		List<Metamodel_datatype> privateMetaModels = metamodel_datatypeService.getMetamodel_datatypeByMetaModelId(metaData.getMetaModelId());
-		for(Metamodel_datatype pri : privateMetaModels){
-			JSONObject node = new JSONObject();
-			node.put("key", pri.getDesribe());
-			node.put("value", json.get(pri.getName()));
-			data.add(node);
-		}	
-//		Datasource_connectinfo datasource_connectinfo = datasource_connectinfoService.getDatasource_connectinfoListByparentid(id);
-//		
-//		JSONObject datasource_connectinfoId = new JSONObject();
-//		datasource_connectinfoId.put("key","ID");
-//		datasource_connectinfoId.put("value", datasource_connectinfo.getParentid());
-//		data.add(datasource_connectinfoId);
-//		
-//		JSONObject url = new JSONObject();
-//		url.put("key","主机名");
-//		url.put("value", datasource_connectinfo.getUrl());
-//		data.add(url);
-//		
-//		JSONObject port = new JSONObject();
-//		port.put("key","端口号");
-//		port.put("value", datasource_connectinfo.getPort());
-//		data.add(port);
-//		
-//		JSONObject name = new JSONObject();
-//		name.put("key","数据库名称");
-//		name.put("value", datasource_connectinfo.getDatabasename());
-//		data.add(name);
-//		
-//		JSONObject type = new JSONObject();
-//		type.put("key","数据库类型");
-//		type.put("value", datasource_connectinfo.getDatabasetype());
-//		data.add(type);
-//		
-//		JSONObject userName = new JSONObject();
-//		userName.put("key","数据库用户名");
-//		userName.put("value", datasource_connectinfo.getUsername());
-//		data.add(userName);
-//		
-//		JSONObject userPassword = new JSONObject();
-//		userPassword.put("key","数据库密码");
-//		userPassword.put("value", datasource_connectinfo.getPassword());
-//		data.add(userPassword);
+//		Metadata metaData = metaDataService.getMetadataById(id);
+//		JSONObject json = JSONObject.fromObject(metaData.getAttributes());
+//		List<Metamodel_datatype> privateMetaModels = metamodel_datatypeService.getMetamodel_datatypeByMetaModelId(metaData.getMetaModelId());
+//		for(Metamodel_datatype pri : privateMetaModels){
+//			JSONObject node = new JSONObject();
+//			node.put("key", pri.getDesribe());
+//			node.put("value", json.get(pri.getName()));
+//			data.add(node);
+//		}	
+		Datasource_connectinfo datasource_connectinfo = datasource_connectinfoService.getDatasource_connectinfoListByparentid(id);
+		
+		JSONObject datasource_connectinfoId = new JSONObject();
+		datasource_connectinfoId.put("key","ID");
+		datasource_connectinfoId.put("value", datasource_connectinfo.getParentid());
+		data.add(datasource_connectinfoId);
+		
+		JSONObject url = new JSONObject();
+		url.put("key","主机名");
+		url.put("value", datasource_connectinfo.getUrl());
+		data.add(url);
+		
+		JSONObject port = new JSONObject();
+		port.put("key","端口号");
+		port.put("value", datasource_connectinfo.getPort());
+		data.add(port);
+		
+		JSONObject name = new JSONObject();
+		name.put("key","数据库名称");
+		name.put("value", datasource_connectinfo.getDatabasename());
+		data.add(name);
+		
+		JSONObject type = new JSONObject();
+		type.put("key","数据库类型");
+		type.put("value", datasource_connectinfo.getDatabasetype());
+		data.add(type);
+		
+		JSONObject userName = new JSONObject();
+		userName.put("key","数据库用户名");
+		userName.put("value", datasource_connectinfo.getUsername());
+		data.add(userName);
+		
+		JSONObject userPassword = new JSONObject();
+		userPassword.put("key","数据库密码");
+		userPassword.put("value", datasource_connectinfo.getPassword());
+		data.add(userPassword);
 		
 		responsejson.put("result", true);
 		responsejson.put("data", data);
@@ -714,7 +714,7 @@ public class Datasource_connectinfoController {
 			for (Connectinfo connectinfo : connectinfoList) {
 				JSONObject node = new JSONObject();
 				node.put("id", connectinfo.getId());
-				node.put("name", connectinfo.getName());
+				node.put("label", connectinfo.getName());
 				data.add(node);
 			}
 			
