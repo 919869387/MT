@@ -387,9 +387,7 @@ public class Datasource_connectinfoController {
 		
 		//检查传参是否正确
 		if(!(map.containsKey("name")&&
-			map.containsKey("type")&&
 			map.containsKey("mountmetadataid")&&
-			map.containsKey("needcheck")&&
 			map.containsKey("url")&&
 			map.containsKey("port")&&
 			map.containsKey("username")&&
@@ -400,13 +398,6 @@ public class Datasource_connectinfoController {
 			responsejson.put("count",0);
 			return responsejson;
 		}
-		
-		//确保type传参的枚举类型值
-		if(!(map.get("type").toString().equals("database") || map.get("type").toString().equals("file"))){
-			responsejson.put("result", false);
-			responsejson.put("count",0);
-			return responsejson;
-		}		
 		
 		//确保databasetype传参的枚举类型值
 		if((!map.get("databasetype").toString().equals(GlobalMethodAndParams.databasetype_MYSQL))&&
@@ -420,12 +411,12 @@ public class Datasource_connectinfoController {
 		//插入数据源信息记录		
 		Connectinfo connectInfo = new Connectinfo();
 		connectInfo.setName(map.get("name").toString());
-		connectInfo.setType(map.get("type").toString());
+		connectInfo.setType("database");
 		if(map.containsKey("describe")){
 			connectInfo.setDescription(map.get("describe").toString());
 		}
 		connectInfo.setMountMetaDataId(Integer.parseInt(map.get("mountmetadataid").toString()));
-		connectInfo.setNeedCheck(Integer.parseInt(map.get("needcheck").toString()));
+		connectInfo.setNeedCheck(1);
 		if(!connectinfoService.insertConnectinfo(connectInfo)){
 			responsejson.put("result", false);
 			responsejson.put("count",0);

@@ -42,6 +42,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		select * from metamodel_hierarchy where type='PACKAGE' and parentid is not null
 	</select>
 	
+	<select id="getMetamodel_packageByType" resultType="com.x8.mt.entity.Metamodel_hierarchy">
+		select * from metamodel_hierarchy where type='METAMODEL'
+	</select>
+	
 	<select id="getMetaModelByMountNode" resultType="com.x8.mt.entity.Metamodel_hierarchy">
 		select * from metamodel_hierarchy where mountnode = 1
 	</select>

@@ -149,6 +149,18 @@ public class Metamodel_hierarchyService {
 		
 		return iMetamodel_hierarchyDao.getAllMetamodel_package();
 	}
+	
+	/**
+	 * 
+	 * 作者:GodDipose
+	 * 时间:2018年3月24日
+	 * 作用:查询所有元模型
+	 */
+	public List<Metamodel_hierarchy> getMetamodel_packageByType() {
+		
+		return iMetamodel_hierarchyDao.getMetamodel_packageByType();
+	}
+
 
 	/**
 	 * 
