@@ -339,6 +339,10 @@ public class Metamodel_hierarchyController {
 		if(map.containsKey("desribe")){
 			metamodel_hierarchy.setDesribe(map.get("desribe").toString());
 		}
+		Metamodel_hierarchy hierarchy = metamodel_hierarchyService.getMetamodel_hierarchyById(Integer.parseInt(map.get("parentid").toString()));
+		metamodel_hierarchy.setCategory(hierarchy.getCategory());
+		metamodel_hierarchy.setMountnode(0);
+		metamodel_hierarchy.setParentid(Integer.parseInt(map.get("parentid").toString()));
 		
 		boolean result = metamodel_hierarchyService.insertMetamodel_hierarchy(metamodel_hierarchy);
 		responsejson.put("result", result);
@@ -450,9 +454,11 @@ public class Metamodel_hierarchyController {
 				return responsejson;
 			}
 		}
-		
+		Metamodel_hierarchy hierarchy = metamodel_hierarchyService.getMetamodel_hierarchyById(id);
+		metamodel_hierarchy.setCategory(hierarchy.getCategory());
 		metamodel_hierarchy.setName(name);
 		metamodel_hierarchy.setParentid(id);
+		metamodel_hierarchy.setMountnode(0);
 		metamodel_hierarchy.setType(GlobalMethodAndParams.metamodel_hierarchy_METAMODEL);
 		if(map.containsKey("desribe")){
 			metamodel_hierarchy.setDesribe(map.get("desribe").toString());
