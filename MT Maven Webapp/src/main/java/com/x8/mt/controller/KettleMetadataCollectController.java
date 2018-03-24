@@ -512,43 +512,43 @@ public class KettleMetadataCollectController {
 	}
 
 	
-//	/**
-//	 * 
-//	 * 作者:GodDispose
-//	 * 时间:2018年3月23日
-//	 * 作用:获取数据库元数据
-//	 * 
-//	 */
-//	@RequestMapping(value = "/getDatabaseMetadata",method=RequestMethod.GET)
-//	@ResponseBody
-//	@Log(operationType="metadata",operationDesc="获取数据库元数据")
-//	public JSONObject getDatabaseMetadata(HttpServletRequest request,HttpServletResponse response) {
-//		JSONObject responsejson = new JSONObject();
-//
-////		if(!GlobalMethodAndParams.checkLogin()){
-////			responsejson.put("result", false);
-////			responsejson.put("count",0);
-////			return responsejson;
-////		}
-//		GlobalMethodAndParams.setHttpServletResponse(request, response);
-//	
-//		try{
-//			List<Metadata> metadatas = metaDataService.getMetadataByMetaModelId(10);
-//			JSONArray data = new JSONArray();
-//			for(Metadata metadata : metadatas){
-//				JSONObject node = new JSONObject();
-//				node.put("id", metadata.getId());
-//				node.put("label", metadata.getName());
-//				data.add(node);
-//			}
-//			responsejson.put("result", true);
-//			responsejson.put("data",data);
-//			responsejson.put("count",data.size());
-//		} catch (Exception e) {
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年3月23日
+	 * 作用:获取数据库元数据
+	 * 
+	 */
+	@RequestMapping(value = "/getDatabaseMetadata",method=RequestMethod.GET)
+	@ResponseBody
+	@Log(operationType="metadata",operationDesc="获取数据库元数据")
+	public JSONObject getDatabaseMetadata(HttpServletRequest request,HttpServletResponse response) {
+		JSONObject responsejson = new JSONObject();
+
+//		if(!GlobalMethodAndParams.checkLogin()){
 //			responsejson.put("result", false);
 //			responsejson.put("count",0);
+//			return responsejson;
 //		}
-//		return responsejson;
-//	}
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
+	
+		try{
+			List<Metadata> metadatas = metaDataService.getMetadataByMetaModelId(10);
+			JSONArray data = new JSONArray();
+			for(Metadata metadata : metadatas){
+				JSONObject node = new JSONObject();
+				node.put("id", metadata.getId());
+				node.put("label", metadata.getName());
+				data.add(node);
+			}
+			responsejson.put("result", true);
+			responsejson.put("data",data);
+			responsejson.put("count",data.size());
+		} catch (Exception e) {
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+		}
+		return responsejson;
+	}
 		
 }

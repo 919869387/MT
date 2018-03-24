@@ -98,14 +98,10 @@ public class Datasource_connectinfoController {
 		
 		JSONObject describe = new JSONObject();
 		describe.put("key","数据源描述");
-		describe.put("value", connectinfo.getDescription());
+		System.out.println(connectinfo.getDescription());
+		describe.put("value", connectinfo.getDescription() == null ? "":connectinfo.getDescription());
 		data.add(describe);
 		
-//		JSONObject systemName = new JSONObject();
-//		systemName.put("key","所属系统");
-//		systemName.put("value", datasource_connectinfoService.getPath(connectinfo.getId()));
-//		data.add(systemName);
-//		
 		responsejson.put("result", true);
 		responsejson.put("data", data);
 		//获取记录数，为日志所用
@@ -309,16 +305,16 @@ public class Datasource_connectinfoController {
 		}
 		if(map.containsKey("describe")){
 			connectinfo.setDescription(map.get("describe").toString());
-		}
-		
-		boolean result = connectinfoService.updateConnectinfoNameOrDescriptionById(connectinfo);
+		}			
+			boolean result = connectinfoService.updateConnectinfoNameOrDescriptionById(connectinfo);
+			
+			responsejson.put("result", result);
+			if(result){
+				responsejson.put("count",1);
+			}else{
+				responsejson.put("count",0);
+			}
 
-		responsejson.put("result", result);
-		if(result){
-			responsejson.put("count",1);
-		}else{
-			responsejson.put("count",0);
-		}
 		return responsejson;
 	}
 	
@@ -376,10 +372,10 @@ public class Datasource_connectinfoController {
 	 * 参数：name、type、url、port、username、password、databasename、databasetype、desribe（可选）、parentid
 	 * 		databasetype--enum('postgresql','oracle','mysql')
 	 */
-	@RequestMapping(value = "/insertConnectinfo",method=RequestMethod.POST)
+	@RequestMapping(value = "/insertConnectinfoBySelf",method=RequestMethod.POST)
 	@ResponseBody
 	@Log(operationType="connectinfo",operationDesc="插入数据源")
-	public JSONObject insertConnectinfo(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map){
+	public JSONObject insertConnectinfoBySelf(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map){
 		JSONObject responsejson = new JSONObject();
 		
 //		if(!GlobalMethodAndParams.checkLogin()){
@@ -430,8 +426,6 @@ public class Datasource_connectinfoController {
 		}
 		connectInfo.setMountMetaDataId(Integer.parseInt(map.get("mountmetadataid").toString()));
 		connectInfo.setNeedCheck(Integer.parseInt(map.get("needcheck").toString()));
-		System.out.println(connectInfo.getMountMetaDataId());
-		System.out.println(connectInfo.getNeedCheck());
 		if(!connectinfoService.insertConnectinfo(connectInfo)){
 			responsejson.put("result", false);
 			responsejson.put("count",0);
@@ -454,6 +448,76 @@ public class Datasource_connectinfoController {
 		if(result){
 			responsejson.put("count",1);
 		}else{
+			responsejson.put("count",0);
+		}
+		return responsejson;
+	}
+	
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年3月24日
+	 * 作用:插入一条数据源记录
+	 * 参数：id
+	 */
+	@RequestMapping(value = "/insertConnectinfoByMetadata",method=RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="connectinfo",operationDesc="插入数据源")
+	public JSONObject insertConnectinfoByMetadata(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map){
+		JSONObject responsejson = new JSONObject();
+		
+//		if(!GlobalMethodAndParams.checkLogin()){
+//			responsejson.put("result", false);
+//			responsejson.put("count",0);
+//			return responsejson;
+//		}
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
+		
+		//检查传参是否正确
+		if(!(map.containsKey("id"))){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}	
+		String idstr = map.get("id").toString();
+		int id = 0;
+		try {
+			id = Integer.parseInt(idstr);
+		
+			Metadata metadata = metaDataService.getMetadataById(id);
+			JSONObject json = JSONObject.fromObject(metadata.getAttributes());
+			
+			//插入数据源信息记录		
+			Connectinfo connectInfo = new Connectinfo();
+			connectInfo.setName(metadata.getName());
+			connectInfo.setType("database");
+			connectInfo.setMountMetaDataId(10);
+			connectInfo.setNeedCheck(1);
+			if(!connectinfoService.insertConnectinfo(connectInfo)){
+				responsejson.put("result", false);
+				responsejson.put("count",0);
+				return responsejson;
+			}
+			
+			//插入数据源连接信息记录
+			Datasource_connectinfo datasource_connectinfo = new Datasource_connectinfo();
+	
+			datasource_connectinfo.setUrl(json.get("dbip").toString());
+			datasource_connectinfo.setPort(json.get("dbport").toString());
+			datasource_connectinfo.setUsername(json.get("dbuser").toString());
+			datasource_connectinfo.setPassword(json.get("dbpassword").toString());
+			datasource_connectinfo.setDatabasename(json.get("dbname").toString());
+			datasource_connectinfo.setDatabasetype(json.get("dbtype").toString());
+			datasource_connectinfo.setParentid(connectInfo.getId());
+			boolean result = datasource_connectinfoService.insertDatasource_connectinfo(datasource_connectinfo);
+			responsejson.put("result", result);
+			if(result){
+				responsejson.put("count",1);
+			}else{
+				responsejson.put("count",0);
+			}
+		}catch(Exception e){
+			responsejson.put("result", false);
 			responsejson.put("count",0);
 		}
 		return responsejson;

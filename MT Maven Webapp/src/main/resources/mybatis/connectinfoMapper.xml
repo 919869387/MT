@@ -29,7 +29,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		update connectinfo
 		<trim prefix="set" suffixOverrides=",">
 			<if test="name!=null">name=#{name},</if>
-			<if test="describe!=null">desribe=#{describe},</if>
+			<if test="description!=null">description=#{description},</if>
 		</trim>
 		where id=#{id}
 	</update>
