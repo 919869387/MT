@@ -14,4 +14,12 @@ public interface IMetaDataRelationDao {
 	 * 作用:插入一条MetaDataRelation记录
 	 */
 	int insertMetaDataRelation(MetaDataRelation metaDataRelation);
+	
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年3月25日
+	 * 作用:删除一条MetaDataRelation记录
+	 */
+	int daleteMetaDataRelation(String metadataId);
 }

@@ -6,6 +6,11 @@ import javax.servlet.http.HttpServletResponse;
 public class GlobalMethodAndParams {
 	
 	/**
+	 * 组合关系名
+	 */
+	public static final String COMPOSITION= "COMPOSITION";
+	
+	/**
 	 * 公共元模型的属性名
 	 */
 	public static final String Public_Metamodel_ATTRIBUTES= "ATTRIBUTES";
@@ -47,7 +52,7 @@ public class GlobalMethodAndParams {
 	/**
 	 * 元数据特有数据项字段名
 	 */
-	public static final String Metadata_Attributes= "attributes";
+	public static final String Metadata_Attributes= "ATTRIBUTES";
 	
 	/**
 	 * 获取元数据视图树所需要的数据库表字段名

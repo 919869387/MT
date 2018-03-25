@@ -51,4 +51,28 @@ public interface IMetadataManagementDao {
 	 * 作用:向metadata表插入一条数据
 	 */
 	int insertMetadata(Metadata metadata);
+	
+	/**
+	 * 
+	 * 作者:allen 
+	 * 时间:2017年3月23日 
+	 * 作用:得到元模型的私有数据类型
+	 */
+	List<String> getAttributesField(String metaModelId);
+
+	/**
+	 * 
+	 * 作者:allen 
+	 * 时间:2017年3月23日 
+	 * 作用:更新元数据
+	 */
+	int updateMetadata(Metadata metadata);
+	
+	/**
+	 * 
+	 * 作者:allen 
+	 * 时间:2017年3月23日 
+	 * 作用:删除一条元数据
+	 */
+	int daleteMetadata(String metadataId);
 }

@@ -483,8 +483,8 @@ public class Datasource_connectinfoController {
 			JSONArray data = new JSONArray();
 			for(Metadata metaData : metaDatas){
 				JSONObject node = new JSONObject();
-				node.put("id", metaData.getId());
-				node.put("name", metaData.getName());
+				node.put("id", metaData.getID());
+				node.put("name", metaData.getNAME());
 				data.add(node);
 			}
 			
@@ -587,7 +587,7 @@ public class Datasource_connectinfoController {
 			Metadata metaData = metaDataService.getMetadataById(id);
 			
 			JSONObject data = new JSONObject();
-			data.put("describe", metaData.getDescription());
+			data.put("describe", metaData.getDESCRIPTION());
 			responsejson.put("result", true);
 			responsejson.put("data", data);
 			responsejson.put("count", 1);

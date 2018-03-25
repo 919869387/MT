@@ -1,5 +1,6 @@
 package com.x8.mt.controller;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,146 @@ public class MetadataManagementController {
 	@Resource
 	MetadataManagementService metadataManagementService;
 
+	@RequestMapping(value = "/daleteMetadataInfo", method = RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="metadata",operationDesc="删除元数据信息")
+	public JSONObject daleteMetadataInfo(HttpServletRequest request,
+			HttpServletResponse response,@RequestBody Map<String, Object> map){
+		JSONObject responsejson = new JSONObject();
+
+		//GlobalMethodAndParams.setHttpServletResponse(request, response);
+
+		//检查传参是否正确
+		if(!map.containsKey("ID")){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}
+		
+		String metadataId = map.get("ID").toString();
+		
+		if(metadataManagementService.daleteMetadataInfo(metadataId)){
+			responsejson.put("result", true);
+			responsejson.put("count", 1);
+		}else{
+			responsejson.put("result", false);
+			responsejson.put("count", 0);
+		}
+
+		return responsejson;
+	}
+	
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2017年3月24日
+	 * 作用:修改元数据信息
+	 *  	1.将元数据在metadata表修改
+	 *  	2.修改后的记录加入metadata_tank表
+	 *  
+	 * 参数： ID [元数据id]
+	 * 		。。。。。
+	 * 
+	 * {
+		"UPDATETIME": "2018-03-16 16:31:02",
+		"DESCRIPTION": null,
+		"VERSION": 1,
+		"ID": 1248,
+		"tablename": "metadata",
+		"CREATETIME": "2018-03-16 16:31:02",
+		"METAMODELID": 31,
+		"CHECKSTATUS": "1",
+		"COLLECTJOBID": 172,
+		"NAME": "metadata"
+	},
+	"metamodelInfo": {
+		"ID": "元数据id",
+		"NAME": "元数据名称",
+		"DESCRIPTION": "元数据业务说明",
+		"CREATETIME": "元数据入库时间",
+		"UPDATETIME": "元数据修改时间",
+		"VERSION": "元数据的版本号",
+		"COLLECTJOBID": "采集元数据的任务编号",
+		"CHECKSTATUS": "审核状态",
+		"METAMODELID": "所属的元模型id",
+		"tablename": "表名"
+	}
+	不管属性有没有改，都要有
+	 */
+	@RequestMapping(value = "/updateMetadataInfoStepTwo", method = RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="metadata",operationDesc="修改元数据信息")
+	public JSONObject updateMetadataInfoStepTwo(HttpServletRequest request,
+			HttpServletResponse response,@RequestBody Map<String, Object> map){
+		JSONObject responsejson = new JSONObject();
+
+		//GlobalMethodAndParams.setHttpServletResponse(request, response);
+
+		//检查传参是否正确
+		if(!(map.containsKey("ID")&&map.containsKey("METAMODELID"))){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}
+
+		if(metadataManagementService.updateMetadataInfo(map)){
+			responsejson.put("result", true);
+			responsejson.put("count", 1);
+		}else{
+			responsejson.put("result", false);
+			responsejson.put("count", 0);
+		}
+
+		return responsejson;
+	}
+	
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2017年3月24日
+	 * 作用:修改元数据信息步骤一,先显示可以修改的信息
+	 *  
+	 * 参数： metadataId[元数据id]
+	 */
+	@RequestMapping(value = "/updateMetadataInfoStepOne", method = RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="metadata",operationDesc="修改元数据信息步骤一")
+	public JSONObject updateMetadataInfoStepOne(HttpServletRequest request,
+			HttpServletResponse response,@RequestBody Map<String, Object> map){
+		JSONObject responsejson = new JSONObject();
+
+		//GlobalMethodAndParams.setHttpServletResponse(request, response);
+
+		//检查传参是否正确
+		if(!(map.containsKey("metadataId")&&map.containsKey("metamodelId"))){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}
+
+		String metadataIdStr = map.get("metadataId").toString();
+		String metamodelIdStr = map.get("metamodelId").toString();
+
+		Map<String, Object> metadataMap= metadataManagementService.getMetadata(metadataIdStr);
+		JSONObject metamodelInfo = metadataManagementService.getMetamodelInfo(metamodelIdStr);
+		
+		List<String> noupdatefield = new ArrayList<String>();
+		noupdatefield.add(GlobalMethodAndParams.Public_Metamodel_COLLECTJOBID);
+		noupdatefield.add(GlobalMethodAndParams.Public_Metamodel_METAMODELID);
+		noupdatefield.add(GlobalMethodAndParams.Public_Metamodel_CHECKSTATUS);
+		noupdatefield.add(GlobalMethodAndParams.Public_Metamodel_VERSION);
+		noupdatefield.add(GlobalMethodAndParams.Public_Metamodel_UPDATETIME);
+		noupdatefield.add(GlobalMethodAndParams.Public_Metamodel_CREATETIME);
+		noupdatefield.add(GlobalMethodAndParams.Public_Metamodel_ID);
+		
+		responsejson.put("result", true);
+		responsejson.put("data", metadataMap);
+		responsejson.put("metamodelInfo", metamodelInfo);
+		responsejson.put("noupdatefield", noupdatefield);
+		responsejson.put("count", 1);
+		return responsejson;
+	}
+	
 	/**
 	 * 
 	 * 作者:allen
@@ -62,8 +203,13 @@ public class MetadataManagementController {
 			return responsejson;
 		}
 
-		metadataManagementService.addMetadata(map);
-
+		if(metadataManagementService.addMetadata(map)){
+			responsejson.put("result", true);
+			responsejson.put("count", 1);
+		}else{
+			responsejson.put("result", false);
+			responsejson.put("count", 0);
+		}
 
 		return responsejson;
 	}
@@ -85,7 +231,7 @@ public class MetadataManagementController {
 			HttpServletResponse response,@RequestBody Map<String, Object> map){
 		JSONObject responsejson = new JSONObject();
 
-		GlobalMethodAndParams.setHttpServletResponse(request, response);
+		//GlobalMethodAndParams.setHttpServletResponse(request, response);
 
 		//检查传参是否正确
 		if(!map.containsKey("metamodelId")){
@@ -141,7 +287,7 @@ public class MetadataManagementController {
 			HttpServletResponse response,@RequestBody Map<String, Object> map){
 		JSONObject responsejson = new JSONObject();
 
-		GlobalMethodAndParams.setHttpServletResponse(request, response);
+		//GlobalMethodAndParams.setHttpServletResponse(request, response);
 
 		//检查传参是否正确
 		if(!(map.containsKey("metadataId")&&map.containsKey("metamodelId"))){
@@ -153,7 +299,7 @@ public class MetadataManagementController {
 		String metadataIdStr = map.get("metadataId").toString();
 		String metamodelIdStr = map.get("metamodelId").toString();
 
-		Object metadataMap= metadataManagementService.getMetadata(metadataIdStr);
+		Map<String, Object> metadataMap= metadataManagementService.getMetadata(metadataIdStr);
 		JSONObject metamodelInfo = metadataManagementService.getMetamodelInfo(metamodelIdStr);
 
 		responsejson.put("result", true);
@@ -178,7 +324,7 @@ public class MetadataManagementController {
 			HttpServletResponse response,@RequestBody Map<String, Object> map){
 		JSONObject responsejson = new JSONObject();
 
-		GlobalMethodAndParams.setHttpServletResponse(request, response);
+		//GlobalMethodAndParams.setHttpServletResponse(request, response);
 
 		//检查传参是否正确
 		if(!map.containsKey("tableMetadataId")){
@@ -219,7 +365,7 @@ public class MetadataManagementController {
 			HttpServletResponse response,@RequestBody Map<String, Object> map){
 		JSONObject responsejson = new JSONObject();
 
-		GlobalMethodAndParams.setHttpServletResponse(request, response);
+		//GlobalMethodAndParams.setHttpServletResponse(request, response);
 
 		//检查传参是否正确
 		if(!map.containsKey("viewid")){
@@ -242,29 +388,4 @@ public class MetadataManagementController {
 		responsejson.put("count", 1);
 		return responsejson;
 	}
-
-//	@RequestMapping(value = "/getMetadataViewTree", method = RequestMethod.GET)
-//	@ResponseBody
-//	@Log(operationType="metadata",operationDesc="查找元数据视图树")
-//	public JSONObject getMetadataViewTree(HttpServletRequest request,
-//			HttpServletResponse response){
-//		JSONObject responsejson = new JSONObject();
-//
-//		GlobalMethodAndParams.setHttpServletResponse(request, response);
-//
-//		String viewidStr = "1";
-//		int viewid = 0;
-//		try {
-//			viewid = Integer.parseInt(viewidStr);
-//		} catch (Exception e) {
-//		}
-//
-//		JSONArray metadataViewTree= metadataManagementService.getMetadataViewTree(viewid);
-//
-//		responsejson.put("result", true);
-//		responsejson.put("data", metadataViewTree);
-//		responsejson.put("count", 1);
-//		return responsejson;
-//	}
-
 }

@@ -141,8 +141,8 @@ public class KettleMetadataCollectController {
 			id = Integer.parseInt(idStr);			
 			boolean result = false;
 			Metadata metaData = new Metadata();
-			metaData.setId(id);
-			metaData.setDescription(describe);
+			metaData.setID(id);
+			metaData.setDESCRIPTION(describe);
 			result = metaDataService.updateMetadataDescribeById(metaData);
 
 			if(result==true){
@@ -198,17 +198,17 @@ public class KettleMetadataCollectController {
 			JSONObject data = new JSONObject();
 			
 			Metadata metaData = metaDataService.getMetadataById(id);
-			JSONObject json = JSONObject.fromObject(metaData.getAttributes());
-			List<Metamodel_datatype> privateMetaModels = metamodel_datatypeService.getMetamodel_datatypeByMetaModelId(metaData.getMetaModelId());
-			data.put("元数据id", metaData.getId());
-			data.put("元数据名称", metaData.getName());
-			data.put("元数据业务说明", metaData.getDescription());
-			data.put("元数据入库时间", metaData.getCreateTime());
-			data.put("元数据修改时间", metaData.getUpdateTime());
-			data.put("元数据的版本号", metaData.getVersion());
-			data.put("采集元数据的编号", metaData.getCollectJobId());
-			data.put("审核状态", metaData.getCheckStatus());
-			data.put("所属元模型id", metaData.getMetaModelId());
+			JSONObject json = JSONObject.fromObject(metaData.getATTRIBUTES());
+			List<Metamodel_datatype> privateMetaModels = metamodel_datatypeService.getMetamodel_datatypeByMetaModelId(metaData.getMETAMODELID());
+			data.put("元数据id", metaData.getID());
+			data.put("元数据名称", metaData.getNAME());
+			data.put("元数据业务说明", metaData.getDESCRIPTION());
+			data.put("元数据入库时间", metaData.getCREATETIME());
+			data.put("元数据修改时间", metaData.getUPDATETIME());
+			data.put("元数据的版本号", metaData.getVERSION());
+			data.put("采集元数据的编号", metaData.getCOLLECTJOBID());
+			data.put("审核状态", metaData.getCHECKSTATUS());
+			data.put("所属元模型id", metaData.getMETAMODELID());
 			for(Metamodel_datatype pri : privateMetaModels){
 				data.put(pri.getDesribe(), json.get(pri.getName()));
 			}			
@@ -538,8 +538,8 @@ public class KettleMetadataCollectController {
 			JSONArray data = new JSONArray();
 			for(Metadata metadata : metadatas){
 				JSONObject node = new JSONObject();
-				node.put("id", metadata.getId());
-				node.put("label", metadata.getName());
+				node.put("id", metadata.getID());
+				node.put("label", metadata.getNAME());
 				data.add(node);
 			}
 			responsejson.put("result", true);
