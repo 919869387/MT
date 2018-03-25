@@ -39,4 +39,7 @@
 	<bean
 		class="org.springframework.web.servlet.view.InternalResourceViewResolver"
 		p:prefix="/WEB-INF/page/" p:suffix=".jsp" />
+		
+	<!--  全局异常处理器只要类实现了HandlerExceptionResolver接口，就是一个全局异常处理器哦  -->  
+	<bean class="com.x8.mt.exception.CustomExceptionResolver"/>  
 </beans>

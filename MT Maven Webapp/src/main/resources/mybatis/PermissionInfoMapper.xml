@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.x8.mt.dao.PermissionInfoDao">
+	
+	<!-- 根据用户id查询权限菜单列表 -->
+	<select id="findMenuListByUserid" parameterType="int" resultType="com.x8.mt.entity.PermissionInfo">
+		select * from permission_info 
+			where resType = 'menu'
+			And id in 
+				(select permissionId  from role_permission 
+					where roleId in 
+						(select roleId from user_role 
+							where userId = #{id}))
+	</select>
+	
+	<!-- 根据用户id查询权限信息 -->
+	<select id="findPermissionByUserId" parameterType="String" resultType="com.x8.mt.entity.PermissionInfo">
+		select * from permission_info
+			where resType = 'permission'
+				And id in 
+					(select permissionId from role_permission
+						where roleId in
+							(select roleId from user_role
+								where userId = #{userid}))
+	</select>
+</mapper>

@@ -24,9 +24,44 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		limit ${offset},${size}
 	</select>
 	
-	<!-- 查询系统所有日志信息 -->
-	<select id="selectAllLog" resultType="com.x8.mt.entity.SystemLog">
+	<!-- 根据条件筛选日志 -->
+	<select id="selectLogByCondition" parameterType="map" resultType="com.x8.mt.entity.SystemLog">
 		select * from systemlog
+		<where>
+			<if test="systemusername != null and systemusername != ''">
+				and systemusername = #{systemusername}
+			</if>
+			<if test="operationtype != null and operationtype != ''">
+				and operationtype = #{operationtype}
+			</if>
+			<if test="startdatetime != null">
+				<![CDATA[and startdatetime >= #{startdatetime}]]>
+			</if>
+			<if test="enddatetime != null">
+				<![CDATA[and enddatetime <= #{enddatetime}]]>
+			</if>
+		</where>
+			order by startdatetime desc
+			limit ${offset},${size}
 	</select>
-
+	
+	<!-- 条件查询日志的总条数 -->
+	<select id="getRowCountByCon" parameterType="com.x8.mt.entity.SystemLog" resultType="int">
+		select count(*) from systemlog
+		<where>
+			<if test="systemusername != null and systemusername != ''">
+				and systemusername = #{systemusername}
+			</if>
+			<if test="operationtype != null and operationtype != ''">
+				and operationtype = #{operationtype}
+			</if>
+			<if test="startdatetime != null">
+				and startdatetime >= #{startdatetime}
+			</if>
+			<if test="enddatetime != null">
+				and #{enddatetime} >= enddatetime 
+			</if>
+		</where>
+	</select>
+	
 </mapper>

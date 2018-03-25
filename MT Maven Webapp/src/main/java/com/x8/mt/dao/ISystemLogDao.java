@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Repository;
+
+import com.x8.mt.entity.Sourcesystem;
 import com.x8.mt.entity.SystemLog;
 
 @Repository
@@ -33,11 +35,15 @@ public interface ISystemLogDao {
 	 */
 	List<SystemLog> selectByParams(Map<String, Object> params);
 	
+	
 	/**
-	 * 作者：yangyuan
-	 * 时间：2018年3月2日
-	 * 备注：查询系统日志
+	 * 根据日志筛选条件分页查询日志信息
 	 */
+	List<SystemLog> selectLogByCondition(Map<String, Object> map);
 
-	List<SystemLog> selectAllLog();
+	
+	/**
+	 * 根据日志筛选条件查询日志总条数
+	 */
+	int getRowCountByCon(SystemLog systemLog);
 }
