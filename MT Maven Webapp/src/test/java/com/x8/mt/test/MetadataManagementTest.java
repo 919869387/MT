@@ -34,7 +34,7 @@ public class MetadataManagementTest {
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("ID", 2017);
+		map.put("ID", 2004);
 		
 		System.out.println(metadataManagementController.daleteMetadataInfo(request, response, map));
 	}
@@ -44,7 +44,7 @@ public class MetadataManagementTest {
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("ID", 1925);
+		map.put("ID", 1958);
 		map.put("METAMODELID", 31);
 		map.put("NAME", "mountnode");
 		map.put("DESCRIPTION", "AAAAA");

@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.x8.mt.common.GlobalMethodAndParams;
 import com.x8.mt.common.TransformMetadata;
+import com.x8.mt.dao.IMetaDataDao;
 import com.x8.mt.dao.IMetaDataRelationDao;
 import com.x8.mt.dao.IMetadataManagementDao;
 import com.x8.mt.dao.IMetadataTankDao;
@@ -44,29 +45,43 @@ public class MetadataManagementService {
 	IMetaDataRelationDao iMetaDataRelationDao;
 	@Resource
 	IMetadataTankDao iMetadataTankDao;
+	@Resource
+	IMetaDataDao iMetaDataDao;
+	
+	public boolean existMetadata(String metadataId) {
+		if(iMetaDataDao.getMetadataById(Integer.parseInt(metadataId))!=null){
+			return true;
+		}
+		return false;
+	}
 	
 	/**
 	 * 
 	 * 作者:allen
 	 * 时间:2017年3月25日
-	 * 作用:删除元数据信息
+	 * 作用:删除元数据信息[因为数据库中是级联删除,删除主键，外键跟着删除。只需要删除metadata表即可]
 	 *  	1.删除metadata_tank表中记录
 	 *  	2.删除metadata_relation表中记录
 	 *  	3.删除metadata表中记录
 	 */
 	@Transactional
-	public boolean daleteMetadataInfo(String metadataId) {
-		if(!(iMetadataTankDao.daletetMetaDataTank(metadataId)>0)){
-			throw new RuntimeException("daletetMetaDataTank Error");
+	public boolean daleteMetadataInfo(String metadataId,List<Object> count) {
+		
+		List<String> sonMetadataIds = iMetaDataRelationDao.getSonMetadataID(metadataId);
+		
+		for(int i=0;i<sonMetadataIds.size();i++){
+			String sonMetadataId = sonMetadataIds.get(i);
+			
+			//递归先删除儿子元数据
+			daleteMetadataInfo(sonMetadataId,count);
 		}
 		
-		if(!(iMetaDataRelationDao.daleteMetaDataRelation(metadataId)>0)){
-			throw new RuntimeException("daleteMetaDataRelation Error");
-		}
-		
-		if(!(imetadataManagementDao.daleteMetadata(metadataId)>0)){
+		if(imetadataManagementDao.daleteMetadata(metadataId)==1){
+			count.add(1);
+		}else{
 			throw new RuntimeException("daleteMetadata Error");
 		}
+		
 		return true;
 	}
 	
@@ -380,7 +395,7 @@ public class MetadataManagementService {
 		List<Metadata> fieldMetadatas= imetadataManagementDao.getFieldMetadata(tableMetadataId);
 		for(int i = 0 ; i < fieldMetadatas.size() ; i++) {
 			Metadata metadata= (Metadata)fieldMetadatas.get(i);
-			Object metadataMap = TransformMetadata.transformMetadataToMap(metadata);
+			Map<String, Object> metadataMap = TransformMetadata.transformMetadataToMap(metadata);
 			metadataList.add(metadataMap);
 		}
 		return metadataList;

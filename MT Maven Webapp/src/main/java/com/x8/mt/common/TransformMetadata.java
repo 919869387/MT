@@ -41,10 +41,14 @@ public class TransformMetadata {
 					while(iterator.hasNext()){
 						String attributes_key = (String) iterator.next();
 						Object attributes_value = attributes.get(attributes_key);
-						metadataMap.put(attributes_key+"", attributes_value);  
+						metadataMap.put(attributes_key+"", attributes_value.toString());  
 					}
 				}else{
-					metadataMap.put(key+"", beanMap.get(key));  
+					Object value = beanMap.get(key);
+					if(value==null){
+						value="";
+					}
+					metadataMap.put(key+"", value);  
 				}
 			}             
 		}  
