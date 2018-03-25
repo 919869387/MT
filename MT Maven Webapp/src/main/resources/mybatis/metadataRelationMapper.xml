@@ -11,6 +11,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		values(#{metaDataId},#{relateMetaDataId},#{type})
 	</insert>
 	
+	<select id="getSonMetadataID" resultType="java.lang.String">
+		select relatedmetadataid from metadata_relation where metadataid=#{metadataId} and type='COMPOSITION'
+	</select>
 </mapper>
 
 

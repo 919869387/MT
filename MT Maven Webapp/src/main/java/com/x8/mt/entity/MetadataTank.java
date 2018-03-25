@@ -2,14 +2,8 @@ package com.x8.mt.entity;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-/**
- * 
- * 作者:GodDispose
- * 时间:下午8:40:22
- * 作用:
- * 参数:
- */
-public class Metadata {
+
+public class MetadataTank {
 	
 	SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//格式化时间
 	
@@ -23,23 +17,7 @@ public class Metadata {
 	private String CHECKSTATUS;
 	private String ATTRIBUTES;
 	private int VERSION;
-
-	public Metadata(){}
-
-	public Metadata( String name, int collectJobId,
-			String description, int metaModelId, Date createTime,
-			Date updateTime, String checkStatus, String attributes,int version) {
-		super();
-		this.NAME = name;
-		this.COLLECTJOBID = collectJobId;
-		this.DESCRIPTION = description;
-		this.METAMODELID = metaModelId;
-		this.CREATETIME = createTime;
-		this.UPDATETIME = updateTime;
-		this.CHECKSTATUS = checkStatus;
-		this.ATTRIBUTES = attributes;
-		this.VERSION = version;
-	}
+	private int keyid;
 	
 	public int getID() {
 		return ID;
@@ -123,4 +101,12 @@ public class Metadata {
 		VERSION = vERSION;
 	}
 
+	public int getKeyid() {
+		return keyid;
+	}
+
+	public void setKeyid(int keyid) {
+		this.keyid = keyid;
+	}
+	
 }

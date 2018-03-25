@@ -3,12 +3,32 @@
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.x8.mt.dao.IMetadataManagementDao">
+	
+	<delete id="daleteMetadata">
+		DELETE FROM metadata WHERE id=#{metadataId}
+	</delete>
+	
+	<update id="updateMetadata" parameterType="com.x8.mt.entity.Metadata">
+		UPDATE metadata
+		SET name=#{NAME},
+		description=#{DESCRIPTION},
+		updatetime=#{UPDATETIME},
+		attributes=#{ATTRIBUTES},
+		version=#{VERSION}
+		WHERE id = #{ID};
+	</update>
 
-	<insert id="insertMetadata" useGeneratedKeys="true" keyProperty="id"
+	<!-- allen -->
+	<select id="getAttributesField" resultType="java.lang.String">
+		select name from
+		metamodel_datatype where metamodelid=#{metaModelId};
+	</select>
+
+	<insert id="insertMetadata" useGeneratedKeys="true" keyProperty="ID"
 		parameterType="com.x8.mt.entity.Metadata">
 		insert into
 		metadata(name,collectjobid,description,metamodelid,createtime,updatetime,checkstatus,attributes,version)
-		values(#{name},NULL,#{description},#{metaModelId},#{createTime},#{updateTime},#{checkStatus},#{attributes},#{version})
+		values(#{NAME},NULL,#{DESCRIPTION},#{METAMODELID},#{CREATETIME},#{UPDATETIME},#{CHECKSTATUS},#{ATTRIBUTES},#{VERSION})
 	</insert>
 
 	<!-- allen -->

@@ -85,4 +85,12 @@ public interface IMetamodel_hierarchyDao {
 	 * 作用:查询所有组合关系的下层元模型
 	 */
 	List<Metamodel_hierarchy> getCOMPOSITIONMetamodel(String metamodelId);
+	
+	/**
+	 * 
+	 * 作者:GodDipose
+	 * 时间:2018年3月24日
+	 * 作用:查询所有元模型
+	 */
+	List<Metamodel_hierarchy> getMetamodel_packageByType();
 }

@@ -7,10 +7,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +30,44 @@ public class MetadataManagementTest {
 	MetadataManagementController metadataManagementController;
 	
 	@Test
+	public void daleteMetadataInfo(){
+		HttpServletRequest request = null;
+		HttpServletResponse response = null;
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("ID", 2004);
+		
+		System.out.println(metadataManagementController.daleteMetadataInfo(request, response, map));
+	}
+	
+	@Test
+	public void updateMetadataInfoStepTwo(){
+		HttpServletRequest request = null;
+		HttpServletResponse response = null;
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("ID", 1958);
+		map.put("METAMODELID", 31);
+		map.put("NAME", "mountnode");
+		map.put("DESCRIPTION", "AAAAA");
+		map.put("VERSION", 2);
+		map.put("tablename", "mountnode");
+		map.put("CREATETIME", "2017-03-24 22:25:24");
+		map.put("CHECKSTATUS", 1);
+		map.put("COLLECTJOBID", 184);
+	
+		System.out.println(metadataManagementController.updateMetadataInfoStepTwo(request, response, map));
+	}
+	
+	@Test
+	public void updateMetadataInfoStepOne(){
+		HttpServletRequest request = null;
+		HttpServletResponse response = null;
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("metadataId", 1239);
+		map.put("metamodelId", 10);
+		System.out.println(metadataManagementController.updateMetadataInfoStepOne(request, response, map));
+	}
+	
+	@Test
 	public void addMetadataStepTwo(){
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
@@ -41,9 +75,9 @@ public class MetadataManagementTest {
 		map.put("metamodelId", 31);
 		map.put("parentMetadataId", 1239);
 		map.put("NAME", "table111");
-		map.put("DESRIBE", "测试元数据添加");
+		map.put("DESCRIPTION", "测试元数据添加");
 		map.put("tablename", "table111");
-		metadataManagementController.addMetadataStepTwo(request, response, map);
+		System.out.println(metadataManagementController.addMetadataStepTwo(request, response, map));
 	}
 	
 	@Test
@@ -57,7 +91,7 @@ public class MetadataManagementTest {
 	
 	
 	@Test
-	public void getMetadata(){
+	public void getMetadataInfo(){
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -71,7 +105,7 @@ public class MetadataManagementTest {
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("tableMetadataId", 1240);
+		map.put("tableMetadataId", 1322);
 		System.out.println(metadataManagementController.getFieldMetadata(request,response,map));
 	}
 	
@@ -94,7 +128,7 @@ public class MetadataManagementTest {
 		map.put("viewid", 1);
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
-		//System.out.println(metadataManagementController.getMetadataViewTree(request,response,map));
+		System.out.println(metadataManagementController.getMetadataViewTree(request,response,map));
 		
 		Date b = new Date();
 

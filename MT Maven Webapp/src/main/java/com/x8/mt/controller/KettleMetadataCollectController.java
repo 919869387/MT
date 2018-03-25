@@ -141,8 +141,8 @@ public class KettleMetadataCollectController {
 			id = Integer.parseInt(idStr);			
 			boolean result = false;
 			Metadata metaData = new Metadata();
-			metaData.setId(id);
-			metaData.setDescription(describe);
+			metaData.setID(id);
+			metaData.setDESCRIPTION(describe);
 			result = metaDataService.updateMetadataDescribeById(metaData);
 
 			if(result==true){
@@ -198,17 +198,17 @@ public class KettleMetadataCollectController {
 			JSONObject data = new JSONObject();
 			
 			Metadata metaData = metaDataService.getMetadataById(id);
-			JSONObject json = JSONObject.fromObject(metaData.getAttributes());
-			List<Metamodel_datatype> privateMetaModels = metamodel_datatypeService.getMetamodel_datatypeByMetaModelId(metaData.getMetaModelId());
-			data.put("元数据id", metaData.getId());
-			data.put("元数据名称", metaData.getName());
-			data.put("元数据业务说明", metaData.getDescription());
-			data.put("元数据入库时间", metaData.getCreateTime());
-			data.put("元数据修改时间", metaData.getUpdateTime());
-			data.put("元数据的版本号", metaData.getVersion());
-			data.put("采集元数据的编号", metaData.getCollectJobId());
-			data.put("审核状态", metaData.getCheckStatus());
-			data.put("所属元模型id", metaData.getMetaModelId());
+			JSONObject json = JSONObject.fromObject(metaData.getATTRIBUTES());
+			List<Metamodel_datatype> privateMetaModels = metamodel_datatypeService.getMetamodel_datatypeByMetaModelId(metaData.getMETAMODELID());
+			data.put("元数据id", metaData.getID());
+			data.put("元数据名称", metaData.getNAME());
+			data.put("元数据业务说明", metaData.getDESCRIPTION());
+			data.put("元数据入库时间", metaData.getCREATETIME());
+			data.put("元数据修改时间", metaData.getUPDATETIME());
+			data.put("元数据的版本号", metaData.getVERSION());
+			data.put("采集元数据的编号", metaData.getCOLLECTJOBID());
+			data.put("审核状态", metaData.getCHECKSTATUS());
+			data.put("所属元模型id", metaData.getMETAMODELID());
 			for(Metamodel_datatype pri : privateMetaModels){
 				data.put(pri.getDesribe(), json.get(pri.getName()));
 			}			
@@ -246,7 +246,7 @@ public class KettleMetadataCollectController {
 		GlobalMethodAndParams.setHttpServletResponse(request, response);
 		
 		//检查传参是否正确
-		if(!map.containsKey("id") && !map.containsKey("name") ){
+		if(!map.containsKey("id") && !map.containsKey("name") && !map.containsKey("checkResult")){
 			responsejson.put("result", false);
 			responsejson.put("description", "传输参数 错误");
 			responsejson.put("count",0);
@@ -268,6 +268,8 @@ public class KettleMetadataCollectController {
 			id = Integer.parseInt(idstr);
 		} catch (Exception e) {
 		}
+		
+		String checkResult = map.get("checkResult").toString();
 
 		Datasource_connectinfo datasource_connectinfo = datasource_connectinfoService.getDatasource_connectinfoListByparentid(id);		
 			
@@ -275,8 +277,6 @@ public class KettleMetadataCollectController {
 		int connectinfoid = id;
 		//获取采集方式
 		String mode ="All";
-		//获取采集方式
-		String checkResult ="1";
 		//获取当前日期
 		Date createDate = null;
 		try{
@@ -291,16 +291,20 @@ public class KettleMetadataCollectController {
 		collectJobService.insertCollectJob(collectjob);				
 	
 		try {
-			int collectCount = kettleMetadataCollectService.metadataAutoCollect(datasource_connectinfo,collectjob.getId(),createDate,id);
-			
-			String[] tables = kettleMetadataCollectService.getTables(datasource_connectinfo);
+			int mountmodelid = 10;
 			JSONArray data = new JSONArray();
-			for(String table : tables){
-				JSONObject node = new JSONObject();
-				node.put("tablename", table);
-				node.put("operationname", null);
-				node.put("operationdescribe", null);
-				data.add(node);
+			if(mountmodelid == 10){
+				int collectCount = kettleMetadataCollectService.metadataAutoCollect(datasource_connectinfo,collectjob.getId(),createDate,id);
+				
+				String[] tables = kettleMetadataCollectService.getTables(datasource_connectinfo);
+
+				for(String table : tables){
+					JSONObject node = new JSONObject();
+					node.put("tablename", table);
+					node.put("operationname", null);
+					node.put("operationdescribe", null);
+					data.add(node);
+				}
 			}
 			responsejson.put("result", true);
 			responsejson.put("data",data);
@@ -431,7 +435,7 @@ public class KettleMetadataCollectController {
 				node.put("databasename",connectinfoService.getConnectinfoByid(collectJob.getConnectinfoId()).getName());
 				node.put("createdate", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(collectJob.getCreateDate()));
 				node.put("creater", collectJob.getCreater());
-				node.put("checkresult", collectJob.getCheckResult());
+				node.put("checkresult", collectJob.getCheckResult().equals("1")?"已审核":"未审核");
 				data.add(node);
 			}
 			
@@ -499,7 +503,7 @@ public class KettleMetadataCollectController {
 				node.put("databasename",connectinfoService.getConnectinfoByid(collectJob.getConnectinfoId()).getName());
 				node.put("createdate", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(collectJob.getCreateDate()));
 				node.put("creater", collectJob.getCreater());
-				node.put("checkresult", collectJob.getCheckResult());
+				node.put("checkresult", collectJob.getCheckResult().equals("1")?"已审核":"未审核");
 				data.add(node);
 			}
 			
@@ -512,43 +516,43 @@ public class KettleMetadataCollectController {
 	}
 
 	
-//	/**
-//	 * 
-//	 * 作者:GodDispose
-//	 * 时间:2018年3月23日
-//	 * 作用:获取数据库元数据
-//	 * 
-//	 */
-//	@RequestMapping(value = "/getDatabaseMetadata",method=RequestMethod.GET)
-//	@ResponseBody
-//	@Log(operationType="metadata",operationDesc="获取数据库元数据")
-//	public JSONObject getDatabaseMetadata(HttpServletRequest request,HttpServletResponse response) {
-//		JSONObject responsejson = new JSONObject();
-//
-////		if(!GlobalMethodAndParams.checkLogin()){
-////			responsejson.put("result", false);
-////			responsejson.put("count",0);
-////			return responsejson;
-////		}
-//		GlobalMethodAndParams.setHttpServletResponse(request, response);
-//	
-//		try{
-//			List<Metadata> metadatas = metaDataService.getMetadataByMetaModelId(10);
-//			JSONArray data = new JSONArray();
-//			for(Metadata metadata : metadatas){
-//				JSONObject node = new JSONObject();
-//				node.put("id", metadata.getId());
-//				node.put("label", metadata.getName());
-//				data.add(node);
-//			}
-//			responsejson.put("result", true);
-//			responsejson.put("data",data);
-//			responsejson.put("count",data.size());
-//		} catch (Exception e) {
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年3月23日
+	 * 作用:获取数据库元数据
+	 * 
+	 */
+	@RequestMapping(value = "/getDatabaseMetadata",method=RequestMethod.GET)
+	@ResponseBody
+	@Log(operationType="metadata",operationDesc="获取数据库元数据")
+	public JSONObject getDatabaseMetadata(HttpServletRequest request,HttpServletResponse response) {
+		JSONObject responsejson = new JSONObject();
+
+//		if(!GlobalMethodAndParams.checkLogin()){
 //			responsejson.put("result", false);
 //			responsejson.put("count",0);
+//			return responsejson;
 //		}
-//		return responsejson;
-//	}
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
+	
+		try{
+			List<Metadata> metadatas = metaDataService.getMetadataByMetaModelId(10);
+			JSONArray data = new JSONArray();
+			for(Metadata metadata : metadatas){
+				JSONObject node = new JSONObject();
+				node.put("id", metadata.getID());
+				node.put("label", metadata.getNAME());
+				data.add(node);
+			}
+			responsejson.put("result", true);
+			responsejson.put("data",data);
+			responsejson.put("count",data.size());
+		} catch (Exception e) {
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+		}
+		return responsejson;
+	}
 		
 }

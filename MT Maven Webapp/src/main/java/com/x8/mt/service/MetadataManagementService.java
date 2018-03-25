@@ -1,5 +1,7 @@
 package com.x8.mt.service;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -12,13 +14,19 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.x8.mt.common.GlobalMethodAndParams;
 import com.x8.mt.common.TransformMetadata;
+import com.x8.mt.dao.IMetaDataDao;
+import com.x8.mt.dao.IMetaDataRelationDao;
 import com.x8.mt.dao.IMetadataManagementDao;
+import com.x8.mt.dao.IMetadataTankDao;
 import com.x8.mt.dao.IMetamodel_datatypeDao;
 import com.x8.mt.dao.IMetamodel_hierarchyDao;
+import com.x8.mt.entity.MetaDataRelation;
 import com.x8.mt.entity.Metadata;
+import com.x8.mt.entity.MetadataTank;
 import com.x8.mt.entity.Metamodel_datatype;
 import com.x8.mt.entity.Metamodel_hierarchy;
 /**
@@ -33,6 +41,102 @@ public class MetadataManagementService {
 	IMetamodel_datatypeDao iMetamodel_datatypeDao;
 	@Resource
 	IMetamodel_hierarchyDao iMetamodel_hierarchyDao;
+	@Resource
+	IMetaDataRelationDao iMetaDataRelationDao;
+	@Resource
+	IMetadataTankDao iMetadataTankDao;
+	@Resource
+	IMetaDataDao iMetaDataDao;
+	
+	public boolean existMetadata(String metadataId) {
+		if(iMetaDataDao.getMetadataById(Integer.parseInt(metadataId))!=null){
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2017年3月25日
+	 * 作用:删除元数据信息[因为数据库中是级联删除,删除主键，外键跟着删除。只需要删除metadata表即可]
+	 *  	1.删除metadata_tank表中记录
+	 *  	2.删除metadata_relation表中记录
+	 *  	3.删除metadata表中记录
+	 */
+	@Transactional
+	public boolean daleteMetadataInfo(String metadataId,List<Object> count) {
+		
+		List<String> sonMetadataIds = iMetaDataRelationDao.getSonMetadataID(metadataId);
+		
+		for(int i=0;i<sonMetadataIds.size();i++){
+			String sonMetadataId = sonMetadataIds.get(i);
+			
+			//递归先删除儿子元数据
+			daleteMetadataInfo(sonMetadataId,count);
+		}
+		
+		if(imetadataManagementDao.daleteMetadata(metadataId)==1){
+			count.add(1);
+		}else{
+			throw new RuntimeException("daleteMetadata Error");
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2017年3月24日
+	 * 作用:修改元数据信息
+	 *  	1.将元数据在metadata表修改
+	 *  	2.修改后的记录加入metadata_tank表
+	 */
+	@Transactional
+	public boolean updateMetadataInfo(Map<String, Object> map) {
+		
+		//1.将元数据在metadata表修改
+		String metaModelId = (map.get(GlobalMethodAndParams.Public_Metamodel_METAMODELID)).toString();
+		
+		List<String> attributesField = imetadataManagementDao.getAttributesField(metaModelId);
+		Metadata metadata = TransformMetadata.transformMapToMetadata(map, attributesField);
+		
+		Date updateDataTime = new Date();
+		metadata.setUPDATETIME(updateDataTime);
+
+		metadata.setVERSION(Integer.parseInt(map.get("VERSION").toString())+1);
+
+		if(!(imetadataManagementDao.updateMetadata(metadata)>0)){
+			throw new RuntimeException("updateMetadata Error");
+		}
+
+		//2.加入metadata_tank表
+		MetadataTank metadataTank = new MetadataTank();
+		metadataTank.setCHECKSTATUS(metadata.getCHECKSTATUS());
+		metadataTank.setATTRIBUTES(metadata.getATTRIBUTES());
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		try {
+			metadataTank.setCREATETIME(sdf.parse(metadata.getCREATETIME()));
+		} catch (ParseException e) {
+			throw new RuntimeException("DATE Transform Error");
+		}
+		
+		metadataTank.setDESCRIPTION(metadata.getDESCRIPTION());
+		metadataTank.setKeyid(metadata.getID());
+		metadataTank.setMETAMODELID(metadata.getMETAMODELID());
+		metadataTank.setNAME(metadata.getNAME());
+		metadataTank.setUPDATETIME(updateDataTime);
+		metadataTank.setVERSION(metadata.getVERSION());
+		metadataTank.setCOLLECTJOBID(metadata.getCOLLECTJOBID());
+
+		if(!(iMetadataTankDao.insertMetaDataTank(metadataTank)>0)){
+			throw new RuntimeException("insertMetaDataTank Error");
+		}
+
+		return true;
+	}
 
 	/**
 	 * 
@@ -43,33 +147,65 @@ public class MetadataManagementService {
 	 *  	2.加入metadata_relation表
 	 *  	3.加入metadata_tank表
 	 */
+	@Transactional
 	public boolean addMetadata(Map<String,Object> map){
-		
+
 		String parentMetadataIdStr = map.get("parentMetadataId").toString();
 		String metamodelIdStr = map.get("metamodelId").toString();
 		Date dataTime = new Date();
-		
+
 		//1.将元数据加入到metadata表
 		Metadata metadata = new Metadata();
-		metadata.setMetaModelId(Integer.parseInt(metamodelIdStr));
-		metadata.setName(map.get("NAME").toString());
-		metadata.setDescription(map.get("DESRIBE").toString());
-		metadata.setCheckStatus("1");
-		metadata.setCreateTime(dataTime);
-		metadata.setUpdateTime(dataTime);
-		metadata.setVersion(1);
-		
+		metadata.setMETAMODELID(Integer.parseInt(metamodelIdStr));
+		metadata.setNAME(map.get("NAME").toString());
+		metadata.setDESCRIPTION(map.get("DESCRIPTION").toString());
+		metadata.setCHECKSTATUS("1");
+		metadata.setCREATETIME(dataTime);
+		metadata.setUPDATETIME(dataTime);
+		metadata.setVERSION(1);
+
 		map.remove("metamodelId");
 		map.remove("NAME");
-		map.remove("DESRIBE");
-		map.remove("parentMetadataIdStr");
-		
-		metadata.setAttributes(JSONObject.fromObject(map).toString());
-		
-		int metadataId = imetadataManagementDao.insertMetadata(metadata);
-		
-		System.out.println(metadataId);
-		return false;
+		map.remove("DESCRIPTION");
+		map.remove("parentMetadataId");
+
+		metadata.setATTRIBUTES(JSONObject.fromObject(map).toString());
+
+		//1.将元数据加入到metadata表
+		if(!(imetadataManagementDao.insertMetadata(metadata)>0)){
+			throw new RuntimeException("insertMetadata Error");
+		}
+
+		//2.加入metadata_relation表
+		int metadataId = metadata.getID();
+
+		MetaDataRelation metaDataRelation = new MetaDataRelation();
+		metaDataRelation.setMetaDataId(Integer.parseInt(parentMetadataIdStr));
+		metaDataRelation.setRelateMetaDataId(metadataId);
+		metaDataRelation.setType(GlobalMethodAndParams.COMPOSITION);
+
+		if(!(iMetaDataRelationDao.insertMetaDataRelation(metaDataRelation)>0)){
+			throw new RuntimeException("insertMetaDataRelation Error");
+		}
+
+		//3.加入metadata_tank表
+		MetadataTank metadataTank = new MetadataTank();
+		metadataTank.setCHECKSTATUS(metadata.getCHECKSTATUS());
+		metadataTank.setATTRIBUTES(metadata.getATTRIBUTES());
+		metadataTank.setCREATETIME(dataTime);
+		metadataTank.setDESCRIPTION(metadata.getDESCRIPTION());
+		metadataTank.setKeyid(metadataId);
+		metadataTank.setMETAMODELID(metadata.getMETAMODELID());
+		metadataTank.setNAME(metadata.getNAME());
+		metadataTank.setUPDATETIME(dataTime);
+		metadataTank.setVERSION(metadata.getVERSION());
+		metadataTank.setCOLLECTJOBID(0);
+
+		if(!(iMetadataTankDao.insertMetaDataTank(metadataTank)>0)){
+			throw new RuntimeException("insertMetaDataTank Error");
+		}
+
+		return true;
 	}
 
 	/**
@@ -259,7 +395,7 @@ public class MetadataManagementService {
 		List<Metadata> fieldMetadatas= imetadataManagementDao.getFieldMetadata(tableMetadataId);
 		for(int i = 0 ; i < fieldMetadatas.size() ; i++) {
 			Metadata metadata= (Metadata)fieldMetadatas.get(i);
-			Object metadataMap = TransformMetadata.transformMetadataToMap(metadata);
+			Map<String, Object> metadataMap = TransformMetadata.transformMetadataToMap(metadata);
 			metadataList.add(metadataMap);
 		}
 		return metadataList;
@@ -271,9 +407,10 @@ public class MetadataManagementService {
 	 * 时间:2017年3月19日
 	 * 作用:根据元数据id,获取某一个元数据
 	 */
-	public Object getMetadata(String metadataId) {
+	public Map<String, Object> getMetadata(String metadataId) {
 		Metadata metadata= imetadataManagementDao.getMetadata(metadataId);
-		Object metadataMap = TransformMetadata.transformMetadataToMap(metadata);
+		Map<String, Object> metadataMap = TransformMetadata.transformMetadataToMap(metadata);
 		return metadataMap;
 	}
+
 }

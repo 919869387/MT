@@ -54,13 +54,13 @@ public class KettleMetadataCollectService {
 
 		String[] tablenames = database.getTablenames();//获取数据库中所有表名		
 		Metadata metadataDatabase = new Metadata();
-		metadataDatabase.setName(datasource_connectinfo.getDatabasename());
-		metadataDatabase.setCollectJobId(collectjobid);
-		metadataDatabase.setMetaModelId(10);
-		metadataDatabase.setCreateTime(createDate);
-		metadataDatabase.setUpdateTime(createDate);
-		metadataDatabase.setCheckStatus("1");
-		metadataDatabase.setVersion(1);
+		metadataDatabase.setNAME(datasource_connectinfo.getDatabasename());
+		metadataDatabase.setCOLLECTJOBID(collectjobid);
+		metadataDatabase.setMETAMODELID(10);
+		metadataDatabase.setCREATETIME(createDate);
+		metadataDatabase.setCREATETIME(createDate);
+		metadataDatabase.setCHECKSTATUS("1");
+		metadataDatabase.setVERSION(1);
 		String databaseAttributes = "{\"dbtype\":\""+datasource_connectinfo.getDatabasetype()
 				+ "\",\"dbversion\":\"1" 
 				+"\",\"dbip\":\"" + datasource_connectinfo.getUrl()
@@ -70,7 +70,7 @@ public class KettleMetadataCollectService {
 				+"\",\"dbname\":\"" + datasource_connectinfo.getDatabasename()
 				+"\"}";	
 		
-		metadataDatabase.setAttributes(databaseAttributes);
+		metadataDatabase.setATTRIBUTES(databaseAttributes);
 		if(!(iMetaDataDao.insertMetadata(metadataDatabase)>0 ? true:false)){//插入不成功
 			throw new RuntimeException("数据库元数据插入失败");
 		}
@@ -78,23 +78,23 @@ public class KettleMetadataCollectService {
 		for(String tablename : tablenames){
 			//表信息插入Metadata
 			Metadata metadataTable = new Metadata();
-			metadataTable.setName(tablename);
-			metadataTable.setCollectJobId(collectjobid);
-			metadataTable.setMetaModelId(31);
-			metadataTable.setCreateTime(createDate);
-			metadataTable.setUpdateTime(createDate);
-			metadataTable.setCheckStatus("1");
-			metadataTable.setVersion(1);
+			metadataTable.setNAME(tablename);
+			metadataTable.setCOLLECTJOBID(collectjobid);
+			metadataTable.setMETAMODELID(31);
+			metadataTable.setCREATETIME(createDate);
+			metadataTable.setCREATETIME(createDate);
+			metadataTable.setCHECKSTATUS("1");
+			metadataTable.setVERSION(1);
 			String tableAttributes = "{\"tablename\":\""+ tablename +"\"}";
-			metadataTable.setAttributes(tableAttributes);	
+			metadataTable.setATTRIBUTES(tableAttributes);	
 			if(!(iMetaDataDao.insertMetadata(metadataTable)>0 ? true:false)){//插入不成功
 				throw new RuntimeException("表元数据插入失败");
 			}
 			collectCount++;//记录表元数据
 			
 			MetaDataRelation metadataRelation = new MetaDataRelation();
-			metadataRelation.setMetaDataId(metadataDatabase.getId());
-			metadataRelation.setRelateMetaDataId(metadataTable.getId());
+			metadataRelation.setMetaDataId(metadataDatabase.getID());
+			metadataRelation.setRelateMetaDataId(metadataTable.getID());
 			metadataRelation.setType("COMPOSITION");
 			
 			if(!(metaDataRelationService.insertMetaDataRelation(metadataRelation))){//插入不成功
@@ -108,13 +108,13 @@ public class KettleMetadataCollectService {
 			List<ValueMetaInterface> fieldNameTypeList = tableFields.getValueMetaList();
 			for(ValueMetaInterface fieldNameType : fieldNameTypeList){
 				Metadata MetadataField = new Metadata();
-				MetadataField.setName(fieldNameType.getName());
-				MetadataField.setCollectJobId(collectjobid);
-				MetadataField.setMetaModelId(32);
-				MetadataField.setCreateTime(createDate);
-				MetadataField.setUpdateTime(createDate);
-				MetadataField.setCheckStatus("1");
-				MetadataField.setVersion(1);
+				MetadataField.setNAME(fieldNameType.getName());
+				MetadataField.setCOLLECTJOBID(collectjobid);
+				MetadataField.setMETAMODELID(32);
+				MetadataField.setCREATETIME(createDate);
+				MetadataField.setCREATETIME(createDate);
+				MetadataField.setCHECKSTATUS("1");
+				MetadataField.setVERSION(1);
 				String fieldAttributes = "{\"fieldname\":\""+ fieldNameType.getName()
 					+ "\",\"fieldtype\":\"" + fieldNameType.getOriginalColumnTypeName()
 					+"\",\"length\":\"" + fieldNameType.getLength()
@@ -124,15 +124,15 @@ public class KettleMetadataCollectService {
 					+"\",\"defaultvalue\":\"" + 0
 					+"\"}";	
 				
-				MetadataField.setAttributes(fieldAttributes);
+				MetadataField.setATTRIBUTES(fieldAttributes);
 					
 				if(!(iMetaDataDao.insertMetadata(MetadataField)>0 ? true:false)){//插入不成功
 					throw new RuntimeException("字段元数据插入失败");
 				}
 				collectCount++;//记录字段元数据
 
-				metadataRelation.setMetaDataId(metadataTable.getId());
-				metadataRelation.setRelateMetaDataId(MetadataField.getId());
+				metadataRelation.setMetaDataId(metadataTable.getID());
+				metadataRelation.setRelateMetaDataId(MetadataField.getID());
 				metadataRelation.setType("COMPOSITION");
 				
 				if(!(metaDataRelationService.insertMetaDataRelation(metadataRelation))){//插入不成功

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.x8.mt.dao.ISystemRoleDao">
+	
+	<!-- 查询所有角色信息 -->
+	<select id="selectAllSystemRole" resultType="com.x8.mt.entity.SystemRole">
+		select * from systemrole
+	</select>
+	
+	<!-- 根据用户id查询用户角色 -->
+	<select id="getRoleById" parameterType="int" resultType="com.x8.mt.entity.SystemRole">
+		select * from systemrole where id in (select roleId from user_role where userId = #{id})
+	</select>
+	
+	<!-- 修改角色信息 -->
+	<update id="updateRoleInfoByRoleId" parameterType="com.x8.mt.entity.SystemRole">
+		update systemrole set description = #{description} where id = #{id}
+	</update>
+	
+	<!-- 添加角色信息 -->
+	<insert id="addRoleInfo" parameterType="com.x8.mt.entity.SystemRole">
+		insert into systemrole(rolename,description) values(#{rolename},#{description})
+	</insert>
+	
+	<!-- 根据角色名称查询角色id -->
+	<select id="selectIdByRoleName" parameterType="String" resultType="int">
+		select id from systemrole where rolename = #{rolename}
+	</select>
+	
+	<!-- 根据角色id删除对应的角色 -->
+	<delete id="deleteRole" parameterType="int">
+		delete from systemrole where id = #{id}
+	</delete>
+</mapper>

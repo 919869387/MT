@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.x8.mt.dao.UserRoleDao">
+	
+	<!-- 添加用户-角色对应关系 -->
+	<insert id="addUserRole" parameterType="com.x8.mt.entity.UserRole">
+		insert into user_role(userId,roleId) values(#{userId},#{roleId})
+	</insert>
+	
+	<!-- 根据用户id修改用户角色id -->
+	<update id="updateUserRolr" parameterType="com.x8.mt.entity.UserRole">
+		update user_role set roleId = #{roleId} where userId = #{userId}
+	</update>
+</mapper>
