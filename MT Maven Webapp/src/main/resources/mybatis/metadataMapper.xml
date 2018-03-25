@@ -26,4 +26,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		select * from metadata where id=#{id}
 	</select>
 	
+	<select id="getMetadataByMap" parameterType="Map" resultType="com.x8.mt.entity.Metadata">
+		select * from metadata where json_extract(attributes,#{key}) = #{value}
+	</select>
+	
 </mapper>

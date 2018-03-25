@@ -1,8 +1,12 @@
 package com.x8.mt.dao;
 
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
 import com.x8.mt.entity.Metadata;
 
 @Repository
@@ -46,4 +50,14 @@ public interface IMetaDataDao {
 	 * 作用:根据id获取一条Metadata记录
 	 */
 	List<Metadata> getMetadataByMetaModelId(int id);
+	
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年3月12日
+	 * 作用:根据Map获取一组Metadata记录
+	 */
+	List<Metadata> 	getMetadataByMap(@Param("key")String key,@Param("value")String value);
+	
+
 }
