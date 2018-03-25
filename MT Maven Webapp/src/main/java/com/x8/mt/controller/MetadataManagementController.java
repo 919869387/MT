@@ -33,7 +33,15 @@ import com.x8.mt.service.MetadataManagementService;
 public class MetadataManagementController {
 	@Resource
 	MetadataManagementService metadataManagementService;
-
+	
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2017年3月25日
+	 * 作用:删除元数据信息
+	 *  
+	 * 参数： ID[元数据id]
+	 */
 	@RequestMapping(value = "/daleteMetadataInfo", method = RequestMethod.POST)
 	@ResponseBody
 	@Log(operationType="metadata",operationDesc="删除元数据信息")
@@ -52,14 +60,21 @@ public class MetadataManagementController {
 		
 		String metadataId = map.get("ID").toString();
 		
-		if(metadataManagementService.daleteMetadataInfo(metadataId)){
-			responsejson.put("result", true);
-			responsejson.put("count", 1);
-		}else{
+		if(!metadataManagementService.existMetadata(metadataId)){
 			responsejson.put("result", false);
 			responsejson.put("count", 0);
+			return responsejson;
 		}
-
+		
+		List<Object> count = new ArrayList<Object>();
+		if(metadataManagementService.daleteMetadataInfo(metadataId,count)){
+			responsejson.put("result", true);
+			responsejson.put("count", count.size());
+		}else{
+			responsejson.put("result", false);
+			responsejson.put("count", count.size());
+		}
+		count.clear();
 		return responsejson;
 	}
 	
@@ -134,6 +149,7 @@ public class MetadataManagementController {
 	 * 作用:修改元数据信息步骤一,先显示可以修改的信息
 	 *  
 	 * 参数： metadataId[元数据id]
+	 * 		metamodelId[元模型id]
 	 */
 	@RequestMapping(value = "/updateMetadataInfoStepOne", method = RequestMethod.POST)
 	@ResponseBody

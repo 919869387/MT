@@ -3,51 +3,70 @@
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.x8.mt.dao.IMetamodel_hierarchyDao">
-	
+
+	<!-- allen -->
+	<select id="getCOMPOSITIONMetamodel" resultType="com.x8.mt.entity.Metamodel_hierarchy">
+		select * from
+		metamodel_hierarchy where id in (select relatedmetamodelid from
+		metamodel_relation where metamodelid=#{metamodelId} and
+		type='COMPOSITION');
+	</select>
+
 	<select id="getMetamodel_hierarchy" resultType="com.x8.mt.entity.Metamodel_hierarchy">
+		select * from
+		metamodel_hierarchy where id=#{id}
+	</select>
+
+	<insert id="insert" parameterType="com.x8.mt.entity.Metamodel_hierarchy"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into
+		metamodel_hierarchy(name,type,desribe,parentid,category,mountnode)
+		values(#{name}, #{type}, #{desribe},
+		<choose>
+			<when test="parentid!=0 ">#{parentid}</when>
+			<when test="parentid==0">null</when>
+		</choose>
+		,
+		#{category},#{mountnode})
+	</insert>
+
+	<select id="getSonMetamodel_hierarchy" parameterType="int"
+		resultType="com.x8.mt.entity.Metamodel_hierarchy">
+		select * from metamodel_hierarchy where parentid=#{id}
+	</select>
+
+	<select id="getSelfMetamodel_hierarchyParentid" parameterType="int">
 		select * from metamodel_hierarchy where id=#{id}
 	</select>
-	
-	<insert id="insert" parameterType="com.x8.mt.entity.Metamodel_hierarchy" useGeneratedKeys="true" keyProperty="id">
-		insert into metamodel_hierarchy(name,type,desribe,parentid,category,mountnode) values(#{name}, #{type}, #{desribe},
-		<choose>  
-             <when test="parentid!=0 ">#{parentid}</when>  
-             <when test="parentid==0">null</when>  
-        </choose>,
-        #{category},#{mountnode})
-	</insert>
-	
-	<select id="getSonMetamodel_hierarchy" parameterType="int" resultType="com.x8.mt.entity.Metamodel_hierarchy">
-		select * from metamodel_hierarchy where  parentid=#{id}
-	</select>
-	
-	<select id="getSelfMetamodel_hierarchyParentid" parameterType="int">
-		select * from metamodel_hierarchy where  id=#{id}
-	</select>
-	
+
 	<!-- 先判断是否有子节点，再删除 -->
 	<select id="packageIshavaSon" parameterType="int" resultType="int">
 		select count(*) from metamodel_hierarchy where parentid=#{id}
 	</select>
-	
+
 	<delete id="deleteMetamodel_hierarchy" parameterType="int">
-		delete from metamodel_hierarchy where id=#{id}
+		delete from
+		metamodel_hierarchy where id=#{id}
 	</delete>
-	
+
 	<update id="updateMetamodel_hierarchy">
-		update metamodel_hierarchy set name=#{name},desribe=#{desribe} where id = #{id} 
+		update metamodel_hierarchy set
+		name=#{name},desribe=#{desribe} where id = #{id}
 	</update>
-	
+
 	<select id="getAllMetamodel_package" resultType="com.x8.mt.entity.Metamodel_hierarchy">
-		select * from metamodel_hierarchy where type='PACKAGE' and parentid is not null
+		select * from
+		metamodel_hierarchy where type='PACKAGE' and parentid is not null
 	</select>
-	
+
 	<select id="getMetamodel_packageByType" resultType="com.x8.mt.entity.Metamodel_hierarchy">
-		select * from metamodel_hierarchy where type='METAMODEL'
+		select * from
+		metamodel_hierarchy where type='METAMODEL'
 	</select>
-	
+
 	<select id="getMetaModelByMountNode" resultType="com.x8.mt.entity.Metamodel_hierarchy">
-		select * from metamodel_hierarchy where mountnode = 1
+		select * from
+		metamodel_hierarchy where mountnode = 1
 	</select>
-	
+
 </mapper>

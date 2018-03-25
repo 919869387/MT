@@ -11,9 +11,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		values(#{metaDataId},#{relateMetaDataId},#{type})
 	</insert>
 	
-	<delete id="daleteMetaDataRelation">
-		DELETE FROM metadata_relation WHERE relatedmetadataid=#{metadataId} and type='COMPOSITION'
-	</delete>
+	<select id="getSonMetadataID" resultType="java.lang.String">
+		select relatedmetadataid from metadata_relation where metadataid=#{metadataId} and type='COMPOSITION'
+	</select>
 </mapper>
 
 

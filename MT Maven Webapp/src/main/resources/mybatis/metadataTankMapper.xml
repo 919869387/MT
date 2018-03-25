@@ -21,8 +21,4 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		#{CREATETIME},#{UPDATETIME},#{CHECKSTATUS},#{ATTRIBUTES},#{VERSION},#{keyid})
 	</insert>
 
-	<delete id="daletetMetaDataTank">
-		DELETE FROM metadata_tank WHERE keyid=#{metadataId}
-	</delete>
-
 </mapper>
