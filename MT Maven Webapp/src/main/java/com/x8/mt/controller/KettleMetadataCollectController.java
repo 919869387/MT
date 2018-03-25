@@ -246,7 +246,7 @@ public class KettleMetadataCollectController {
 		GlobalMethodAndParams.setHttpServletResponse(request, response);
 		
 		//检查传参是否正确
-		if(!map.containsKey("id") && !map.containsKey("name") ){
+		if(!map.containsKey("id") && !map.containsKey("name") && !map.containsKey("checkResult")){
 			responsejson.put("result", false);
 			responsejson.put("description", "传输参数 错误");
 			responsejson.put("count",0);
@@ -268,16 +268,15 @@ public class KettleMetadataCollectController {
 			id = Integer.parseInt(idstr);
 		} catch (Exception e) {
 		}
+		
+		String checkResult = map.get("checkResult").toString();
 
 		Datasource_connectinfo datasource_connectinfo = datasource_connectinfoService.getDatasource_connectinfoListByparentid(id);		
-		
-		//将采集任务结果插入到数据库中		
+			
 		//获取数据源编号
 		int connectinfoid = id;
 		//获取采集方式
 		String mode ="All";
-		//获取采集方式
-		String checkResult ="1";
 		//获取当前日期
 		Date createDate = null;
 		try{
@@ -292,16 +291,20 @@ public class KettleMetadataCollectController {
 		collectJobService.insertCollectJob(collectjob);				
 	
 		try {
-			int collectCount = kettleMetadataCollectService.metadataAutoCollect(datasource_connectinfo,collectjob.getId(),createDate,id);
-			
-			String[] tables = kettleMetadataCollectService.getTables(datasource_connectinfo);
+			int mountmodelid = 10;
 			JSONArray data = new JSONArray();
-			for(String table : tables){
-				JSONObject node = new JSONObject();
-				node.put("tablename", table);
-				node.put("operationname", null);
-				node.put("operationdescribe", null);
-				data.add(node);
+			if(mountmodelid == 10){
+				int collectCount = kettleMetadataCollectService.metadataAutoCollect(datasource_connectinfo,collectjob.getId(),createDate,id);
+				
+				String[] tables = kettleMetadataCollectService.getTables(datasource_connectinfo);
+
+				for(String table : tables){
+					JSONObject node = new JSONObject();
+					node.put("tablename", table);
+					node.put("operationname", null);
+					node.put("operationdescribe", null);
+					data.add(node);
+				}
 			}
 			responsejson.put("result", true);
 			responsejson.put("data",data);
@@ -432,7 +435,7 @@ public class KettleMetadataCollectController {
 				node.put("databasename",connectinfoService.getConnectinfoByid(collectJob.getConnectinfoId()).getName());
 				node.put("createdate", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(collectJob.getCreateDate()));
 				node.put("creater", collectJob.getCreater());
-				node.put("checkresult", collectJob.getCheckResult());
+				node.put("checkresult", collectJob.getCheckResult().equals("1")?"已审核":"未审核");
 				data.add(node);
 			}
 			
@@ -500,7 +503,7 @@ public class KettleMetadataCollectController {
 				node.put("databasename",connectinfoService.getConnectinfoByid(collectJob.getConnectinfoId()).getName());
 				node.put("createdate", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(collectJob.getCreateDate()));
 				node.put("creater", collectJob.getCreater());
-				node.put("checkresult", collectJob.getCheckResult());
+				node.put("checkresult", collectJob.getCheckResult().equals("1")?"已审核":"未审核");
 				data.add(node);
 			}
 			

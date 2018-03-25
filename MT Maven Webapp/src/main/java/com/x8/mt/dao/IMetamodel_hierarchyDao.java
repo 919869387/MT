@@ -32,21 +32,6 @@ public interface IMetamodel_hierarchyDao {
 	 */
 	List<Metamodel_hierarchy> getSonMetamodel_hierarchy(int id);
 
-	/**
-	 * 
-	 * 作者:allen 
-	 * 时间:2017年11月17日 
-	 * 作用:删除元模型(已经废弃)
-	 */
-	int delete_METAMODEL(int id);
-
-	/**
-	 * 
-	 * 作者:allen 
-	 * 时间:2017年11月17日 
-	 * 作用:删除包(已经废弃)
-	 */
-	int delete_PACKAGE(int id);
 
 	/**
 	 * 
@@ -100,4 +85,12 @@ public interface IMetamodel_hierarchyDao {
 	 * 作用:查询所有组合关系的下层元模型
 	 */
 	List<Metamodel_hierarchy> getCOMPOSITIONMetamodel(String metamodelId);
+	
+	/**
+	 * 
+	 * 作者:GodDipose
+	 * 时间:2018年3月24日
+	 * 作用:查询所有元模型
+	 */
+	List<Metamodel_hierarchy> getMetamodel_packageByType();
 }

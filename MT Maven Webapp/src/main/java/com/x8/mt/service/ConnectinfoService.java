@@ -44,6 +44,7 @@ public class ConnectinfoService {
 		try {
 			return iConnectinfoDao.updateConnectinfoNameOrDescriptionById(connectinfo)>0 ? true:false;
 		} catch (Exception e) {
+			e.printStackTrace();
 			return false;
 		}
 	}

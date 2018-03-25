@@ -29,7 +29,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		update connectinfo
 		<trim prefix="set" suffixOverrides=",">
 			<if test="name!=null">name=#{name},</if>
-			<if test="describe!=null">desribe=#{describe},</if>
+			<if test="description!=null">description=#{description},</if>
 		</trim>
 		where id=#{id}
 	</update>
@@ -37,7 +37,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<insert id="insert" parameterType="com.x8.mt.entity.Connectinfo"
 		useGeneratedKeys="true" keyProperty="id">
 		insert into
-		connectinfo (name, type,desribe,mountmetadataid,needcheck)
+		connectinfo (name, type,description,mountmetadataid,needcheck)
 		values (#{name}, #{type},#{description},#{mountMetaDataId},#{needCheck})
 	</insert>
 	

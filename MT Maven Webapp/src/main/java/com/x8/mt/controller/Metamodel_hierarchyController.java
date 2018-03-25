@@ -254,48 +254,6 @@ public class Metamodel_hierarchyController {
         return responsejson;
 	}
 	
-	/**
-	 * 
-	 * 作者:allen
-	 * 时间:2017年11月17日
-	 * 作用:删除包[只有包下面没有元模型时才可以删除]
-	 * 参数：需要删除包的id(已经废弃)
-	 */
-	@RequestMapping(value = "/deleteMetamodel_hierarchy_PACKAGE",method=RequestMethod.POST)
-	@ResponseBody
-	@Log(operationType="metamodel_hierarchy",operationDesc="根据包id,删除包")
-	public JSONObject deleteMetamodel_hierarchy_PACKAGE(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map){
-		JSONObject responsejson = new JSONObject();
-		
-//		if(!GlobalMethodAndParams.checkLogin()){
-//			responsejson.put("result", false);
-//			responsejson.put("count",0);
-//			return responsejson;
-//		}
-		GlobalMethodAndParams.setHttpServletResponse(request, response);
-		
-		//检查传参是否正确
-		if(!map.containsKey("id")){
-			responsejson.put("result", false);
-			responsejson.put("count",0);
-	        return responsejson;
-		}
-		
-		String idStr = map.get("id").toString();
-		int id = 0;
-		try {
-			id = Integer.parseInt(idStr);
-		} catch (Exception e) {
-		}
-		boolean result = metamodel_hierarchyService.deleteMetamodel_hierarchy_PACKAGE(id);
-		responsejson.put("result", result);
-		if(result){
-			responsejson.put("count",1);
-		}else{
-			responsejson.put("count",0);
-		}
-        return responsejson;
-	}
 	
 	/**
 	 * 
@@ -543,6 +501,40 @@ public class Metamodel_hierarchyController {
 		responsejson.put("data", data);
 		responsejson.put("count", data.size());
 		
+		return responsejson;
+	}
+	
+	/**
+	 * 
+	 * 作者:GodDipose
+	 * 时间:2018年3月24日
+	 * 作用:查询所有元模型
+	 */
+	@RequestMapping(value = "/getMetamodelByType",method=RequestMethod.GET)
+	@ResponseBody
+	@Log(operationType="metamodel_hierarchy",operationDesc="查询所有元模型")
+	public JSONObject getMetamodelByType(HttpServletRequest request,HttpServletResponse response){
+		JSONObject responsejson = new JSONObject();
+		
+//		if(!GlobalMethodAndParams.checkLogin()){
+//			responsejson.put("result", false);
+//			responsejson.put("count",0);
+//			return responsejson;
+//		}
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
+
+		List<Metamodel_hierarchy> metamodelPackageList = metamodel_hierarchyService.getMetamodel_packageByType();
+		
+		JSONArray data = new JSONArray();
+		for (Metamodel_hierarchy metamodel_hierarchy : metamodelPackageList) {
+			JSONObject json = new JSONObject();
+			json.put("value", metamodel_hierarchy.getId());
+			json.put("label", metamodel_hierarchy.getName());
+			data.add(json);
+		}
+		responsejson.put("result", true);
+		responsejson.put("data", data);
+		responsejson.put("count", 1);
 		return responsejson;
 	}
 }

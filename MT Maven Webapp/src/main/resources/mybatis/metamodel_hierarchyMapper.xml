@@ -18,25 +18,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</insert>
 	
 	<select id="getSonMetamodel_hierarchy" parameterType="int" resultType="com.x8.mt.entity.Metamodel_hierarchy">
-		select id,name,desribe from metamodel_hierarchy where  parentid=#{id}
+		select * from metamodel_hierarchy where  parentid=#{id}
 	</select>
 	
 	<select id="getSelfMetamodel_hierarchyParentid" parameterType="int">
-		select parentid from metamodel_hierarchy where  id=#{id}
+		select * from metamodel_hierarchy where  id=#{id}
 	</select>
 	
 	<!-- 先判断是否有子节点，再删除 -->
 	<select id="packageIshavaSon" parameterType="int" resultType="int">
 		select count(*) from metamodel_hierarchy where parentid=#{id}
 	</select>
-	<!-- (已经废弃) -->
-	<delete id="delete_PACKAGE" parameterType="int">
-		delete from metamodel_hierarchy where id=#{id} and type='PACKAGE'
-	</delete>
-	<!-- (已经废弃) -->
-	<delete id="delete_METAMODEL" parameterType="int">
-		delete from metamodel_hierarchy where id=#{id} and type='METAMODEL'
-	</delete>
 	
 	<delete id="deleteMetamodel_hierarchy" parameterType="int">
 		delete from metamodel_hierarchy where id=#{id}
@@ -47,16 +39,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</update>
 	
 	<select id="getAllMetamodel_package" resultType="com.x8.mt.entity.Metamodel_hierarchy">
-		select id,name from metamodel_hierarchy where type='PACKAGE' and parentid is not null
+		select * from metamodel_hierarchy where type='PACKAGE' and parentid is not null
+	</select>
+	
+	<select id="getMetamodel_packageByType" resultType="com.x8.mt.entity.Metamodel_hierarchy">
+		select * from metamodel_hierarchy where type='METAMODEL'
 	</select>
 	
 	<select id="getMetaModelByMountNode" resultType="com.x8.mt.entity.Metamodel_hierarchy">
-		select id,name from metamodel_hierarchy where mountnode = 1
-	</select>
-	
-	<!-- allen -->
-	<select id="getCOMPOSITIONMetamodel" resultType="com.x8.mt.entity.Metamodel_hierarchy">
-		select * from metamodel_hierarchy where id in (select relatedmetamodelid from metamodel_relation where metamodelid=#{metamodelId} and type='COMPOSITION');
+		select * from metamodel_hierarchy where mountnode = 1
 	</select>
 	
 </mapper>
