@@ -3,6 +3,9 @@ package com.x8.mt.common;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
+
 public class GlobalMethodAndParams {
 	
 	/**
@@ -163,4 +166,18 @@ public class GlobalMethodAndParams {
 		response.setHeader("XDomainRequestAllowed","1");
 	}
 	
+	
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2017年11月29日
+	 * 作用:检查用户是否登录
+	 */
+	public static boolean checkLogin(){ 
+		Subject currentUser = SecurityUtils.getSubject();
+		if (!currentUser.isAuthenticated()) {  
+			return false;  
+		}
+		return true;  
+	}
 }

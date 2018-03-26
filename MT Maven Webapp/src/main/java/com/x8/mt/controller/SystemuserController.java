@@ -147,7 +147,7 @@ public class SystemuserController {
 	 * 备注：在浏览器没有请求过服务器(没有session)，就直接请求登出方法的时候，
 	 * 	该方法返回error路径。前段在这个方法的ajax里的error中需要写逻辑
 	 */
-	/*@RequestMapping(value = "/logout", method = RequestMethod.GET)  
+	@RequestMapping(value = "/logout", method = RequestMethod.GET)  
 	@ResponseBody
 	@Log(operationType="systemusercontroller",operationDesc="用户登出")
 	public JSONObject logout(HttpServletRequest request,HttpServletResponse response) {		
@@ -163,7 +163,7 @@ public class SystemuserController {
 			responsejson.put("count",0);
 		}
 		return responsejson;  
-	}*/
+	}
 	
 	/**
 	 * 作者：yangyuan
@@ -344,6 +344,11 @@ public class SystemuserController {
 		//创建一个JSON对象
 		JSONObject responsejson = new JSONObject();
 		
+//		if(!GlobalMethodAndParams.checkLogin()){
+//			responsejson.put("result", false);
+//			responsejson.put("count",0);
+//			return responsejson;
+//		}
 		//检查传参是否正确
 		if(!(map.containsKey("userName")&&map.containsKey("password")&&map.containsKey("userCode")&&map.containsKey("userRole")&&map.containsKey("state"))){
 			responsejson.put("status", false);
