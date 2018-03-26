@@ -23,7 +23,26 @@ import com.x8.mt.entity.Metadata;
  * 作用：Metadata与map相互转换
  */
 public class TransformMetadata {
-
+	
+	/**
+	 * 作者:allen
+	 * 时间:2018年3月26日
+	 * 作用:生产Attributes
+	 */
+	public static JSONObject createAttributes(Map<String,Object> map , List<String> attributesField){
+		JSONObject attributes = new JSONObject();
+		Iterator it = map.entrySet().iterator();  
+		while (it.hasNext()) {
+			Entry entry = (Entry) it.next();  
+			String key = (String) entry.getKey();
+			Object value = entry.getValue();
+			if(attributesField.contains(key)){
+				attributes.put(key, value);
+			}
+		}
+		return attributes;
+	}
+	
 	/**
 	 * 作者:allen
 	 * 时间:2018年3月22日

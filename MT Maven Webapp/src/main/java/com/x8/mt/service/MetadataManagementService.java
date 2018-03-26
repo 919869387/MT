@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -47,14 +48,14 @@ public class MetadataManagementService {
 	IMetadataTankDao iMetadataTankDao;
 	@Resource
 	IMetaDataDao iMetaDataDao;
-	
+
 	public boolean existMetadata(String metadataId) {
 		if(iMetaDataDao.getMetadataById(Integer.parseInt(metadataId))!=null){
 			return true;
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 
 	 * 作者:allen
@@ -66,25 +67,62 @@ public class MetadataManagementService {
 	 */
 	@Transactional
 	public boolean daleteMetadataInfo(String metadataId,List<Object> count) {
-		
+
 		List<String> sonMetadataIds = iMetaDataRelationDao.getSonMetadataID(metadataId);
-		
+
 		for(int i=0;i<sonMetadataIds.size();i++){
 			String sonMetadataId = sonMetadataIds.get(i);
-			
+
 			//递归先删除儿子元数据
 			daleteMetadataInfo(sonMetadataId,count);
 		}
-		
+
 		if(imetadataManagementDao.daleteMetadata(metadataId)==1){
 			count.add(1);
 		}else{
 			throw new RuntimeException("daleteMetadata Error");
 		}
-		
+
 		return true;
 	}
 	
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2017年3月26日
+	 * 作用:修改元数据私有信息
+	 *  	1.将元数据在metadata表修改Attributes
+	 *  	2.再修改metadata_tank表Attributes
+	 */
+	@Transactional
+	public boolean updateMetadataInfoForPRIVATE(Map<String, Object> map) {
+
+		//1.将元数据在metadata表修改
+		String metaModelId = (map.get(GlobalMethodAndParams.Public_Metamodel_METAMODELID)).toString();
+
+		List<String> attributesField = imetadataManagementDao.getAttributesField(metaModelId);
+		JSONObject attributes = TransformMetadata.createAttributes(map, attributesField);
+		
+		Metadata metadata = new Metadata();
+		metadata.setID(Integer.parseInt(map.get("ID").toString()));
+		metadata.setATTRIBUTES(attributes.toString());
+		
+		if(!(imetadataManagementDao.updateMetadatAttributes(metadata)>0)){
+			throw new RuntimeException("updateMetadatAttributes Error");
+		}
+
+		//2.加入metadata_tank表
+		MetadataTank metadataTank = new MetadataTank();
+		metadataTank.setATTRIBUTES(metadata.getATTRIBUTES());
+		metadataTank.setID(Integer.parseInt(map.get("metadataTankid").toString()));
+
+		if(!(iMetadataTankDao.updateMetaDataTankAttributes(metadataTank)>0)){
+			throw new RuntimeException("updateMetaDataTankAttributes Error");
+		}
+
+		return true;
+	}
+
 	/**
 	 * 
 	 * 作者:allen
@@ -94,35 +132,34 @@ public class MetadataManagementService {
 	 *  	2.修改后的记录加入metadata_tank表
 	 */
 	@Transactional
-	public boolean updateMetadataInfo(Map<String, Object> map) {
-		
+	public int updateMetadataInfoForCommon(Map<String, Object> map) {
+
 		//1.将元数据在metadata表修改
-		String metaModelId = (map.get(GlobalMethodAndParams.Public_Metamodel_METAMODELID)).toString();
+		Metadata metadata = iMetaDataDao.getMetadataById(Integer.parseInt(map.get("ID").toString()));
 		
-		List<String> attributesField = imetadataManagementDao.getAttributesField(metaModelId);
-		Metadata metadata = TransformMetadata.transformMapToMetadata(map, attributesField);
-		
+		metadata.setNAME(map.get("NAME").toString());
+		metadata.setDESCRIPTION(map.get("DESCRIPTION").toString());
+
 		Date updateDataTime = new Date();
 		metadata.setUPDATETIME(updateDataTime);
 
-		metadata.setVERSION(Integer.parseInt(map.get("VERSION").toString())+1);
+		metadata.setVERSION(metadata.getVERSION()+1);
 
 		if(!(imetadataManagementDao.updateMetadata(metadata)>0)){
 			throw new RuntimeException("updateMetadata Error");
 		}
-
+		
 		//2.加入metadata_tank表
 		MetadataTank metadataTank = new MetadataTank();
 		metadataTank.setCHECKSTATUS(metadata.getCHECKSTATUS());
-		metadataTank.setATTRIBUTES(metadata.getATTRIBUTES());
-		
+
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		try {
 			metadataTank.setCREATETIME(sdf.parse(metadata.getCREATETIME()));
 		} catch (ParseException e) {
 			throw new RuntimeException("DATE Transform Error");
 		}
-		
+
 		metadataTank.setDESCRIPTION(metadata.getDESCRIPTION());
 		metadataTank.setKeyid(metadata.getID());
 		metadataTank.setMETAMODELID(metadata.getMETAMODELID());
@@ -135,7 +172,7 @@ public class MetadataManagementService {
 			throw new RuntimeException("insertMetaDataTank Error");
 		}
 
-		return true;
+		return metadataTank.getID();
 	}
 
 	/**
@@ -215,20 +252,30 @@ public class MetadataManagementService {
 	 * 作用:查询得到元数据对应的元模型信息,这个方法显示全部元模型的信息
 	 * 
 	 */
-	public JSONObject getMetamodelInfoForAddMetadata(String metamodelid){
+	public JSONArray getMetamodelInfoForAddMetadata(String metamodelid){
 
-		JSONObject metamodelInfo = getMetamodelInfo(metamodelid);
+		JSONObject metamodelInfoMap = getMetamodelInfo(metamodelid);
 
-		metamodelInfo.remove(GlobalMethodAndParams.Public_Metamodel_ATTRIBUTES);
-		metamodelInfo.remove(GlobalMethodAndParams.Public_Metamodel_COLLECTJOBID);
-		metamodelInfo.remove(GlobalMethodAndParams.Public_Metamodel_METAMODELID);
-		metamodelInfo.remove(GlobalMethodAndParams.Public_Metamodel_CHECKSTATUS);
-		metamodelInfo.remove(GlobalMethodAndParams.Public_Metamodel_VERSION);
-		metamodelInfo.remove(GlobalMethodAndParams.Public_Metamodel_UPDATETIME);
-		metamodelInfo.remove(GlobalMethodAndParams.Public_Metamodel_CREATETIME);
-		metamodelInfo.remove(GlobalMethodAndParams.Public_Metamodel_ID);
+		metamodelInfoMap.remove(GlobalMethodAndParams.Public_Metamodel_ATTRIBUTES);
+		metamodelInfoMap.remove(GlobalMethodAndParams.Public_Metamodel_COLLECTJOBID);
+		metamodelInfoMap.remove(GlobalMethodAndParams.Public_Metamodel_METAMODELID);
+		metamodelInfoMap.remove(GlobalMethodAndParams.Public_Metamodel_CHECKSTATUS);
+		metamodelInfoMap.remove(GlobalMethodAndParams.Public_Metamodel_VERSION);
+		metamodelInfoMap.remove(GlobalMethodAndParams.Public_Metamodel_UPDATETIME);
+		metamodelInfoMap.remove(GlobalMethodAndParams.Public_Metamodel_CREATETIME);
+		metamodelInfoMap.remove(GlobalMethodAndParams.Public_Metamodel_ID);
 
-		return metamodelInfo;
+		JSONArray metamodelInfos = new JSONArray();  
+		Iterator iterator = metamodelInfoMap.keys();  
+		while(iterator.hasNext()){
+			JSONObject metamodelInfo = new JSONObject();
+			String key = (String) iterator.next();  
+			String describe = metamodelInfoMap.get(key).toString();
+			metamodelInfo.put("key", key);
+			metamodelInfo.put("describe", describe);
+			metamodelInfos.add(metamodelInfo);
+		}  
+		return metamodelInfos;
 	}
 
 	/**
@@ -238,17 +285,22 @@ public class MetadataManagementService {
 	 * 作用:查询得到COMPOSITION类型的儿子元模型
 	 * 
 	 */
-	public JSONObject getCOMPOSITIONMetamodel(String metamodelId){
+	public List<JSONObject> getCOMPOSITIONMetamodel(String metamodelId){
 		List<Metamodel_hierarchy> metamodel_hierarchys = iMetamodel_hierarchyDao.getCOMPOSITIONMetamodel(metamodelId);
 		if(metamodel_hierarchys.size()==0){
 			return null;
 		}else{
-			JSONObject metamodels = new JSONObject();
+			List<JSONObject> includeMetaModel = new ArrayList<JSONObject>();
+
 			for(int i=0;i<metamodel_hierarchys.size();i++){
 				Metamodel_hierarchy metamodel_hierarchy = metamodel_hierarchys.get(i);
-				metamodels.put(metamodel_hierarchy.getId(), metamodel_hierarchy.getName());
+				JSONObject metamodel = new JSONObject();
+				metamodel.put("modelid",metamodel_hierarchy.getId());
+				metamodel.put("name",metamodel_hierarchy.getName());
+				includeMetaModel.add(metamodel);
 			}
-			return metamodels;
+
+			return includeMetaModel;
 		}
 	}
 

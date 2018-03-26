@@ -75,4 +75,12 @@ public interface IMetadataManagementDao {
 	 * 作用:删除一条元数据
 	 */
 	int daleteMetadata(String metadataId);
+	
+	/**
+	 * 
+	 * 作者:allen 
+	 * 时间:2017年3月23日 
+	 * 作用:更新元数据的Attributes属性
+	 */
+	int updateMetadatAttributes(Metadata metadata);
 }

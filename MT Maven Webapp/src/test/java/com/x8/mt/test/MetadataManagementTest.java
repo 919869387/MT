@@ -44,15 +44,18 @@ public class MetadataManagementTest {
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("ID", 1958);
+//		map.put("type","COMMON");
+//		map.put("ID", 1282);
+//		map.put("METAMODELID", 31);
+//		map.put("NAME", "mountnode");
+//		map.put("DESCRIPTION", "AAAAA");
+//		map.put("tablename", "mountnode");
+		
+		map.put("type","PRIVATE");
+		map.put("ID", 1282);
 		map.put("METAMODELID", 31);
-		map.put("NAME", "mountnode");
-		map.put("DESCRIPTION", "AAAAA");
-		map.put("VERSION", 2);
+		map.put("metadataTankid", "170");
 		map.put("tablename", "mountnode");
-		map.put("CREATETIME", "2017-03-24 22:25:24");
-		map.put("CHECKSTATUS", 1);
-		map.put("COLLECTJOBID", 184);
 	
 		System.out.println(metadataManagementController.updateMetadataInfoStepTwo(request, response, map));
 	}
@@ -62,13 +65,16 @@ public class MetadataManagementTest {
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("metadataId", 1239);
-		map.put("metamodelId", 10);
+		map.put("metadataId", 1282);
+		map.put("metamodelId", 31);
+		//map.put("type", "COMMON");
+		map.put("type", "PRIVATE");
+		
 		System.out.println(metadataManagementController.updateMetadataInfoStepOne(request, response, map));
 	}
 	
 	@Test
-	public void addMetadataStepTwo(){
+	public void addMetadataStepThree(){
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -77,6 +83,15 @@ public class MetadataManagementTest {
 		map.put("NAME", "table111");
 		map.put("DESCRIPTION", "测试元数据添加");
 		map.put("tablename", "table111");
+		System.out.println(metadataManagementController.addMetadataStepThree(request, response, map));
+	}
+	
+	@Test
+	public void addMetadataStepTwo(){
+		HttpServletRequest request = null;
+		HttpServletResponse response = null;
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("metamodelId", 31);
 		System.out.println(metadataManagementController.addMetadataStepTwo(request, response, map));
 	}
 	
@@ -95,8 +110,8 @@ public class MetadataManagementTest {
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("metadataId", 1248);
-		map.put("metamodelId", 31);
+		map.put("metadataId", 1291);
+		map.put("metamodelId", 32);
 		System.out.println(metadataManagementController.getMetadataInfo(request,response,map));
 	}
 	
