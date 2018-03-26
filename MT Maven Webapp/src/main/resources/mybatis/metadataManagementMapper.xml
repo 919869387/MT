@@ -8,12 +8,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		DELETE FROM metadata WHERE id=#{metadataId}
 	</delete>
 	
+	<update id="updateMetadatAttributes" parameterType="com.x8.mt.entity.Metadata">
+		UPDATE metadata
+		SET attributes=#{ATTRIBUTES}
+		WHERE id = #{ID};
+	</update>
+	
 	<update id="updateMetadata" parameterType="com.x8.mt.entity.Metadata">
 		UPDATE metadata
 		SET name=#{NAME},
 		description=#{DESCRIPTION},
 		updatetime=#{UPDATETIME},
-		attributes=#{ATTRIBUTES},
 		version=#{VERSION}
 		WHERE id = #{ID};
 	</update>

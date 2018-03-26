@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.x8.mt.common.GlobalMethodAndParams;
 import com.x8.mt.common.Log;
 import com.x8.mt.service.MetadataManagementService;
+import com.x8.mt.service.Metamodel_hierarchyService;
 /**
  * 作者： allen
  * 时间：2018年3月15日
@@ -33,7 +35,9 @@ import com.x8.mt.service.MetadataManagementService;
 public class MetadataManagementController {
 	@Resource
 	MetadataManagementService metadataManagementService;
-	
+	@Resource
+	Metamodel_hierarchyService metamodel_hierarchyService;
+
 	/**
 	 * 
 	 * 作者:allen
@@ -57,15 +61,15 @@ public class MetadataManagementController {
 			responsejson.put("count",0);
 			return responsejson;
 		}
-		
+
 		String metadataId = map.get("ID").toString();
-		
+
 		if(!metadataManagementService.existMetadata(metadataId)){
 			responsejson.put("result", false);
 			responsejson.put("count", 0);
 			return responsejson;
 		}
-		
+
 		List<Object> count = new ArrayList<Object>();
 		if(metadataManagementService.daleteMetadataInfo(metadataId,count)){
 			responsejson.put("result", true);
@@ -77,7 +81,7 @@ public class MetadataManagementController {
 		count.clear();
 		return responsejson;
 	}
-	
+
 	/**
 	 * 
 	 * 作者:allen
@@ -90,34 +94,17 @@ public class MetadataManagementController {
 	 * 		。。。。。
 	 * 
 	 * {
-		"UPDATETIME": "2018-03-16 16:31:02",
-		"DESCRIPTION": null,
-		"VERSION": 1,
 		"ID": 1248,
 		"tablename": "metadata",
-		"CREATETIME": "2018-03-16 16:31:02",
 		"METAMODELID": 31,
-		"CHECKSTATUS": "1",
-		"COLLECTJOBID": 172,
-		"NAME": "metadata"
-	},
-	"metamodelInfo": {
-		"ID": "元数据id",
-		"NAME": "元数据名称",
-		"DESCRIPTION": "元数据业务说明",
-		"CREATETIME": "元数据入库时间",
-		"UPDATETIME": "元数据修改时间",
-		"VERSION": "元数据的版本号",
-		"COLLECTJOBID": "采集元数据的任务编号",
-		"CHECKSTATUS": "审核状态",
-		"METAMODELID": "所属的元模型id",
-		"tablename": "表名"
-	}
-	不管属性有没有改，都要有
+		"NAME": "metadata",
+		 "type":"COMMON",
+		 "metadataTankid":1212
+		}
 	 */
 	@RequestMapping(value = "/updateMetadataInfoStepTwo", method = RequestMethod.POST)
 	@ResponseBody
-	@Log(operationType="metadata",operationDesc="修改元数据信息")
+	@Log(operationType="metadata",operationDesc="修改元数据信息步骤二")
 	public JSONObject updateMetadataInfoStepTwo(HttpServletRequest request,
 			HttpServletResponse response,@RequestBody Map<String, Object> map){
 		JSONObject responsejson = new JSONObject();
@@ -131,17 +118,29 @@ public class MetadataManagementController {
 			return responsejson;
 		}
 
-		if(metadataManagementService.updateMetadataInfo(map)){
-			responsejson.put("result", true);
-			responsejson.put("count", 1);
+		if(map.containsKey("metadataTankid")){
+			//说明是更新私有属性
+			if(metadataManagementService.updateMetadataInfoForPRIVATE(map)){
+				responsejson.put("result", true);
+				responsejson.put("count", 1);
+			}else{
+				responsejson.put("result", false);
+				responsejson.put("count", 0);
+			}
 		}else{
-			responsejson.put("result", false);
-			responsejson.put("count", 0);
+			int metadataTankid = metadataManagementService.updateMetadataInfoForCommon(map);
+			if(metadataTankid>0){
+				responsejson.put("result", true);
+				responsejson.put("metadataTankid", metadataTankid);
+				responsejson.put("count", 1);
+			}else{
+				responsejson.put("result", false);
+				responsejson.put("count", 0);
+			}
 		}
-
 		return responsejson;
 	}
-	
+
 	/**
 	 * 
 	 * 作者:allen
@@ -150,6 +149,7 @@ public class MetadataManagementController {
 	 *  
 	 * 参数： metadataId[元数据id]
 	 * 		metamodelId[元模型id]
+	 * 		type[请求类型信息]
 	 */
 	@RequestMapping(value = "/updateMetadataInfoStepOne", method = RequestMethod.POST)
 	@ResponseBody
@@ -158,38 +158,81 @@ public class MetadataManagementController {
 			HttpServletResponse response,@RequestBody Map<String, Object> map){
 		JSONObject responsejson = new JSONObject();
 
-		//GlobalMethodAndParams.setHttpServletResponse(request, response);
-
 		//检查传参是否正确
-		if(!(map.containsKey("metadataId")&&map.containsKey("metamodelId"))){
+		if(!(map.containsKey("metadataId")&&map.containsKey("metamodelId")&&map.containsKey("type"))){
 			responsejson.put("result", false);
 			responsejson.put("count",0);
 			return responsejson;
 		}
+
+		String type = map.get("type").toString();
+		//GlobalMethodAndParams.setHttpServletResponse(request, response);
+
+		//不可更新的字段
+		List<String> noupdatefield = new ArrayList<String>();
+		noupdatefield.add("COLLECTJOBID");
+		noupdatefield.add("METAMODELID");
+		noupdatefield.add("CHECKSTATUS");
+		noupdatefield.add("VERSION");
+		noupdatefield.add("UPDATETIME");
+		noupdatefield.add("CREATETIME");
+		noupdatefield.add("ID");
+
+		//元模型的公共属性
+		List<String> systemModelField= new ArrayList<String>();
+		systemModelField.add("ID");
+		systemModelField.add("NAME");
+		systemModelField.add("DESCRIPTION");
+		systemModelField.add("CREATETIME");
+		systemModelField.add("UPDATETIME");
+		systemModelField.add("VERSION");
+		systemModelField.add("COLLECTJOBID");
+		systemModelField.add("CHECKSTATUS");
+		systemModelField.add("METAMODELID");
 
 		String metadataIdStr = map.get("metadataId").toString();
 		String metamodelIdStr = map.get("metamodelId").toString();
 
 		Map<String, Object> metadataMap= metadataManagementService.getMetadata(metadataIdStr);
 		JSONObject metamodelInfo = metadataManagementService.getMetamodelInfo(metamodelIdStr);
-		
-		List<String> noupdatefield = new ArrayList<String>();
-		noupdatefield.add(GlobalMethodAndParams.Public_Metamodel_COLLECTJOBID);
-		noupdatefield.add(GlobalMethodAndParams.Public_Metamodel_METAMODELID);
-		noupdatefield.add(GlobalMethodAndParams.Public_Metamodel_CHECKSTATUS);
-		noupdatefield.add(GlobalMethodAndParams.Public_Metamodel_VERSION);
-		noupdatefield.add(GlobalMethodAndParams.Public_Metamodel_UPDATETIME);
-		noupdatefield.add(GlobalMethodAndParams.Public_Metamodel_CREATETIME);
-		noupdatefield.add(GlobalMethodAndParams.Public_Metamodel_ID);
-		
+
+		JSONArray canUpdateInfo = new JSONArray();
+
+		Iterator it = metadataMap.entrySet().iterator();  
+		while (it.hasNext()) {
+			JSONObject metadataInfo = new JSONObject();
+			Entry entry = (Map.Entry) it.next();  
+			String key = (String) entry.getKey(); 
+
+			if(type.equals("COMMON")){
+				if((systemModelField.contains(key)&&(!noupdatefield.contains(key)))){
+					String cnKey = metamodelInfo.get(key).toString();
+					Object value = entry.getValue();
+
+					metadataInfo.put("key", key);
+					metadataInfo.put("description", cnKey);
+					metadataInfo.put("value", value);
+					canUpdateInfo.add(metadataInfo);
+				}
+			}else{
+				if((!systemModelField.contains(key)&&(!noupdatefield.contains(key)))){
+					String cnKey = metamodelInfo.get(key).toString();
+					Object value = entry.getValue();
+
+					metadataInfo.put("key", key);
+					metadataInfo.put("description", cnKey);
+					metadataInfo.put("value", value);
+					canUpdateInfo.add(metadataInfo);
+				}
+			}
+		}
+
 		responsejson.put("result", true);
-		responsejson.put("data", metadataMap);
-		responsejson.put("metamodelInfo", metamodelInfo);
-		responsejson.put("noupdatefield", noupdatefield);
+		responsejson.put("canUpdateInfo", canUpdateInfo);
 		responsejson.put("count", 1);
 		return responsejson;
 	}
-	
+
 	/**
 	 * 
 	 * 作者:allen
@@ -203,10 +246,10 @@ public class MetadataManagementController {
 	 * 		parentMetadataId [父元数据id]
 	 * 		。。。。。
 	 */
-	@RequestMapping(value = "/addMetadataStepTwo", method = RequestMethod.POST)
+	@RequestMapping(value = "/addMetadataStepThree", method = RequestMethod.POST)
 	@ResponseBody
-	@Log(operationType="metadata",operationDesc="新增元数据步骤二")
-	public JSONObject addMetadataStepTwo(HttpServletRequest request,
+	@Log(operationType="metadata",operationDesc="新增元数据步骤三")
+	public JSONObject addMetadataStepThree(HttpServletRequest request,
 			HttpServletResponse response,@RequestBody Map<String, Object> map){
 		JSONObject responsejson = new JSONObject();
 
@@ -234,9 +277,42 @@ public class MetadataManagementController {
 	 * 
 	 * 作者:allen
 	 * 时间:2017年3月23日
-	 * 作用:新增元数据,判断是否可以添加。如果可以添加返回相应元模型的信息
-	 * 	步骤一:判断传入的metamodelid下面是否有组合关系的id，有的话前端页面进行步骤二
-	 *  这里新增的不包含：
+	 * 作用:新增元数据第二步,获取具体要增加元数据的元模型的信息
+	 *  
+	 * 参数： metamodelId [要添加元数据的元模型id]
+	 */
+	@RequestMapping(value = "/addMetadataStepTwo", method = RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="metadata",operationDesc="新增元数据步骤二")
+	public JSONObject addMetadataStepTwo(HttpServletRequest request,
+			HttpServletResponse response,@RequestBody Map<String, Object> map){
+		JSONObject responsejson = new JSONObject();
+
+		//GlobalMethodAndParams.setHttpServletResponse(request, response);
+
+		//检查传参是否正确
+		if(!map.containsKey("metamodelId")){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}
+
+		String metamodelIdStr = map.get("metamodelId").toString();
+
+		JSONArray metamodelInfos = metadataManagementService.getMetamodelInfoForAddMetadata(metamodelIdStr);
+
+		responsejson.put("result", true);
+		responsejson.put("metamodelInfos", metamodelInfos);
+		responsejson.put("metamodelInfoCount", metamodelInfos.size());
+		responsejson.put("count", 1);
+		return responsejson;
+	}
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2017年3月23日
+	 * 作用:新增元数据第一步,获取子元模型
 	 *  
 	 * 参数： metamodelId [这里的元模型id是父亲元模型的id]
 	 */
@@ -257,33 +333,15 @@ public class MetadataManagementController {
 		}
 
 		String metamodelIdStr = map.get("metamodelId").toString();
+		String metamodelname = metamodel_hierarchyService.getMetamodel_hierarchy(Integer.parseInt(metamodelIdStr)).getName();
 
-		//根据metamodelId找到所有组合关系的元模型
-		JSONObject metamodelNames = metadataManagementService.getCOMPOSITIONMetamodel(metamodelIdStr);
-		if(metamodelNames==null){
-			//说明该类元数据下面不能再加元数据
-			responsejson.put("result", false);
-			responsejson.put("count",0);
-			return responsejson;
-		}
-
-		JSONObject metamodelInfos =  new JSONObject();
-
-		Iterator iterator = metamodelNames.keys();  
-		while(iterator.hasNext()){  
-			String metamodelid = (String) iterator.next();
-			/**
-			 * 这里处理特殊元数据的添加
-			 */
-			JSONObject metamodelInfo = metadataManagementService.getMetamodelInfoForAddMetadata(metamodelid);
-			metamodelInfos.put(metamodelid, metamodelInfo);
-		}  
-
+		List<JSONObject> includeMetaModel = metadataManagementService.getCOMPOSITIONMetamodel(metamodelIdStr);
 
 		responsejson.put("result", true);
-		responsejson.put("metamodelNames", metamodelNames);
-		responsejson.put("metamodelInfos", metamodelInfos);
-		responsejson.put("count", metamodelNames.size());
+		responsejson.put("metamodelname", metamodelname);
+		responsejson.put("includeMetaModel", includeMetaModel);
+		responsejson.put("includeCount", includeMetaModel.size());
+		responsejson.put("count", includeMetaModel.size());
 		return responsejson;
 	}
 
@@ -315,12 +373,45 @@ public class MetadataManagementController {
 		String metadataIdStr = map.get("metadataId").toString();
 		String metamodelIdStr = map.get("metamodelId").toString();
 
+
+		//元模型的公共属性
+		List<String> systemModelField= new ArrayList<String>();
+		systemModelField.add("ID");
+		systemModelField.add("NAME");
+		systemModelField.add("DESCRIPTION");
+		systemModelField.add("CREATETIME");
+		systemModelField.add("UPDATETIME");
+		systemModelField.add("VERSION");
+		systemModelField.add("COLLECTJOBID");
+		systemModelField.add("CHECKSTATUS");
+		systemModelField.add("METAMODELID");
+
+		JSONArray CommonModelInfo= new JSONArray();
+		JSONArray PrivateModelInfo= new JSONArray();
+
 		Map<String, Object> metadataMap= metadataManagementService.getMetadata(metadataIdStr);
 		JSONObject metamodelInfo = metadataManagementService.getMetamodelInfo(metamodelIdStr);
 
+		Iterator it = metadataMap.entrySet().iterator();  
+		while (it.hasNext()) {
+			JSONObject metadataInfo = new JSONObject();
+			Entry entry = (Map.Entry) it.next();  
+			String key = (String) entry.getKey();  
+			String cnKey = metamodelInfo.get(key).toString();
+			Object value = entry.getValue(); 
+
+			metadataInfo.put("key", cnKey);
+			metadataInfo.put("value", value);
+			if(systemModelField.contains(key)){
+				CommonModelInfo.add(metadataInfo);
+			}else{
+				PrivateModelInfo.add(metadataInfo);
+			}
+		} 
+
 		responsejson.put("result", true);
-		responsejson.put("data", metadataMap);
-		responsejson.put("metamodelInfo", metamodelInfo);
+		responsejson.put("CommonModelInfo", CommonModelInfo);
+		responsejson.put("PrivateModelInfo", PrivateModelInfo);
 		responsejson.put("count", 1);
 		return responsejson;
 	}

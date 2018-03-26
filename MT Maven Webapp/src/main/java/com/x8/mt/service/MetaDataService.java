@@ -5,13 +5,17 @@ import javax.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
 import com.x8.mt.dao.IMetaDataDao;
+import com.x8.mt.dao.IMetadataManagementDao;
 import com.x8.mt.entity.Metadata;
 
 @Service
 public class MetaDataService {
 	@Resource
 	IMetaDataDao iMetadataDao;
+	@Resource
+	IMetadataManagementDao imetadataManagementDao;	
 	
 	/**
 	 * 
@@ -23,6 +27,7 @@ public class MetaDataService {
 		try{			
 			return iMetadataDao.deleteMetadataById(id) == 1 ? true : false;
 		}catch(Exception e){
+			e.printStackTrace();
 			return false;
 		}
 	}
@@ -37,6 +42,7 @@ public class MetaDataService {
 		try{			
 			return iMetadataDao.getMetadataByMetaModelId(id);
 		}catch(Exception e){
+			e.printStackTrace();
 			return null;
 		}
 	}
@@ -51,6 +57,7 @@ public class MetaDataService {
 		try{
 			return iMetadataDao.updateMetadataDescribeById(Metadata) == 1 ? true : false;
 		}catch(Exception e){
+			e.printStackTrace();
 			return false;
 		}
 	}
@@ -65,8 +72,38 @@ public class MetaDataService {
 		try{
 			return iMetadataDao.getMetadataById(id);
 		}catch(Exception e){
+			e.printStackTrace();
 			return null;
-		}
-		
+		}		
 	}
+	/**
+	 * 
+	 * 作者:GodDipose
+	 * 时间:2018年3月14日
+	 * 作用:根据id查找元数据
+	 */
+	public boolean insertMetadata(Metadata metadata){
+		try{
+			return iMetadataDao.insertMetadata(metadata) > 0 ? true : false;
+		}catch(Exception e){
+			e.printStackTrace();
+			return false;
+		}		
+	}
+	/**
+	 * 
+	 * 作者:GodDipose
+	 * 时间:2018年3月22日
+	 * 作用:根据id查找元数据
+	 */
+	public boolean insertMetadataWithNoCollectJob(Metadata metadata){
+		try{
+			return imetadataManagementDao.insertMetadata(metadata) > 0 ? true : false;
+		}catch(Exception e){
+			e.printStackTrace();
+			return false;
+		}		
+	}
+	
+	
 }

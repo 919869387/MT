@@ -287,14 +287,14 @@ public class SystemuserController {
 		
 		pageParam = systemuserService.selectAllSystemUsers(pageParam);
 		
-		if(pageParam.getDate() == null){
+		if(pageParam.getData() == null){
 			responsejson.put("state", false);
 			responsejson.put("msg", "没有用户");
 		}else {
 			responsejson.put("state", true);
 			responsejson.put("msg", "成功");
 			
-			List<SystemUser> systemUsers = pageParam.getDate();
+			List<SystemUser> systemUsers = pageParam.getData();
 			
 			
 			List list = new ArrayList();
@@ -325,7 +325,7 @@ public class SystemuserController {
 			}
 			pageParam.setDate(list);
 			responsejson.put("page", pageParam);
-			responsejson.put("count", pageParam.getDate().size());
+			responsejson.put("count", pageParam.getData().size());
 		}
 		return responsejson;
 	}

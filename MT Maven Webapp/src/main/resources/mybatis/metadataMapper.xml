@@ -12,18 +12,21 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</update>
 	
 	<insert id="insertMetadata" parameterType="com.x8.mt.entity.Metadata" 
-	useGeneratedKeys="true" keyProperty="id">
-		insert into metadata values(
-		#{ID},#{NAME},#{COLLECTJOBID},#{DESCRIPTION},#{METAMODELID},
-		#{CREATETIME},#{UPDATETIME},#{CHECKSTATUS},#{ATTRIBUTES},#{VERSION})
+	useGeneratedKeys="true" keyProperty="ID">
+		insert into 		
+		metadata(name,collectjobid,description,metamodelid,createtime,updatetime,checkstatus,attributes,version)
+		values(#{NAME},#{COLLECTJOBID},#{DESCRIPTION},#{METAMODELID},#{CREATETIME},#{UPDATETIME},#{CHECKSTATUS},#{ATTRIBUTES},#{VERSION})
 	</insert>
-	
 	<select id="getMetadataByMetaModelId" resultType="com.x8.mt.entity.Metadata">
 		select * from metadata where metamodelid=#{metaModelId}
 	</select>
 	
 	<select id="getMetadataById" resultType="com.x8.mt.entity.Metadata">
 		select * from metadata where id=#{id}
+	</select>
+	
+	<select id="getMetadataByMap" parameterType="Map" resultType="com.x8.mt.entity.Metadata">
+		select * from metadata where json_extract(attributes,#{key}) = #{value}
 	</select>
 	
 </mapper>
