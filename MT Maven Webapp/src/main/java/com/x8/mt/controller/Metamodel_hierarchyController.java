@@ -339,6 +339,10 @@ public class Metamodel_hierarchyController {
 		if(map.containsKey("desribe")){
 			metamodel_hierarchy.setDesribe(map.get("desribe").toString());
 		}
+		Metamodel_hierarchy hierarchy = metamodel_hierarchyService.getMetamodel_hierarchyById(Integer.parseInt(map.get("parentid").toString()));
+		metamodel_hierarchy.setCategory(hierarchy.getCategory());
+		metamodel_hierarchy.setMountnode(0);
+		metamodel_hierarchy.setParentid(Integer.parseInt(map.get("parentid").toString()));
 		
 		boolean result = metamodel_hierarchyService.insertMetamodel_hierarchy(metamodel_hierarchy);
 		responsejson.put("result", result);
@@ -450,9 +454,11 @@ public class Metamodel_hierarchyController {
 				return responsejson;
 			}
 		}
-		
+		Metamodel_hierarchy hierarchy = metamodel_hierarchyService.getMetamodel_hierarchyById(id);
+		metamodel_hierarchy.setCategory(hierarchy.getCategory());
 		metamodel_hierarchy.setName(name);
 		metamodel_hierarchy.setParentid(id);
+		metamodel_hierarchy.setMountnode(0);
 		metamodel_hierarchy.setType(GlobalMethodAndParams.metamodel_hierarchy_METAMODEL);
 		if(map.containsKey("desribe")){
 			metamodel_hierarchy.setDesribe(map.get("desribe").toString());
@@ -501,40 +507,6 @@ public class Metamodel_hierarchyController {
 		responsejson.put("data", data);
 		responsejson.put("count", data.size());
 		
-		return responsejson;
-	}
-	
-	/**
-	 * 
-	 * 作者:GodDipose
-	 * 时间:2018年3月24日
-	 * 作用:查询所有元模型
-	 */
-	@RequestMapping(value = "/getMetamodelByType",method=RequestMethod.GET)
-	@ResponseBody
-	@Log(operationType="metamodel_hierarchy",operationDesc="查询所有元模型")
-	public JSONObject getMetamodelByType(HttpServletRequest request,HttpServletResponse response){
-		JSONObject responsejson = new JSONObject();
-		
-//		if(!GlobalMethodAndParams.checkLogin()){
-//			responsejson.put("result", false);
-//			responsejson.put("count",0);
-//			return responsejson;
-//		}
-		GlobalMethodAndParams.setHttpServletResponse(request, response);
-
-		List<Metamodel_hierarchy> metamodelPackageList = metamodel_hierarchyService.getMetamodel_packageByType();
-		
-		JSONArray data = new JSONArray();
-		for (Metamodel_hierarchy metamodel_hierarchy : metamodelPackageList) {
-			JSONObject json = new JSONObject();
-			json.put("value", metamodel_hierarchy.getId());
-			json.put("label", metamodel_hierarchy.getName());
-			data.add(json);
-		}
-		responsejson.put("result", true);
-		responsejson.put("data", data);
-		responsejson.put("count", 1);
 		return responsejson;
 	}
 }

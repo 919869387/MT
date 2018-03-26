@@ -1,8 +1,10 @@
 package com.x8.mt.service;
 
+import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.sql.SQLException;
 
 import javax.annotation.Resource;
 
@@ -18,11 +20,13 @@ import org.springframework.transaction.annotation.Transactional;
 import com.x8.mt.common.GlobalMethodAndParams;
 import com.x8.mt.dao.ICollectJobDao;
 import com.x8.mt.dao.IMetaDataDao;
+import com.x8.mt.dao.IMetadataTankDao;
 import com.x8.mt.dao.IMetamodel_datatypeDao;
 import com.x8.mt.entity.CollectJob;
 import com.x8.mt.entity.Datasource_connectinfo;
 import com.x8.mt.entity.MetaDataRelation;
 import com.x8.mt.entity.Metadata;
+import com.x8.mt.entity.MetadataTank;
 
 @Service
 public class KettleMetadataCollectService {
@@ -35,6 +39,8 @@ public class KettleMetadataCollectService {
 	MetaDataRelationService metaDataRelationService;
 	@Resource
 	IMetamodel_datatypeDao iMetamodel_datatypeDao;
+	@Resource
+	IMetadataTankDao iMetadataTankDao;
 
 
 	Database database = null;
@@ -45,20 +51,22 @@ public class KettleMetadataCollectService {
 	 * 作用:根据Datasource_connectinfo信息，kettle自动采集元数据
 	 * 多表插入，有事务
 	 * @throws SQLException 
+	 * @throws ParseException 
 	 */
 	@Transactional
-	public int metadataAutoCollect(Datasource_connectinfo datasource_connectinfo,int collectjobid,Date createDate,int datasourceId) throws KettleException, SQLException {
+	public int metadataAutoCollect(Datasource_connectinfo datasource_connectinfo,int collectjobid,Date createDate,int datasourceId) throws KettleException, SQLException, ParseException {
 		int collectCount = 0;//表元数据、字段元数据记录数共同记录
 		
 		database = initKettleEnvironment(datasource_connectinfo);
-
+		
+		//1.将数据库元数据存入元数据表
 		String[] tablenames = database.getTablenames();//获取数据库中所有表名		
 		Metadata metadataDatabase = new Metadata();
 		metadataDatabase.setNAME(datasource_connectinfo.getDatabasename());
 		metadataDatabase.setCOLLECTJOBID(collectjobid);
 		metadataDatabase.setMETAMODELID(10);
 		metadataDatabase.setCREATETIME(createDate);
-		metadataDatabase.setCREATETIME(createDate);
+		metadataDatabase.setUPDATETIME(createDate);
 		metadataDatabase.setCHECKSTATUS("1");
 		metadataDatabase.setVERSION(1);
 		String databaseAttributes = "{\"dbtype\":\""+datasource_connectinfo.getDatabasetype()
@@ -75,6 +83,25 @@ public class KettleMetadataCollectService {
 			throw new RuntimeException("数据库元数据插入失败");
 		}
 		
+		//2.将数据库元数据加入metadata_tank表
+		MetadataTank metadataTank = new MetadataTank();
+		metadataTank.setCHECKSTATUS(metadataDatabase.getCHECKSTATUS());
+		metadataTank.setATTRIBUTES(metadataDatabase.getATTRIBUTES());
+		metadataTank.setCREATETIME(new Date());
+		metadataTank.setDESCRIPTION(metadataDatabase.getDESCRIPTION());
+		System.out.println(metadataDatabase.getID());
+		metadataTank.setKeyid(metadataDatabase.getID());
+		metadataTank.setMETAMODELID(metadataDatabase.getMETAMODELID());
+		metadataTank.setNAME(metadataDatabase.getNAME());
+		metadataTank.setUPDATETIME(new Date());
+		metadataTank.setVERSION(metadataDatabase.getVERSION());
+		metadataTank.setCOLLECTJOBID(collectjobid);
+
+		if(!(iMetadataTankDao.insertMetaDataTank(metadataTank)>0)){
+			throw new RuntimeException("insertMetaDataTank Error");
+		}
+		
+		
 		for(String tablename : tablenames){
 			//表信息插入Metadata
 			Metadata metadataTable = new Metadata();
@@ -82,7 +109,7 @@ public class KettleMetadataCollectService {
 			metadataTable.setCOLLECTJOBID(collectjobid);
 			metadataTable.setMETAMODELID(31);
 			metadataTable.setCREATETIME(createDate);
-			metadataTable.setCREATETIME(createDate);
+			metadataTable.setUPDATETIME(createDate);
 			metadataTable.setCHECKSTATUS("1");
 			metadataTable.setVERSION(1);
 			String tableAttributes = "{\"tablename\":\""+ tablename +"\"}";
@@ -100,6 +127,21 @@ public class KettleMetadataCollectService {
 			if(!(metaDataRelationService.insertMetaDataRelation(metadataRelation))){//插入不成功
 				throw new RuntimeException("元数据关系插入失败");
 			}
+
+			metadataTank.setCHECKSTATUS(metadataTable.getCHECKSTATUS());
+			metadataTank.setATTRIBUTES(metadataTable.getATTRIBUTES());
+			metadataTank.setCREATETIME(new Date());
+			metadataTank.setDESCRIPTION(metadataTable.getDESCRIPTION());
+			metadataTank.setKeyid(metadataTable.getID());
+			metadataTank.setMETAMODELID(metadataTable.getMETAMODELID());
+			metadataTank.setNAME(metadataTable.getNAME());
+			metadataTank.setUPDATETIME(new Date());
+			metadataTank.setVERSION(metadataTable.getVERSION());
+			metadataTank.setCOLLECTJOBID(collectjobid);
+
+			if(!(iMetadataTankDao.insertMetaDataTank(metadataTank)>0)){
+				throw new RuntimeException("insertMetaDataTank Error");
+			}
 			
 			RowMetaInterface tableFields = database.getTableFields(tablename);
 
@@ -112,7 +154,7 @@ public class KettleMetadataCollectService {
 				MetadataField.setCOLLECTJOBID(collectjobid);
 				MetadataField.setMETAMODELID(32);
 				MetadataField.setCREATETIME(createDate);
-				MetadataField.setCREATETIME(createDate);
+				MetadataField.setUPDATETIME(createDate);
 				MetadataField.setCHECKSTATUS("1");
 				MetadataField.setVERSION(1);
 				String fieldAttributes = "{\"fieldname\":\""+ fieldNameType.getName()
@@ -134,6 +176,21 @@ public class KettleMetadataCollectService {
 				metadataRelation.setMetaDataId(metadataTable.getID());
 				metadataRelation.setRelateMetaDataId(MetadataField.getID());
 				metadataRelation.setType("COMPOSITION");
+				
+				metadataTank.setCHECKSTATUS(MetadataField.getCHECKSTATUS());
+				metadataTank.setATTRIBUTES(MetadataField.getATTRIBUTES());
+				metadataTank.setCREATETIME(new Date());
+				metadataTank.setDESCRIPTION(MetadataField.getDESCRIPTION());
+				metadataTank.setKeyid(MetadataField.getID());
+				metadataTank.setMETAMODELID(MetadataField.getMETAMODELID());
+				metadataTank.setNAME(MetadataField.getNAME());
+				metadataTank.setUPDATETIME(new Date());
+				metadataTank.setVERSION(MetadataField.getVERSION());
+				metadataTank.setCOLLECTJOBID(collectjobid);
+
+				if(!(iMetadataTankDao.insertMetaDataTank(metadataTank)>0)){
+					throw new RuntimeException("insertMetaDataTank Error");
+				}
 				
 				if(!(metaDataRelationService.insertMetaDataRelation(metadataRelation))){//插入不成功
 					throw new RuntimeException("元数据关系插入失败");

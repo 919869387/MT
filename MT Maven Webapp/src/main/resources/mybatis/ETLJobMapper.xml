@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.x8.mt.dao.IETLJobDao">
+
+
+	<insert id="insert" parameterType="com.x8.mt.entity.ETLJob"
+	useGeneratedKeys="true" keyProperty="id">
+		insert into 		
+		etljob(description,status,create_date,createuserid,recentlyrunuserid,recently_run_date
+		,log,metadata_id,type,mappingid)
+		value(#{description},#{status},#{create_date},#{createuserid},#{recentlyrunuserid}
+		,#{recently_run_date},#{log},#{metadata_id},#{type},#{mappingid})
+	</insert>
+	
+	<update id="update" parameterType="com.x8.mt.entity.ETLJob" >
+		update etljob 
+		set status = #{status}
+			,recently_run_date=#{recently_run_date}
+			,log = #{log}		
+		 where mappingid = #{mappingid}
+	</update>
+	
+	<select id="getRowCount" resultType="int">
+		select count(*) from
+		etljob;
+	</select>
+	
+	<select id="selectByParams" resultType="com.x8.mt.entity.ETLJob"
+		parameterType="map">
+		select * from etljob
+		order by create_date desc
+		limit ${offset},${size}
+	</select>
+	
+	<delete id="deleteETLJob" parameterType="int">
+	delete from etljob
+	where id = #{id}
+	</delete>
+	
+	<delete id="deleteETLJobs" parameterType="List">
+        delete from etljob where id in
+        <foreach item="ETLJobItem" collection="array" index="index" open="(" separator="," close=")">
+            #{ETLJobItem}
+        </foreach>
+    </delete> 
+    <select id="queryTargetTableIdAndName" resultType="String">
+		select distinct json_extract(attributes,'$.targettableid') 
+		from metadata		
+		where json_extract(attributes,'$.targettableid') not in (SELECT mappingid from etljob)
+	</select>
+	
+	<select id="queryTargetTableId" resultType="String">
+		select distinct json_extract(attributes,'$.targettableid') 
+		from metadata
+	</select>
+	
+	<select id="getETLJobById" resultType="com.x8.mt.entity.ETLJob">
+		select * from etljob where id = #{id}
+	</select>
+	
+
+</mapper>
