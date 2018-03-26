@@ -57,6 +57,7 @@ public class Metamodel_hierarchyService {
 			JSONObject tagTree = new JSONObject();
 			tagTree.put("id", metamodel_hierarchy.getId());
 			tagTree.put("label", metamodel_hierarchy.getName());
+			tagTree.put("type", metamodel_hierarchy.getType());
 			return tagTree;
 		}
 		JSONArray children = new JSONArray();
@@ -67,6 +68,7 @@ public class Metamodel_hierarchyService {
 				JSONObject node = new JSONObject();
 				node.put("id", sonMetamodel_hierarchy.getId());
 				node.put("label", sonMetamodel_hierarchy.getName());
+				node.put("type", sonMetamodel_hierarchy.getType());
 				children.add(node);
 			}else{
 				JSONObject childTree = getTreeByParentTag(sonMetamodel_hierarchy);
@@ -76,6 +78,7 @@ public class Metamodel_hierarchyService {
 		JSONObject tagTree = new JSONObject();
 		tagTree.put("id", metamodel_hierarchy.getId());
 		tagTree.put("label", metamodel_hierarchy.getName());
+		tagTree.put("type", metamodel_hierarchy.getType());
 		tagTree.put("children", children);
 		return tagTree;
 	}
