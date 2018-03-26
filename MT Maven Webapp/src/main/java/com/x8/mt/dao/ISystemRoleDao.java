@@ -43,4 +43,8 @@ public interface ISystemRoleDao {
 	
 	//根据角色id删除角色
 	int deleteRole(int id);
+
+	
+	//根据角色名称查询角色是否存在
+	SystemRole selectRoleByRoleName(String rolename);
 }

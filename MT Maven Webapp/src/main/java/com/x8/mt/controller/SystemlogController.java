@@ -124,6 +124,10 @@ public class SystemlogController {
 		}
 		//获取总记录数
 		int rowCount = systemlogService.getRowCount();
+		if(rowCount == 0){
+			responsejson.put("status", false);
+			responsejson.put("msg", "没有相关记录");
+		}else{
 	
 		//构造分页数据
 		PageParam pageParam = new PageParam();
@@ -146,6 +150,7 @@ public class SystemlogController {
 			responsejson.put("page", pageParam);
 			responsejson.put("count",pageParam.getDate().size());
 		}
+	}
 		return responsejson;
 	}
 	
@@ -204,6 +209,11 @@ public class SystemlogController {
 		//获取总记录数
 		int rowCount = systemlogService.getRowCountByCondition(systemLog);
 		System.out.println(rowCount+"***********************************************");
+		if(rowCount == 0){
+			responsejson.put("status", false);
+			responsejson.put("msg", "没有相关记录");
+		}else{
+		
 		
 		//构造分页数据
 		PageParam pageParam = new PageParam();
@@ -228,7 +238,7 @@ public class SystemlogController {
 			responsejson.put("page", pageParam);
 			responsejson.put("count",pageParam.getDate().size());
 		}
-		
+		}
 		return responsejson;
 	
 	}
