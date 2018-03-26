@@ -2,6 +2,8 @@ package com.x8.mt.common;
 
 import java.util.List;
 
+import com.x8.mt.entity.ETLJob;
+
 /**
  * 
  * 作者:  allen
@@ -13,7 +15,7 @@ public class PageParam {
 	private int totalPage;//总页
 	private int rowCount;//总记录数
 	private int pageSize;//页大小
-	private List date;//数据
+	private List data;//数据
 	public int getCurrPage() {
 		return currPage;
 	}
@@ -43,10 +45,10 @@ public class PageParam {
 	public void setPageSize(int pageSize) {
 		this.pageSize = pageSize;
 	}
-	public List getDate() {
-		return date;
+	public List getData() {
+		return data;
 	}
-	public void setDate(List date) {
-		this.date = date;
+	public void setDate(List data) {
+		this.data = data;
 	}
 }

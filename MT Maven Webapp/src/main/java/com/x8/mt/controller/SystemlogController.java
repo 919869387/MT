@@ -86,7 +86,7 @@ public class SystemlogController {
 
 		responsejson.put("result", true);
 		responsejson.put("data", pageParam);
-		responsejson.put("count",pageParam.getDate().size());
+		responsejson.put("count",pageParam.getData().size());
 		return responsejson;
 	}
 	
@@ -139,16 +139,16 @@ public class SystemlogController {
 		pageParam.setCurrPage(currPage);
 		pageParam = systemlogService.getSystemlogListByPage(pageParam);
 		
-		if (pageParam.getDate() == null) {
+		if (pageParam.getData() == null) {
 			responsejson.put("status", false);
 			responsejson.put("msg", "没有找到相关记录");
 			responsejson.put("page", pageParam);
-			responsejson.put("count",pageParam.getDate().size());
+			responsejson.put("count",pageParam.getData().size());
 		}else {
 			responsejson.put("status", true);
 			responsejson.put("msg", "查找成功");
 			responsejson.put("page", pageParam);
-			responsejson.put("count",pageParam.getDate().size());
+			responsejson.put("count",pageParam.getData().size());
 		}
 	}
 		return responsejson;
@@ -227,16 +227,16 @@ public class SystemlogController {
 		//调用日志条件筛选方法
 		pageParam = systemlogService.selectLogListByCondition(systemLog,pageParam);
 		
-		if (pageParam.getDate() == null) {
+		if (pageParam.getData() == null) {
 			responsejson.put("status", false);
 			responsejson.put("msg", "没有找到相关记录");
 			responsejson.put("page", pageParam);
-			responsejson.put("count",pageParam.getDate().size());
+			responsejson.put("count",pageParam.getData().size());
 		}else {
 			responsejson.put("status", true);
 			responsejson.put("msg", "查找成功");
 			responsejson.put("page", pageParam);
-			responsejson.put("count",pageParam.getDate().size());
+			responsejson.put("count",pageParam.getData().size());
 		}
 		}
 		return responsejson;

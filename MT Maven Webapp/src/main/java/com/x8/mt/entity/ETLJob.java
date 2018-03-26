@@ -11,26 +11,22 @@ import java.util.Date;
  *
  */
 public class ETLJob {
-	private int target_table_id;
-	private String target_table;
+	private int id;
 	private String description;
 	private String status;
 	private Date create_date;
+	private int createuserid;
 	private Date recently_run_date;
+	private int recentlyrunuserid;
 	private String log;
-	
-	
-	public int getTarget_table_id() {
-		return target_table_id;
+	private int metadata_id;
+	private String type;
+	private int mappingid;
+	public int getId() {
+		return id;
 	}
-	public void setTarget_table_id(int target_table_id) {
-		this.target_table_id = target_table_id;
-	}
-	public String getTarget_table() {
-		return target_table;
-	}
-	public void setTarget_table(String target_table) {
-		this.target_table = target_table;
+	public void setId(int id) {
+		this.id = id;
 	}
 	public String getDescription() {
 		return description;
@@ -50,11 +46,23 @@ public class ETLJob {
 	public void setCreate_date(Date create_date) {
 		this.create_date = create_date;
 	}
+	public int getCreateuserid() {
+		return createuserid;
+	}
+	public void setCreateuserid(int createuserid) {
+		this.createuserid = createuserid;
+	}
 	public Date getRecently_run_date() {
 		return recently_run_date;
 	}
 	public void setRecently_run_date(Date recently_run_date) {
 		this.recently_run_date = recently_run_date;
+	}
+	public int getRecentlyrunuserid() {
+		return recentlyrunuserid;
+	}
+	public void setRecentlyrunuserid(int recentlyrunuserid) {
+		this.recentlyrunuserid = recentlyrunuserid;
 	}
 	public String getLog() {
 		return log;
@@ -62,6 +70,23 @@ public class ETLJob {
 	public void setLog(String log) {
 		this.log = log;
 	}
-	
-	
+	public int getMetadata_id() {
+		return metadata_id;
+	}
+	public void setMetadata_id(int metadata_id) {
+		this.metadata_id = metadata_id;
+	}
+	public String getType() {
+		return type;
+	}
+	public void setType(String type) {
+		this.type = type;
+	}
+	public int getMappingid() {
+		return mappingid;
+	}
+	public void setMappingid(int mappingid) {
+		this.mappingid = mappingid;
+	}
+
 }
