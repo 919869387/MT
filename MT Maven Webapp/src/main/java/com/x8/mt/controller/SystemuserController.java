@@ -59,7 +59,7 @@ public class SystemuserController {
 	 * 作用:用户登录
 	 * 参数：username、password
 	 */
-	/*@RequestMapping(value = "/login",method=RequestMethod.POST)
+	@RequestMapping(value = "/login",method=RequestMethod.POST)
 	@ResponseBody
 	@Log(operationType="systemusercontroller",operationDesc="用户登录")
 	public JSONObject login(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map) {
@@ -87,7 +87,7 @@ public class SystemuserController {
 			responsejson.put("count",0);
 		}
 		return responsejson;
-	}*/
+	}
 	
 	
 	
@@ -95,7 +95,7 @@ public class SystemuserController {
 	 * 作者：yangyaun 
 	 * 时间：2018年3月14日
 	 * 备注：登录验证
-	 */
+	 *//*
 	@RequestMapping(value = "/login",method=RequestMethod.POST)
 	@ResponseBody
 	@Log(operationType="systemusercontroller",operationDesc="用户登录")
@@ -133,7 +133,7 @@ public class SystemuserController {
 				//登陆失败还到login页面
 				return "/login";
 		
-	}
+	}*/
 	
 	
 	
@@ -302,6 +302,7 @@ public class SystemuserController {
 				JSONObject user = new JSONObject();
 				user.put("id", systemUser.getId());
 				user.put("username", systemUser.getUsername());
+				user.put("password", systemUser.getPassword());
 				user.put("nickname", systemUser.getUsercode());
 				user.put("status", systemUser.getStatus());
 				List<SystemRole> systemRoles = systemroleService.getRoleByUserId(systemUser.getId());
@@ -333,7 +334,7 @@ public class SystemuserController {
 	/**
 	 * 添加用户信息
 	 */
-	@RequestMapping(value="addUserMessage",method=RequestMethod.POST)
+	@RequestMapping(value="/addUserMessage",method=RequestMethod.POST)
 	@ResponseBody
 	@Log(operationType="systemusercontroller" , operationDesc="添加用户信息")
 	public JSONObject addUserInfo(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String,Object> map){
@@ -363,7 +364,7 @@ public class SystemuserController {
 			//说明用户已被占用或用户已存在
 			responsejson.put("status", false);
 			responsejson.put("msg", "用户名被占用或用户已存在");
-		}
+		}else{
 		
 		//密码加密：随机生成字符串当盐
 		String str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -410,6 +411,7 @@ public class SystemuserController {
 				responsejson.put("status", true);
 				responsejson.put("msg", "添加成功");
 			}
+		}
 		}
 		return responsejson;
 		

@@ -26,9 +26,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		insert into systemuser(username,usercode,password,salt,status) 
 		values(#{username},#{usercode},#{password},#{salt},#{status})
 		
-		<!-- <selectKey keyColumn="id" resultType="int" keyProperty="id" order="AFTER">
+		<selectKey keyColumn="id" resultType="int" keyProperty="id" order="AFTER">
 			select last_insert_id()
-		</selectKey> -->
+		</selectKey>
 	</insert>
 	
 	<!-- 查询记录总条数 -->

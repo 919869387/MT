@@ -33,4 +33,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<delete id="deleteRole" parameterType="int">
 		delete from systemrole where id = #{id}
 	</delete>
+	
+	<!-- 根据角色名称查询角色是否存在 -->
+	<select id="selectRoleByRoleName" parameterType="String" resultType="com.x8.mt.entity.SystemRole">
+		select * from systemrole where rolename = #{rolename}
+	</select>
 </mapper>

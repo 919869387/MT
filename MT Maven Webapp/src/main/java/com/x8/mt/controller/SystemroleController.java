@@ -138,6 +138,15 @@ public class SystemroleController {
 		systemRole.setRolename(rolename);
 		systemRole.setDescription(description);
 		
+		//根据用户名查询用户看用户是否已经存在
+		SystemRole systemRole2 = systemroleService.selectRole(rolename);
+		System.out.println(systemRole2+"****************************************************");
+		if(systemRole2 != null){
+			//说明用户已被占用或用户已存在
+			responsejson.put("status", false);
+			responsejson.put("msg", "角色已存在");
+		}else{
+		
         int result = systemroleService.addRole(systemRole);
         if (result == 0){
         	responsejson.put("status", false);
@@ -146,6 +155,7 @@ public class SystemroleController {
 		}else {
 			responsejson.put("status", true);
 			responsejson.put("msg", "添加成功");
+		}
 		}
         return responsejson;
 	}

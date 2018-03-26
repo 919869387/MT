@@ -75,4 +75,11 @@ public class SystemroleService {
 	public int deleteRoleById(int id){
 		return iSystemRoleDao.deleteRole(id);
 	}
+
+	
+	//根据角色名称查询角色是否存在
+	public SystemRole selectRole(String rolename) {
+		SystemRole systemRole = iSystemRoleDao.selectRoleByRoleName(rolename);
+		return systemRole;
+	}
 }

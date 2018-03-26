@@ -61,15 +61,16 @@ public class SystemLogService {
 		
 
 		List list = new ArrayList();
-		for(SystemLog systemLog : systemlogList){
-			JSONObject log = new JSONObject();
-			log.put("ID", systemLog.getId());
-			log.put("operationtype", systemLog.getOperationtype());
-			log.put("operationdesc", systemLog.getOperationdesc());
-			log.put("result", systemLog.getResult());
-			log.put("startdatetime", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(systemLog.getStartdatetime()));
-			log.put("systemusername", systemLog.getSystemusername());
-			
+		for(SystemLog systemLog2 : systemlogList){
+			//JSONObject log = new JSONObject();
+			Map<String, Object> log = new HashMap<String,Object>();
+			log.put("ID", systemLog2.getId());
+			log.put("operationtype", systemLog2.getOperationtype());
+			log.put("operationdesc", systemLog2.getOperationdesc());
+			log.put("result", systemLog2.getResult());
+			log.put("startdatetime", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(systemLog2.getStartdatetime()));
+			log.put("systemusername", systemLog2.getSystemusername());
+			System.out.println(systemLog2.getSystemusername());
 			list.add(log);
 		}
 			
@@ -95,7 +96,7 @@ public class SystemLogService {
 		int offset = (currPage - 1)*pageSize;
 		
 		//将分页参数封装到map中
-		Map<String, Object> map = new HashMap<String,Object>();
+		Map<String, Object> map = new HashMap<>();
 		map.put("offset", offset);
 		map.put("size", pageSize);
 		map.put("systemusername", systemLog.getSystemusername());
@@ -109,7 +110,8 @@ public class SystemLogService {
 
 		List list = new ArrayList();
 		for(SystemLog systemLog2 : systemlogList){
-			JSONObject log = new JSONObject();
+			//JSONObject log = new JSONObject();
+			Map<String, Object> log = new HashMap<>();
 			log.put("ID", systemLog2.getId());
 			log.put("operationtype", systemLog2.getOperationtype());
 			log.put("operationdesc", systemLog2.getOperationdesc());
