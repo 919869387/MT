@@ -100,7 +100,8 @@ public class MetadataManagementTest {
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("metamodelId", 10);
+		//map.put("metamodelId", 10);
+		map.put("id", 2);
 		System.out.println(metadataManagementController.addMetadataStepOne(request, response, map));
 	}
 	
