@@ -70,4 +70,5 @@
 		<property name="minIdle" value="0" />
 		<property name="defaultAutoCommit" value="false" />
 	</bean>
+	
 </beans>
