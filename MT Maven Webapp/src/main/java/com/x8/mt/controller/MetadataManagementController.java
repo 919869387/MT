@@ -22,7 +22,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.x8.mt.common.GlobalMethodAndParams;
 import com.x8.mt.common.Log;
+import com.x8.mt.entity.MetadataViewNode;
+import com.x8.mt.entity.Metamodel_hierarchy;
 import com.x8.mt.service.MetadataManagementService;
+import com.x8.mt.service.MetadataViewNodeService;
 import com.x8.mt.service.Metamodel_hierarchyService;
 /**
  * 作者： allen
@@ -37,6 +40,8 @@ public class MetadataManagementController {
 	MetadataManagementService metadataManagementService;
 	@Resource
 	Metamodel_hierarchyService metamodel_hierarchyService;
+	@Resource
+	MetadataViewNodeService metadataViewNodeService;
 
 	/**
 	 * 
@@ -324,7 +329,35 @@ public class MetadataManagementController {
 		JSONObject responsejson = new JSONObject();
 
 		//GlobalMethodAndParams.setHttpServletResponse(request, response);
-
+		
+		//增加第一层元数据的逻辑
+		if(map.containsKey("id")){
+			String idStr = map.get("id").toString();
+			
+			List<MetadataViewNode> metadataViewNodes= metadataViewNodeService.getMetadataViewNode(idStr);
+			
+			List<JSONObject> includeMetaModel = new ArrayList<JSONObject>();
+			
+			for(MetadataViewNode metadataViewNode:metadataViewNodes){
+				int modelid = metadataViewNode.getChildmetamodelid();
+				Metamodel_hierarchy metamodel_hierarchy = metamodel_hierarchyService.getMetamodel_hierarchy(modelid);
+				
+				JSONObject metamodel = new JSONObject();
+				metamodel.put("modelid", modelid);
+				metamodel.put("name", metamodel_hierarchy.getName());
+				
+				includeMetaModel.add(metamodel);
+			}
+			
+			responsejson.put("result", true);
+			responsejson.put("metamodelname", metadataViewNodes.get(0).getName());
+			responsejson.put("includeMetaModel", includeMetaModel);
+			responsejson.put("includeCount", includeMetaModel.size());
+			responsejson.put("count", includeMetaModel.size());
+			return responsejson;
+		}
+			
+			
 		//检查传参是否正确
 		if(!map.containsKey("metamodelId")){
 			responsejson.put("result", false);
