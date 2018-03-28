@@ -187,7 +187,7 @@ public class MetadataManagementService {
 	@Transactional
 	public boolean addMetadata(Map<String,Object> map){
 
-		//String parentMetadataIdStr = map.get("parentMetadataId").toString();
+		String parentMetadataIdStr = map.get("parentMetadataId").toString();
 		String metamodelIdStr = map.get("metamodelId").toString();
 		Date dataTime = new Date();
 
@@ -214,10 +214,9 @@ public class MetadataManagementService {
 
 		//2.加入metadata_relation表
 		int metadataId = metadata.getID();
-		if(!(map.get("parentMetadataId").toString().equals("0"))){
+		
+		if(!parentMetadataIdStr.equals("0")){
 			//parentMetadataId!=0,说明添加不是第一层元数据
-			String parentMetadataIdStr = map.get("parentMetadataId").toString();
-			
 			MetaDataRelation metaDataRelation = new MetaDataRelation();
 			metaDataRelation.setMetaDataId(Integer.parseInt(parentMetadataIdStr));
 			metaDataRelation.setRelateMetaDataId(metadataId);

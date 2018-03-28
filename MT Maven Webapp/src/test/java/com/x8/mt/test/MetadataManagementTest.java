@@ -79,7 +79,7 @@ public class MetadataManagementTest {
 		HttpServletResponse response = null;
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("metamodelId", 31);
-		map.put("parentMetadataId", 1239);
+		map.put("parentMetadataId", 1542);
 		map.put("NAME", "table111");
 		map.put("DESCRIPTION", "测试元数据添加");
 		map.put("tablename", "table111");
