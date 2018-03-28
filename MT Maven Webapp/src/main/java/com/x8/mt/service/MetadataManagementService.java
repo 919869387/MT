@@ -187,7 +187,7 @@ public class MetadataManagementService {
 	@Transactional
 	public boolean addMetadata(Map<String,Object> map){
 
-		String parentMetadataIdStr = map.get("parentMetadataId").toString();
+		//String parentMetadataIdStr = map.get("parentMetadataId").toString();
 		String metamodelIdStr = map.get("metamodelId").toString();
 		Date dataTime = new Date();
 
@@ -208,21 +208,24 @@ public class MetadataManagementService {
 
 		metadata.setATTRIBUTES(JSONObject.fromObject(map).toString());
 
-		//1.将元数据加入到metadata表
 		if(!(imetadataManagementDao.insertMetadata(metadata)>0)){
 			throw new RuntimeException("insertMetadata Error");
 		}
 
 		//2.加入metadata_relation表
 		int metadataId = metadata.getID();
+		if(!(map.get("parentMetadataId").toString().equals("0"))){
+			//parentMetadataId!=0,说明添加不是第一层元数据
+			String parentMetadataIdStr = map.get("parentMetadataId").toString();
+			
+			MetaDataRelation metaDataRelation = new MetaDataRelation();
+			metaDataRelation.setMetaDataId(Integer.parseInt(parentMetadataIdStr));
+			metaDataRelation.setRelateMetaDataId(metadataId);
+			metaDataRelation.setType(GlobalMethodAndParams.COMPOSITION);
 
-		MetaDataRelation metaDataRelation = new MetaDataRelation();
-		metaDataRelation.setMetaDataId(Integer.parseInt(parentMetadataIdStr));
-		metaDataRelation.setRelateMetaDataId(metadataId);
-		metaDataRelation.setType(GlobalMethodAndParams.COMPOSITION);
-
-		if(!(iMetaDataRelationDao.insertMetaDataRelation(metaDataRelation)>0)){
-			throw new RuntimeException("insertMetaDataRelation Error");
+			if(!(iMetaDataRelationDao.insertMetaDataRelation(metaDataRelation)>0)){
+				throw new RuntimeException("insertMetaDataRelation Error");
+			}
 		}
 
 		//3.加入metadata_tank表

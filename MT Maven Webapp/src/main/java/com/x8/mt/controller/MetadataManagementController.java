@@ -248,7 +248,7 @@ public class MetadataManagementController {
 	 *  	3.加入metadata_tank表
 	 *  
 	 * 参数： metamodelId [元模型id]
-	 * 		parentMetadataId [父元数据id]
+	 * 		parentMetadataId [父元数据id]--如果添加第一层节点元数据,这个参数值为0
 	 * 		。。。。。
 	 */
 	@RequestMapping(value = "/addMetadataStepThree", method = RequestMethod.POST)
