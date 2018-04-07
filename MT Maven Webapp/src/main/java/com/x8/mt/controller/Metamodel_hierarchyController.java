@@ -481,10 +481,10 @@ public class Metamodel_hierarchyController {
 	 * 作用:查询所有能被悬挂的元模型
 	 * 		
 	 */
-	@RequestMapping(value = "/getMetaModelByMountMode",method=RequestMethod.GET)
+	@RequestMapping(value = "/getMetamodelByType",method=RequestMethod.GET)
 	@ResponseBody
-	@Log(operationType="metamodel_hierarchy",operationDesc="插入一条Metamodel记录[只有元模型名字不能为null，入参id不能为null]")
-	public JSONObject getMetaModelByMountMode(HttpServletRequest request,HttpServletResponse response){
+	@Log(operationType="metamodel_hierarchy",operationDesc="查询所有能被悬挂的元模型")
+	public JSONObject getMetamodelByType(HttpServletRequest request,HttpServletResponse response){
 		JSONObject responsejson = new JSONObject();
 		
 //		if(!GlobalMethodAndParams.checkLogin()){

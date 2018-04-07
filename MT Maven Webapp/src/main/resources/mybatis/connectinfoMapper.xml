@@ -16,6 +16,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		select * from connectinfo where id = #{id}
 	</select>
 	
+	<select id="getConnectinfoByName" parameterType="String" resultType="com.x8.mt.entity.Connectinfo">
+		select * from connectinfo where name = #{name}
+	</select>
+	
 	<select id="getConnectinfo" resultType="com.x8.mt.entity.Connectinfo">
 		select * from connectinfo 
 	</select>

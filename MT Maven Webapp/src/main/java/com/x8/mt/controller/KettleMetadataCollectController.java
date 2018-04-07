@@ -260,6 +260,11 @@ public class KettleMetadataCollectController {
 			responsejson.put("description", "采集名称不能为空");
 			responsejson.put("count",0);
 			return responsejson;
+		}else if(collectJobService.isExistName(name)){
+			responsejson.put("result", false);
+			responsejson.put("description", "采集名称已经存在");
+			responsejson.put("count",0);
+			return responsejson;
 		}
 		
 		String idstr = map.get("id").toString();
@@ -305,6 +310,9 @@ public class KettleMetadataCollectController {
 					node.put("operationdescribe", null);
 					data.add(node);
 				}
+//				JSONObject node = new JSONObject();
+//				node.put("id", collectjob.getId());
+//				data.add(node);
 			}
 			responsejson.put("result", true);
 			responsejson.put("data",data);
@@ -512,6 +520,66 @@ public class KettleMetadataCollectController {
 			responsejson.put("count",data.size());
 		}
 		
+		return responsejson;
+	}
+	
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年3月28日
+	 * 作用:根据id获取采集任务
+	 * 
+	 */
+	@RequestMapping(value = "/getMetadataCollectById",method=RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="collectjob",operationDesc="根据id获取采集任务")
+	public JSONObject getMetadataCollectById(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map) {
+		JSONObject responsejson = new JSONObject();
+
+//		if(!GlobalMethodAndParams.checkLogin()){
+//			responsejson.put("result", false);
+//			responsejson.put("count",0);
+//			return responsejson;
+//		}
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
+		
+		
+		//检查传参是否正确
+		if(!(map.containsKey("id"))){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}
+		//判断id是否为空
+		
+		String idStr = map.get("id").toString();
+		int id = 0;
+		try{
+			id = Integer.parseInt(idStr);
+			
+			JSONObject data = new JSONObject();      
+			CollectJob collectJob = collectJobService.getCollectJobById(id);
+			if(collectJob == null){
+				responsejson.put("result",true);
+				responsejson.put("description", "今日没采集日志");
+				responsejson.put("count",0);
+			}else{
+				data.put("id", collectJob.getId());
+				data.put("name", collectJob.getName());
+				data.put("databasename",connectinfoService.getConnectinfoByid(collectJob.getConnectinfoId()).getName());
+				data.put("createdate", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(collectJob.getCreateDate()));
+				data.put("creater", collectJob.getCreater());
+				data.put("checkresult", collectJob.getCheckResult().equals("1")?"已审核":"未审核");		
+				responsejson.put("result",true);
+				responsejson.put("data",data);
+				responsejson.put("count",data.size());
+			}
+		}catch(Exception e){
+			e.printStackTrace();			
+			responsejson.put("result",true);
+			responsejson.put("description", "今日没采集日志");
+			responsejson.put("count",0);
+		}		
 		return responsejson;
 	}
 

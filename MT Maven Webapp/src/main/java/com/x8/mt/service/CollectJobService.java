@@ -75,4 +75,34 @@ public class CollectJobService {
 		}
 	}
 	
+	/**
+	 * 
+	 * 作者:GodDipose
+	 * 时间:2018年3月14日
+	 * 作用:根据id查找采集任务
+	 */
+	public CollectJob getCollectJobById(int id){
+		try{
+			return  iCollectJobDao.getCollectJobById(id);
+		}catch(Exception e){
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	/**
+	 * 
+	 * 作者:GodDipose
+	 * 时间:2018年3月28日
+	 * 作用:查询是否存在该名称
+	 */
+	public boolean isExistName(String name){
+		try{
+			return  iCollectJobDao.isExistName(name) != null? true:false;
+		}catch(Exception e){
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
 }

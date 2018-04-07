@@ -79,6 +79,8 @@ public class KettleMetadataCollectService {
 				+"\"}";	
 		
 		metadataDatabase.setATTRIBUTES(databaseAttributes);
+
+		System.out.println(metadataDatabase.getMETAMODELID());
 		if(!(iMetaDataDao.insertMetadata(metadataDatabase)>0 ? true:false)){//插入不成功
 			throw new RuntimeException("数据库元数据插入失败");
 		}
@@ -89,7 +91,6 @@ public class KettleMetadataCollectService {
 		metadataTank.setATTRIBUTES(metadataDatabase.getATTRIBUTES());
 		metadataTank.setCREATETIME(new Date());
 		metadataTank.setDESCRIPTION(metadataDatabase.getDESCRIPTION());
-		System.out.println(metadataDatabase.getID());
 		metadataTank.setKeyid(metadataDatabase.getID());
 		metadataTank.setMETAMODELID(metadataDatabase.getMETAMODELID());
 		metadataTank.setNAME(metadataDatabase.getNAME());
@@ -114,6 +115,8 @@ public class KettleMetadataCollectService {
 			metadataTable.setVERSION(1);
 			String tableAttributes = "{\"tablename\":\""+ tablename +"\"}";
 			metadataTable.setATTRIBUTES(tableAttributes);	
+
+			System.out.println(metadataTable.getMETAMODELID()+ "fdsaf");
 			if(!(iMetaDataDao.insertMetadata(metadataTable)>0 ? true:false)){//插入不成功
 				throw new RuntimeException("表元数据插入失败");
 			}
@@ -149,14 +152,14 @@ public class KettleMetadataCollectService {
 			
 			List<ValueMetaInterface> fieldNameTypeList = tableFields.getValueMetaList();
 			for(ValueMetaInterface fieldNameType : fieldNameTypeList){
-				Metadata MetadataField = new Metadata();
-				MetadataField.setNAME(fieldNameType.getName());
-				MetadataField.setCOLLECTJOBID(collectjobid);
-				MetadataField.setMETAMODELID(32);
-				MetadataField.setCREATETIME(createDate);
-				MetadataField.setUPDATETIME(createDate);
-				MetadataField.setCHECKSTATUS("1");
-				MetadataField.setVERSION(1);
+				Metadata metadataField = new Metadata();
+				metadataField.setNAME(fieldNameType.getName());
+				metadataField.setCOLLECTJOBID(collectjobid);
+				metadataField.setMETAMODELID(32);
+				metadataField.setCREATETIME(createDate);
+				metadataField.setUPDATETIME(createDate);
+				metadataField.setCHECKSTATUS("1");
+				metadataField.setVERSION(1);
 				String fieldAttributes = "{\"fieldname\":\""+ fieldNameType.getName()
 					+ "\",\"fieldtype\":\"" + fieldNameType.getOriginalColumnTypeName()
 					+"\",\"length\":\"" + fieldNameType.getLength()
@@ -166,26 +169,26 @@ public class KettleMetadataCollectService {
 					+"\",\"defaultvalue\":\"" + 0
 					+"\"}";	
 				
-				MetadataField.setATTRIBUTES(fieldAttributes);
-					
-				if(!(iMetaDataDao.insertMetadata(MetadataField)>0 ? true:false)){//插入不成功
+				metadataField.setATTRIBUTES(fieldAttributes);
+				System.out.println(metadataField.getMETAMODELID());
+				if(!(iMetaDataDao.insertMetadata(metadataField)>0 ? true:false)){//插入不成功
 					throw new RuntimeException("字段元数据插入失败");
 				}
 				collectCount++;//记录字段元数据
 
 				metadataRelation.setMetaDataId(metadataTable.getID());
-				metadataRelation.setRelateMetaDataId(MetadataField.getID());
+				metadataRelation.setRelateMetaDataId(metadataField.getID());
 				metadataRelation.setType("COMPOSITION");
 				
-				metadataTank.setCHECKSTATUS(MetadataField.getCHECKSTATUS());
-				metadataTank.setATTRIBUTES(MetadataField.getATTRIBUTES());
+				metadataTank.setCHECKSTATUS(metadataField.getCHECKSTATUS());
+				metadataTank.setATTRIBUTES(metadataField.getATTRIBUTES());
 				metadataTank.setCREATETIME(new Date());
-				metadataTank.setDESCRIPTION(MetadataField.getDESCRIPTION());
-				metadataTank.setKeyid(MetadataField.getID());
-				metadataTank.setMETAMODELID(MetadataField.getMETAMODELID());
-				metadataTank.setNAME(MetadataField.getNAME());
+				metadataTank.setDESCRIPTION(metadataField.getDESCRIPTION());
+				metadataTank.setKeyid(metadataField.getID());
+				metadataTank.setMETAMODELID(metadataField.getMETAMODELID());
+				metadataTank.setNAME(metadataField.getNAME());
 				metadataTank.setUPDATETIME(new Date());
-				metadataTank.setVERSION(MetadataField.getVERSION());
+				metadataTank.setVERSION(metadataField.getVERSION());
 				metadataTank.setCOLLECTJOBID(collectjobid);
 
 				if(!(iMetadataTankDao.insertMetaDataTank(metadataTank)>0)){

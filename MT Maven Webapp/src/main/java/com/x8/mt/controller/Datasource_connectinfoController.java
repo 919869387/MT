@@ -408,6 +408,13 @@ public class Datasource_connectinfoController {
 			return responsejson;
 		}
 		
+		if(connectinfoService.getConnectinfoByName(map.get("name").toString()) != null){
+			responsejson.put("result", false);
+			responsejson.put("description", "采集名称不能为空");
+			responsejson.put("count",0);
+			return responsejson;
+		}
+		
 		//插入数据源信息记录		
 		Connectinfo connectInfo = new Connectinfo();
 		connectInfo.setName(map.get("name").toString());

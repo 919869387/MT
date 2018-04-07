@@ -51,6 +51,15 @@ public interface IConnectinfoDao {
 	
 	/**
 	 * 
+	 * 作者:itcoder
+	 * 时间:2018年3月14日
+	 * 作用:根据id得到一条Connectinfo记录
+	 */
+	Connectinfo getConnectinfoByName(String name);
+	
+	
+	/**
+	 * 
 	 * 作者:GodDispose
 	 * 时间:2018年3月12日
 	 * 作用:获取全部记录

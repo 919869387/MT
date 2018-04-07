@@ -224,7 +224,8 @@ public class ETLJobController {
 		List<ETLJob> ETLJobList=pageParam.getData();
 		for(ETLJob etlJob :ETLJobList){
 			JSONObject etljobJson = new JSONObject();
-			if(etlJob.getType().equals("ALL")){				
+			etljobJson.put("id", etlJob.getId());
+			if(etlJob.getType().equals("LOCAL")){				
 				if(etlJob.getStatus().equals("NewCreate")){
 					etljobJson.put("target_table_id", etlJob.getMappingid());
 					etljobJson.put("target_table", metaDataService.getMetadataById(etlJob.getMappingid()).getNAME());
