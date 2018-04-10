@@ -4,8 +4,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.x8.mt.dao.IDatamapitemsDao">	
 	
-	<select id="queryDatamap">
-		
+	<select id="getDatamapitemsListByMaplayerId" resultType="com.x8.mt.entity.Datamapitems">
+		select * from datamapitems where maplayerid=#{id}
 	</select>
 	
 </mapper>

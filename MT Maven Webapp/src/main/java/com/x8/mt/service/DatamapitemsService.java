@@ -18,6 +18,10 @@ public class DatamapitemsService {
 	public List<Datamapitems> getDatamap() {
 		return iDatamapitemsDao.queryDatamap();
 	}
+
+	public List<Datamapitems> getDatamapitemsListByMaplayerId(Integer id) {
+		return iDatamapitemsDao.getDatamapitemsListByMaplayerId(id);
+	}
 	
 	
 }
