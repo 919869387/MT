@@ -139,6 +139,10 @@ public class SystemuserService {
 	}
 	
 	
-	
+	//根据角色id查询具有该角色的用户
+	public List<SystemUser> usersByRoleId(int roleId){
+		List<SystemUser> usersByRoleId = iSystemUserDao.findUsersByRoleId(roleId);
+		return usersByRoleId;
+	}
 	
 }

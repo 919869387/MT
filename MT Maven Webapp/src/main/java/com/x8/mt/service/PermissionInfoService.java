@@ -26,5 +26,24 @@ public class PermissionInfoService {
 		List<PermissionInfo> permissionInfos = permissionInfoDao.findPermissionByUserId(userid);
 		return null;
 	}
+	
+	//查询权限列表
+	public List<PermissionInfo> findAllPermission(){
+		List<PermissionInfo> permissionList = permissionInfoDao.findPermissionList();
+		return permissionList;
+	}
 
+	
+	//根据权限名称模糊查询权限
+	public List<PermissionInfo> findPermissionListByPname(String permissionName){
+		List<PermissionInfo> permissionList = permissionInfoDao.findPermissionByPname(permissionName);
+		return permissionList;
+	}
+		
+	
+	//根据用户名称查询用户具有的权限
+	public List<PermissionInfo> permissionByRoleName(String roleName){
+		List<PermissionInfo> permissionByRoleName = permissionInfoDao.findPermissionByRoleName(roleName);
+		return permissionByRoleName;
+	}
 }

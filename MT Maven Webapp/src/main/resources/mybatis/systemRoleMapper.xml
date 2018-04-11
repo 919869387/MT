@@ -38,4 +38,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<select id="selectRoleByRoleName" parameterType="String" resultType="com.x8.mt.entity.SystemRole">
 		select * from systemrole where rolename = #{rolename}
 	</select>
+	
+	<!-- 根据权限id查询具有该权限的角色名称 -->
+	<select id="findRolesByPerId" parameterType="int" resultType="com.x8.mt.entity.SystemRole">
+		select * from systemrole where id in (select roleId from role_permission where permissionId = #{permissionId})
+	</select>
 </mapper>

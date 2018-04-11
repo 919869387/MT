@@ -50,4 +50,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<delete id="deleteUser" parameterType="int">
 		delete from systemuser where id = #{id}
 	</delete>
+	
+	
+	<!-- 根据角色id查询具有该角色的用户名称 -->
+	<select id="findUsersByRoleId" parameterType="int" resultType="com.x8.mt.entity.SystemUser">
+	 	select * from systemuser where id in (select userId from user_role where roleId = #{roleId})
+	</select>
 </mapper>
