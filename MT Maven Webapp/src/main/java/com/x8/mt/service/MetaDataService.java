@@ -104,6 +104,10 @@ public class MetaDataService {
 			return false;
 		}		
 	}
+
+	public boolean updateMetadataCheckstatus(Metadata metadata) {
+		return imetadataManagementDao.updataMetadataCheckstatus(metadata);
+	}
 	
 	
 }

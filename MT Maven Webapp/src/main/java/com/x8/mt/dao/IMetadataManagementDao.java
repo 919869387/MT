@@ -83,4 +83,6 @@ public interface IMetadataManagementDao {
 	 * 作用:更新元数据的Attributes属性
 	 */
 	int updateMetadatAttributes(Metadata metadata);
+
+	boolean updataMetadataCheckstatus(Metadata metadata);
 }

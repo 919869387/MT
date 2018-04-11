@@ -18,6 +18,7 @@ import net.sf.json.JSONObject;
 
 
 
+
 import org.pentaho.di.core.exception.KettleException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -60,6 +61,68 @@ public class KettleMetadataCollectController {
 	Metamodel_hierarchyService metamodel_hierarchyService;	
 	@Resource
 	Metamodel_datatypeService metamodel_datatypeService;
+	
+	/**
+	 * 
+	 * 作者:itcoder
+	 * 时间:2018年4月11日
+	 * 作用:根据入参id修改状态字段
+	 * 参数:id
+	 * 
+	 */
+	@RequestMapping(value = "/updateMetaDataCheckstatus",method=RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="metadata",operationDesc="根据入参id，describe修改描述字段")
+	public JSONObject updateMetaDataCheckstatus(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map) {
+		JSONObject responsejson = new JSONObject();
+
+//		if(!GlobalMethodAndParams.checkLogin()){
+//			responsejson.put("result", false);
+//			responsejson.put("count",0);
+//			return responsejson;
+//		}
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
+		
+		//检查传参是否正确
+		if(!(map.containsKey("id")&&map.containsKey("checkstatus"))){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}
+		//判断id是否为空
+		if(map.get("id").toString().trim().equals("")||map.get("checkstatus").toString().trim().equals("")){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}
+		
+		String idStr = map.get("id").toString();
+		String checkstatusStr = map.get("checkstatus").toString();
+		int id = 0;
+		try{
+			id = Integer.parseInt(idStr);			
+			boolean result = false;
+			Metadata metadata = new Metadata();
+			metadata.setCHECKSTATUS(checkstatusStr);
+			metadata.setID(id);
+			result = metaDataService.updateMetadataCheckstatus(metadata);
+
+			if(result==true){
+				responsejson.put("result", result);
+				responsejson.put("count", 1);
+			}else{
+				responsejson.put("result", result);
+				responsejson.put("count", 0);
+			}			
+		}catch(Exception e){
+			e.printStackTrace();
+			responsejson.put("result", false);
+			responsejson.put("count", 0);
+		}		
+		
+		return responsejson;
+	}
+	
 	
 	/**
 	 * 

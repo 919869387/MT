@@ -22,6 +22,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		version=#{VERSION}
 		WHERE id = #{ID};
 	</update>
+	
+	<update id="updataMetadataCheckstatus" parameterType="com.x8.mt.entity.Metadata">
+		update metadata set checkstatus = #{CHECKSTATUS} where id = #{ID}
+	</update>
 
 	<!-- allen -->
 	<select id="getAttributesField" resultType="java.lang.String">
