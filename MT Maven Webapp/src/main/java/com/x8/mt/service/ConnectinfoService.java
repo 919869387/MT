@@ -38,6 +38,16 @@ public class ConnectinfoService {
 	 * 
 	 * 作者:GodDispose
 	 * 时间:2018年3月14日
+	 * 作用:根据id得到一条Connectinfo记录
+	 */
+	public Connectinfo getConnectinfoByName(String name){
+		return iConnectinfoDao.getConnectinfoByName(name);
+	}
+	
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年3月14日
 	 * 作用:修改一条Connectinfo记录
 	 */
 	public boolean updateConnectinfoNameOrDescriptionById(Connectinfo connectinfo){

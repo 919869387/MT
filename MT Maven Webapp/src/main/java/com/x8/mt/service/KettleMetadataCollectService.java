@@ -3,6 +3,7 @@ package com.x8.mt.service;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -27,6 +28,7 @@ import com.x8.mt.entity.Datasource_connectinfo;
 import com.x8.mt.entity.MetaDataRelation;
 import com.x8.mt.entity.Metadata;
 import com.x8.mt.entity.MetadataTank;
+import com.x8.mt.entity.Table;
 
 @Service
 public class KettleMetadataCollectService {
@@ -48,15 +50,15 @@ public class KettleMetadataCollectService {
 	/**
 	 * 作者:GodDispose
 	 * 时间:2018年3月12日
-	 * 作用:根据Datasource_connectinfo信息，kettle自动采集元数据
+	 * 作用:根据Datasource_connectinfo信息，kettle自动采集数据库与表元数据
 	 * 多表插入，有事务
 	 * @throws SQLException 
 	 * @throws ParseException 
 	 */
 	@Transactional
-	public int metadataAutoCollect(Datasource_connectinfo datasource_connectinfo,int collectjobid,Date createDate,int datasourceId) throws KettleException, SQLException, ParseException {
+	public int collectDataBaseAndzTableMetaData(Datasource_connectinfo datasource_connectinfo,int collectjobid,Date createDate,int datasourceId
+			,List<Table> tables) throws KettleException, SQLException, ParseException {
 		int collectCount = 0;//表元数据、字段元数据记录数共同记录
-		
 		database = initKettleEnvironment(datasource_connectinfo);
 		
 		//1.将数据库元数据存入元数据表
@@ -79,9 +81,11 @@ public class KettleMetadataCollectService {
 				+"\"}";	
 		
 		metadataDatabase.setATTRIBUTES(databaseAttributes);
+
 		if(!(iMetaDataDao.insertMetadata(metadataDatabase)>0 ? true:false)){//插入不成功
 			throw new RuntimeException("数据库元数据插入失败");
 		}
+		collectCount++;//记录数据库元数据
 		
 		//2.将数据库元数据加入metadata_tank表
 		MetadataTank metadataTank = new MetadataTank();
@@ -89,7 +93,6 @@ public class KettleMetadataCollectService {
 		metadataTank.setATTRIBUTES(metadataDatabase.getATTRIBUTES());
 		metadataTank.setCREATETIME(new Date());
 		metadataTank.setDESCRIPTION(metadataDatabase.getDESCRIPTION());
-		System.out.println(metadataDatabase.getID());
 		metadataTank.setKeyid(metadataDatabase.getID());
 		metadataTank.setMETAMODELID(metadataDatabase.getMETAMODELID());
 		metadataTank.setNAME(metadataDatabase.getNAME());
@@ -102,22 +105,27 @@ public class KettleMetadataCollectService {
 		}
 		
 		
-		for(String tablename : tablenames){
+		for(Table table : tables){
 			//表信息插入Metadata
 			Metadata metadataTable = new Metadata();
-			metadataTable.setNAME(tablename);
+			metadataTable.setNAME(table.getName());
 			metadataTable.setCOLLECTJOBID(collectjobid);
 			metadataTable.setMETAMODELID(31);
 			metadataTable.setCREATETIME(createDate);
 			metadataTable.setUPDATETIME(createDate);
 			metadataTable.setCHECKSTATUS("1");
 			metadataTable.setVERSION(1);
-			String tableAttributes = "{\"tablename\":\""+ tablename +"\"}";
+			String tableAttributes = "{\"tablename\":\""+ table.getName() +"\"}";
 			metadataTable.setATTRIBUTES(tableAttributes);	
+
 			if(!(iMetaDataDao.insertMetadata(metadataTable)>0 ? true:false)){//插入不成功
 				throw new RuntimeException("表元数据插入失败");
 			}
 			collectCount++;//记录表元数据
+			
+			table.setId(metadataTable.getID());
+			table.setOperationDescription(null);
+			table.setOperationName(null);
 			
 			MetaDataRelation metadataRelation = new MetaDataRelation();
 			metadataRelation.setMetaDataId(metadataDatabase.getID());
@@ -142,21 +150,46 @@ public class KettleMetadataCollectService {
 			if(!(iMetadataTankDao.insertMetaDataTank(metadataTank)>0)){
 				throw new RuntimeException("insertMetaDataTank Error");
 			}
-			
-			RowMetaInterface tableFields = database.getTableFields(tablename);
 
-			String[] primaryKeyColumnNames = database.getPrimaryKeyColumnNames(tablename);//得到表中所有主键名
+		}
+		shutdownKettleEnvironment(database);
+		
+		return collectCount;
+	}
+	
+	/**
+	 * 作者:GodDispose
+	 * 时间:2018年4月8日
+	 * 作用:根据Datasource_connectinfo信息，kettle自动采集字段元数据
+	 * 多表插入，有事务
+	 * @throws SQLException 
+	 * @throws ParseException 
+	 */
+	@Transactional
+	public int collectFieldMetaData(Datasource_connectinfo datasource_connectinfo,int collectjobid,Date createDate,int datasourceId
+			,List<Table> tables) throws KettleException, SQLException, ParseException {
+		int collectCount = 0;//表元数据、字段元数据记录数共同记录
+		
+		database = initKettleEnvironment(datasource_connectinfo);
+
+		String[] tablenames = database.getTablenames();//获取数据库中所有表名	
+		MetaDataRelation metadataRelation = new MetaDataRelation();
+		MetadataTank metadataTank = new MetadataTank();
+		for(Table table : tables){
+			RowMetaInterface tableFields = database.getTableFields(table.getName());
+
+			String[] primaryKeyColumnNames = database.getPrimaryKeyColumnNames(table.getName());//得到表中所有主键名
 			
 			List<ValueMetaInterface> fieldNameTypeList = tableFields.getValueMetaList();
 			for(ValueMetaInterface fieldNameType : fieldNameTypeList){
-				Metadata MetadataField = new Metadata();
-				MetadataField.setNAME(fieldNameType.getName());
-				MetadataField.setCOLLECTJOBID(collectjobid);
-				MetadataField.setMETAMODELID(32);
-				MetadataField.setCREATETIME(createDate);
-				MetadataField.setUPDATETIME(createDate);
-				MetadataField.setCHECKSTATUS("1");
-				MetadataField.setVERSION(1);
+				Metadata metadataField = new Metadata();
+				metadataField.setNAME(fieldNameType.getName());
+				metadataField.setCOLLECTJOBID(collectjobid);
+				metadataField.setMETAMODELID(32);
+				metadataField.setCREATETIME(createDate);
+				metadataField.setUPDATETIME(createDate);
+				metadataField.setCHECKSTATUS("1");
+				metadataField.setVERSION(1);
 				String fieldAttributes = "{\"fieldname\":\""+ fieldNameType.getName()
 					+ "\",\"fieldtype\":\"" + fieldNameType.getOriginalColumnTypeName()
 					+"\",\"length\":\"" + fieldNameType.getLength()
@@ -166,26 +199,25 @@ public class KettleMetadataCollectService {
 					+"\",\"defaultvalue\":\"" + 0
 					+"\"}";	
 				
-				MetadataField.setATTRIBUTES(fieldAttributes);
-					
-				if(!(iMetaDataDao.insertMetadata(MetadataField)>0 ? true:false)){//插入不成功
+				metadataField.setATTRIBUTES(fieldAttributes);
+				if(!(iMetaDataDao.insertMetadata(metadataField)>0 ? true:false)){//插入不成功
 					throw new RuntimeException("字段元数据插入失败");
 				}
 				collectCount++;//记录字段元数据
 
-				metadataRelation.setMetaDataId(metadataTable.getID());
-				metadataRelation.setRelateMetaDataId(MetadataField.getID());
+				metadataRelation.setMetaDataId(table.getId());
+				metadataRelation.setRelateMetaDataId(metadataField.getID());
 				metadataRelation.setType("COMPOSITION");
 				
-				metadataTank.setCHECKSTATUS(MetadataField.getCHECKSTATUS());
-				metadataTank.setATTRIBUTES(MetadataField.getATTRIBUTES());
+				metadataTank.setCHECKSTATUS(metadataField.getCHECKSTATUS());
+				metadataTank.setATTRIBUTES(metadataField.getATTRIBUTES());
 				metadataTank.setCREATETIME(new Date());
-				metadataTank.setDESCRIPTION(MetadataField.getDESCRIPTION());
-				metadataTank.setKeyid(MetadataField.getID());
-				metadataTank.setMETAMODELID(MetadataField.getMETAMODELID());
-				metadataTank.setNAME(MetadataField.getNAME());
+				metadataTank.setDESCRIPTION(metadataField.getDESCRIPTION());
+				metadataTank.setKeyid(metadataField.getID());
+				metadataTank.setMETAMODELID(metadataField.getMETAMODELID());
+				metadataTank.setNAME(metadataField.getNAME());
 				metadataTank.setUPDATETIME(new Date());
-				metadataTank.setVERSION(MetadataField.getVERSION());
+				metadataTank.setVERSION(metadataField.getVERSION());
 				metadataTank.setCOLLECTJOBID(collectjobid);
 
 				if(!(iMetadataTankDao.insertMetaDataTank(metadataTank)>0)){
@@ -196,7 +228,6 @@ public class KettleMetadataCollectService {
 					throw new RuntimeException("元数据关系插入失败");
 				}
 			}
-
 		}
 		shutdownKettleEnvironment(database);
 		
@@ -211,14 +242,22 @@ public class KettleMetadataCollectService {
 	 * 
 	 */
 	@Transactional
-	public String[] getTables(Datasource_connectinfo datasource_connectinfo) throws KettleException {
+	public List<Table> getTables(Datasource_connectinfo datasource_connectinfo) throws KettleException {
+		List<Table> tables = new ArrayList<>();
 		database = initKettleEnvironment(datasource_connectinfo);
 
 		String[] tablenames = database.getTablenames();//获取数据库中所有表名
 		
 		shutdownKettleEnvironment(database);
+		for(String tablename : tablenames){
+			Table table = new Table();
+			table.setName(tablename);
+			table.setOperationDescription(null);
+			table.setOperationName(null);
+			tables.add(table);
+		}
 		
-		return tablenames;
+		return tables;
 	}
 	
 

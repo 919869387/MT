@@ -52,4 +52,13 @@ public interface ICollectJobDao {
 	 * 作用:删除一条CollectJob记录
 	 */
 	int delete(int id);
+	
+	
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年3月28日 
+	 * 作用:查询是否存在该名称
+	 */
+	CollectJob isExistName(String name);
 }

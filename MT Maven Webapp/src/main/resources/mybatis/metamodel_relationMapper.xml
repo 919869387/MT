@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.x8.mt.dao.IMetamodel_relationDao">
+
+	<select id="getDependencyRelationList" resultType="com.x8.mt.entity.Metamodel_relation">
+		select * from  metamodel_relation where type = "DEPENDENCY"
+	</select>
+
+	<insert id="insertMetamodel_relation" parameterType="com.x8.mt.entity.Metamodel_relation">
+		insert into metamodel_relation(metamodelid,relatedmetamodelid,type) values(#{metamodelid},#{relatedmetamodelid},#{type})
+	</insert>
+
+	<delete id="deleteMetamodel_relation" parameterType="Integer">
+		delete from metamodel_relation where id = #{id}
+	</delete>
+
+</mapper>

@@ -85,6 +85,16 @@ public class GlobalMethodAndParams {
 	public static final String metamodel_hierarchy_METAMODEL= "METAMODEL";
 	
 	/**
+	 * 元模型依赖关系
+	 */
+	public static final String metamodel_relation_dependency= "DEPENDENCY";
+	
+	/**
+	 * 元模型组合关系
+	 */
+	public static final String metamodel_relation_composition= "COMPOSITION";
+	
+	/**
 	 * 层次类型为包
 	 */
 	public static final String metamodel_hierarchy_PACKAGE= "PACKAGE";
