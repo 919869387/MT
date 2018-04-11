@@ -56,4 +56,7 @@ public interface ISystemuserDao {
 	//根据用户id删除用户
 	int deleteUser(int id);
 	
+	//根据角色id查询具有该角色的用户名称
+	List<SystemUser> findUsersByRoleId(int roleId);
+	
 }

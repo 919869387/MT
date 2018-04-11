@@ -23,4 +23,20 @@ public interface PermissionInfoDao {
 	 * @return
 	 */
 	List<PermissionInfo> findPermissionByUserId(String userid);
+	
+	/**
+	 * 查询权限列表
+	 */
+	List<PermissionInfo> findPermissionList();
+	
+	/**
+	 * 根据权限名称模糊查询权限项
+	 */
+	List<PermissionInfo> findPermissionByPname(String permissionName);
+	
+	
+	/**
+	 * 根据角色名称查询该角色具有的权限
+	 */
+	List<PermissionInfo> findPermissionByRoleName(String roleName);
 }

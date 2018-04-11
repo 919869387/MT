@@ -47,4 +47,8 @@ public interface ISystemRoleDao {
 	
 	//根据角色名称查询角色是否存在
 	SystemRole selectRoleByRoleName(String rolename);
+	
+	
+	//根据权限id查询具有该权限的角色名称
+    List<SystemRole> findRolesByPerId(int permissionId);
 }

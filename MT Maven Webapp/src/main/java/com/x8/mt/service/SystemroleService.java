@@ -82,4 +82,10 @@ public class SystemroleService {
 		SystemRole systemRole = iSystemRoleDao.selectRoleByRoleName(rolename);
 		return systemRole;
 	}
+	
+	//根据权限id查询具有该权限的角色名称
+	public List<SystemRole> RolesByPerId(int permissionId){
+		List<SystemRole> rolesByPerId = iSystemRoleDao.findRolesByPerId(permissionId);
+		return rolesByPerId;
+	}
 }
