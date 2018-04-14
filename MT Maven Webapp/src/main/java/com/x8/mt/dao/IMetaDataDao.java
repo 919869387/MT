@@ -22,6 +22,14 @@ public interface IMetaDataDao {
 	/**
 	 * 
 	 * 作者:GodDispose
+	 * 时间:2018年4月11日
+	 * 作用:根据采集任务id删除Metadata记录
+	 */
+	int deleteMetadataByCollectJobId(int id);
+	
+	/**
+	 * 
+	 * 作者:GodDispose
 	 * 时间:2018年3月12日
 	 * 作用:更新一条Metadata记录
 	 */

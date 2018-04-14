@@ -15,10 +15,6 @@ import javax.servlet.http.HttpServletResponse;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
-
-
-
-
 import org.pentaho.di.core.exception.KettleException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -31,6 +27,7 @@ import com.alibaba.fastjson.JSON;
 import com.x8.mt.common.GlobalMethodAndParams;
 import com.x8.mt.common.Log;
 import com.x8.mt.entity.CollectJob;
+import com.x8.mt.entity.Connectinfo;
 import com.x8.mt.entity.Datasource_connectinfo;
 import com.x8.mt.entity.Metadata;
 import com.x8.mt.entity.Metamodel_datatype;
@@ -352,36 +349,42 @@ public class KettleMetadataCollectController {
 		String creater = "admin";
 		//获取数据源的详细连接信息
 		Datasource_connectinfo datasource_connectinfo = datasource_connectinfoService.getDatasource_connectinfoListByparentid(id);		
+		Connectinfo connectinfo = connectinfoService.getConnectinfoByid(id);
 		
+		//删除以前采集的元数据
+		CollectJob oldCollectJob = collectJobService.getCollectJobByConnectinfoId(id);
+		metaDataService.deleteMetadataById(id);		
 		
-		CollectJob collectjob = new CollectJob(name,connectinfoid,mode,checkResult,createDate,creater);			
-		collectJobService.insertCollectJob(collectjob);				
+		CollectJob newCollectJob = new CollectJob(name,connectinfoid,mode,checkResult,createDate,creater);			
+		collectJobService.insertCollectJob(newCollectJob);				
 	
 		try {
-			
-			String json = JSON.toJSONString(map, true);
-			HashMap parseMap = JSON.parseObject(json, HashMap.class);
-			List<com.alibaba.fastjson.JSONObject> tableList = (List<com.alibaba.fastjson.JSONObject>) parseMap.get("multipleSelection");
-			//解析需要采集的表名并封装成Table类
-			List<Table> tables = new ArrayList<>();
-			
-			for(com.alibaba.fastjson.JSONObject tableName :tableList){
-				Table table = new Table();
-				table.setName(tableName.getString("tablename"));
-				table.setOperationDescription(null);
-				table.setOperationName(null);
-				tables.add(table);
-			}
-			
 			//表示接下来采集的是数据库元数据，即对应的元模型Id为10
-			int mountmodelid = 10;
-			//采集的数据库和表的数量
-			int tableSize = 0;
-			//采集的字段的数量
-			int fieldSize = 0;
-			if(mountmodelid == 10){
-				tableSize = kettleMetadataCollectService.collectDataBaseAndzTableMetaData(datasource_connectinfo,collectjob.getId(),createDate,id,tables);
-				fieldSize = kettleMetadataCollectService.collectFieldMetaData(datasource_connectinfo,collectjob.getId(),createDate,id,tables);				
+			int mountmodelid = connectinfo.getMountMetaDataId();
+
+			if(mountmodelid == 10){		
+				
+				String json = JSON.toJSONString(map, true);
+				HashMap parseMap = JSON.parseObject(json, HashMap.class);
+				List<com.alibaba.fastjson.JSONObject> tableList = (List<com.alibaba.fastjson.JSONObject>) parseMap.get("multipleSelection");
+				//解析需要采集的表名并封装成Table类
+				List<Table> tables = new ArrayList<>();
+				
+				for(com.alibaba.fastjson.JSONObject tableName :tableList){
+					Table table = new Table();
+					table.setName(tableName.getString("tablename"));
+					table.setOperationDescription(null);
+					table.setOperationName(null);
+					tables.add(table);
+				}
+				
+				//采集的数据库和表的数量
+				int tableSize = 0;
+				//采集的字段的数量
+				int fieldSize = 0;
+				
+				tableSize = kettleMetadataCollectService.collectDataBaseAndTableMetaData(datasource_connectinfo,newCollectJob.getId(),createDate,id,tables);
+				fieldSize = kettleMetadataCollectService.collectFieldMetaData(datasource_connectinfo,newCollectJob.getId(),createDate,id,tables);				
 				
 				for(Table table : tables){
 					JSONObject node = new JSONObject();
@@ -389,18 +392,93 @@ public class KettleMetadataCollectController {
 					node.put("operationname", table.getOperationName());
 					node.put("operationdescribe", table.getOperationDescription());
 					data.add(node);
-				}
+				}			
+
+				responsejson.put("tableSize",String.valueOf(tableSize));
+				responsejson.put("fieldSize",String.valueOf(fieldSize));
+				responsejson.put("collectionId",newCollectJob.getId());			
+
+			}else if(mountmodelid == 202){
+				String repositoryName = connectinfo.getName();				
+				List<Table> tables = kettleMetadataCollectService.collectKettleJob(datasource_connectinfo,newCollectJob.getId(),createDate,id,repositoryName);
+			
+				for(Table table : tables){
+					JSONObject node = new JSONObject();
+					node.put("tablename", table.getName());
+					node.put("operationname", table.getOperationName());
+					node.put("operationdescribe", table.getOperationDescription());
+					data.add(node);
+				}	
 			}
+			
 			responsejson.put("result", true);
 			responsejson.put("data",data);
-			responsejson.put("tableSize",String.valueOf(tableSize));
-			responsejson.put("fieldSize",String.valueOf(fieldSize));
-			responsejson.put("collectionId",collectjob.getId());			
 			responsejson.put("count",data.size());
+
 		} catch (Exception e) {
 			e.printStackTrace();
-			collectJobService.deleteById(collectjob.getId());
+			collectJobService.deleteById(newCollectJob.getId());
 			responsejson.put("result", false);
+			responsejson.put("count",0);
+		}
+
+		return responsejson;
+	}
+	
+	
+	
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年4月11日
+	 * 作用:判断数据源是否已经采集
+	 * 参数：id(数据源的id)
+	 */
+	@RequestMapping(value = "/judgeConnectExist",method=RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="null",operationDesc="判断数据源是否已经采集")
+	public JSONObject judgeConnectExist(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map){
+		JSONObject responsejson = new JSONObject();
+
+//		if(!GlobalMethodAndParams.checkLogin()){
+//			responsejson.put("result", false);
+//			responsejson.put("count",0);
+//			return responsejson;
+//		}
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
+		
+		//检查传参是否正确
+		if(!map.containsKey("id")){
+			responsejson.put("result", false);
+			responsejson.put("description", "传输参数 错误");
+			responsejson.put("count",0);
+			return responsejson;
+		}
+		
+		//获取数据源id
+		String idstr = map.get("id").toString();
+		int id = 0;
+		try {
+			id = Integer.parseInt(idstr);
+		} catch (Exception e) {
+		}
+		
+		try {
+			CollectJob collectJob = collectJobService.getCollectJobByConnectinfoId(id);
+			if(collectJob != null){
+				responsejson.put("result", false);
+				responsejson.put("flag",0);
+				responsejson.put("desciption","数据源已经采集");
+				responsejson.put("count",1);
+			}else{
+				responsejson.put("result", true);
+				responsejson.put("flag",1);
+				responsejson.put("desciption","数据源未采集");
+				responsejson.put("count",1);
+			}
+		} catch (Exception e) {
+			responsejson.put("result", false);
+			responsejson.put("flag",2);
 			responsejson.put("count",0);
 		}
 
@@ -434,7 +512,15 @@ public class KettleMetadataCollectController {
 			responsejson.put("count",0);
 			return responsejson;
 		}
-
+		
+		//获取数据源id
+		String idstr = map.get("id").toString();
+		int id = 0;
+		try {
+			id = Integer.parseInt(idstr);
+		} catch (Exception e) {
+		}
+		
 		//获取采集任务名称并判断是否存在
 		String name = map.get("name").toString();
 		if(name == null || name.isEmpty()){
@@ -449,16 +535,8 @@ public class KettleMetadataCollectController {
 			return responsejson;
 		}
 		
-		String idstr = map.get("id").toString();
-		int id = 0;
 		try {
-			id = Integer.parseInt(idstr);
-		} catch (Exception e) {
-		}
-		
-		Datasource_connectinfo datasource_connectinfo = datasource_connectinfoService.getDatasource_connectinfoListByparentid(id);		
-	
-		try {
+			Datasource_connectinfo datasource_connectinfo = datasource_connectinfoService.getDatasource_connectinfoListByparentid(id);			
 			List<Table> tables = kettleMetadataCollectService.getTables(datasource_connectinfo);
 			JSONArray data = new JSONArray();
 			for(Table table : tables){

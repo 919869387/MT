@@ -480,19 +480,20 @@ public class Datasource_connectinfoController {
 		
 		String idstr = map.get("id").toString();
 		int id = 0;
-		try {
-			id = Integer.parseInt(idstr);
+		id = Integer.parseInt(idstr);
 		
-			Metadata metadata = metaDataService.getMetadataById(id);
+		Metadata metadata = metaDataService.getMetadataById(id);
+
+		
+		if(connectinfoService.getConnectinfoByName(metadata.getNAME()) != null){
+			responsejson.put("result", false);
+			responsejson.put("description", "数据源名称已经存在");
+			responsejson.put("count",0);
+			return responsejson;
+		}
+		try {
+
 			JSONObject json = JSONObject.fromObject(metadata.getATTRIBUTES());
-			
-			if(connectinfoService.getConnectinfoByName(metadata.getNAME()) != null){
-				responsejson.put("result", false);
-				responsejson.put("description", "数据源名称已经存在");
-				responsejson.put("count",0);
-				return responsejson;
-			}
-			
 			//插入数据源信息记录		
 			Connectinfo connectInfo = new Connectinfo();
 			connectInfo.setName(metadata.getNAME());
