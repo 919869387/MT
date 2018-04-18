@@ -1,6 +1,7 @@
 package com.x8.mt.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,5 +46,23 @@ public class PermissionInfoService {
 	public List<PermissionInfo> permissionByRoleName(String roleName){
 		List<PermissionInfo> permissionByRoleName = permissionInfoDao.findPermissionByRoleName(roleName);
 		return permissionByRoleName;
+	}
+	
+	//根据角色id查询该角色没有的权限项
+	public List<PermissionInfo> roleNoPermissionByRoleId(String roleName){
+		List<PermissionInfo> roleNoPermission = permissionInfoDao.roleNoPermission(roleName);
+		return roleNoPermission;
+	}
+	
+	//给角色添加权限
+	public int addPermissions(List<Map<String, Object>> permissionList){
+		int addPermission = permissionInfoDao.addPermission(permissionList);
+		return addPermission;
+	}
+	
+	//删除指定的用户权限
+	public int deletePermissionList(Map<String, Object> perMap){
+		int deletePermission = permissionInfoDao.deletePermission(perMap);
+		return deletePermission;
 	}
 }

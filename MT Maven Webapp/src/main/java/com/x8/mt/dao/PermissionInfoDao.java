@@ -1,7 +1,9 @@
 package com.x8.mt.dao;
 
 import java.util.List;
+import java.util.Map;
 
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import com.x8.mt.entity.PermissionInfo;
@@ -39,4 +41,19 @@ public interface PermissionInfoDao {
 	 * 根据角色名称查询该角色具有的权限
 	 */
 	List<PermissionInfo> findPermissionByRoleName(String roleName);
+	
+	/**
+	 * 根据角色id查询用户没有的权限项
+	 */
+	List<PermissionInfo> roleNoPermission(String roleName);
+	
+	/**
+	 * 给角色添加权限
+	 */
+	int addPermission(List<Map<String, Object>> permissionList);
+	
+	/**
+	 * 删除指定的角色权限项
+	 */
+	int deletePermission(Map<String, Object> perMap);
 }

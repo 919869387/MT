@@ -59,7 +59,7 @@ public class SystemuserController {
 	 * 作用:用户登录
 	 * 参数：username、password
 	 */
-	@RequestMapping(value = "/login",method=RequestMethod.POST)
+	/*@RequestMapping(value = "/login",method=RequestMethod.POST)
 	@ResponseBody
 	@Log(operationType="systemusercontroller",operationDesc="用户登录")
 	public JSONObject login(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map) {
@@ -87,7 +87,7 @@ public class SystemuserController {
 			responsejson.put("count",0);
 		}
 		return responsejson;
-	}
+	}*/
 	
 	
 	
@@ -95,45 +95,37 @@ public class SystemuserController {
 	 * 作者：yangyaun 
 	 * 时间：2018年3月14日
 	 * 备注：登录验证
-	 *//*
+	 */
 	@RequestMapping(value = "/login",method=RequestMethod.POST)
 	@ResponseBody
 	@Log(operationType="systemusercontroller",operationDesc="用户登录")
-	public String login(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map) throws Exception{
+	public JSONObject login(HttpServletRequest request,HttpServletResponse response) throws Exception{
+		
 		GlobalMethodAndParams.setHttpServletResponse(request, response);
 		
+		JSONObject responsejson = new JSONObject();
 		//如果登陆失败从request中获取认证异常信息，shiroLoginFailure就是shiro异常类的全限定名
-				String exceptionClassName = (String) request.getAttribute("shiroLoginFailure");
-				//根据shiro返回的异常类路径判断，抛出指定异常信息
-				if(exceptionClassName!=null){
-					if (UnknownAccountException.class.getName().equals(exceptionClassName)) {
-						//最终会抛给异常处理器
-						throw new CustomException("账号不存在");
-					} else if (IncorrectCredentialsException.class.getName().equals(
-							exceptionClassName)) {
-						throw new CustomException("用户名/密码错误");
-					} else if("randomCodeError".equals(exceptionClassName)){
-						throw new CustomException("验证码错误 ");
-					}else {
-						throw new Exception();//最终在异常处理器生成未知错误
-					}
-				}else {
-					//此方法不处理登陆成功（认证成功），shiro认证成功会自动跳转到上一个请求路径
-					JSONObject responsejson = new JSONObject();
-					String username = map.get("username").toString();
-					String password = map.get("password").toString();
-					
-					Subject currentUser = SecurityUtils.getSubject();
-					Session session = currentUser.getSession();
-					session.setAttribute("username", username);
-					session.setAttribute("password", password);
-				}
-				
-				
-				//登陆失败还到login页面
-				return "/login";
-		
-	}*/
+		String exceptionClassName = (String) request.getAttribute("shiroLoginFailure");
+		//根据shiro返回的异常类路径判断，抛出指定异常信息
+		if(exceptionClassName!=null){
+			if (UnknownAccountException.class.getName().equals(exceptionClassName)) {
+				//最终会抛给异常处理器
+				responsejson.put("status", false);
+				responsejson.put("msg", "账号不存在");
+			} else if (IncorrectCredentialsException.class.getName().equals(
+					exceptionClassName)) {
+				responsejson.put("status", false);
+				responsejson.put("msg", "用户名/密码错误");
+			} else {
+				//最终在异常处理器生成未知错误
+				responsejson.put("status", false);
+				responsejson.put("msg", "未知错误");
+			}
+		}
+
+		return responsejson;
+	
+	}
 	
 	
 	
@@ -147,7 +139,7 @@ public class SystemuserController {
 	 * 备注：在浏览器没有请求过服务器(没有session)，就直接请求登出方法的时候，
 	 * 	该方法返回error路径。前段在这个方法的ajax里的error中需要写逻辑
 	 */
-	@RequestMapping(value = "/logout", method = RequestMethod.GET)  
+	/*@RequestMapping(value = "/logout", method = RequestMethod.GET)  
 	@ResponseBody
 	@Log(operationType="systemusercontroller",operationDesc="用户登出")
 	public JSONObject logout(HttpServletRequest request,HttpServletResponse response) {		
@@ -163,7 +155,7 @@ public class SystemuserController {
 			responsejson.put("count",0);
 		}
 		return responsejson;  
-	}
+	}*/
 	
 	/**
 	 * 作者：yangyuan

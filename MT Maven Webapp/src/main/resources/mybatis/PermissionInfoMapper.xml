@@ -34,7 +34,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	
 	<!-- 根据权限名称模糊查询权限 -->
 	<select id="findPermissionByPname" parameterType="String" resultType="com.x8.mt.entity.PermissionInfo">
-		select * from permission_info where permissionName like '%${permissionName}%'
+		select * from permission_info where permissionName = #{permissionName}
 	</select>
 	
 	<!-- 根据角色名称查询给角色具有的权限 -->
@@ -43,4 +43,30 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			(select permissionId from role_permission where roleId in
 				(select id from systemrole where rolename = #{roleName}))
 	</select>
+	
+	<!-- 根据角色名称查询角色没有的权限项 -->
+	<select id="roleNoPermission" parameterType="String" resultType="com.x8.mt.entity.PermissionInfo">
+		select * from permission_info where id not in 
+			(select permissionId from role_permission where roleId in
+				(select id from systemrole where rolename = #{roleName}))
+	</select>
+	
+	<!-- 给角色添加权限 -->
+	<insert id="addPermission" parameterType="java.util.List">
+		insert into role_permission(roleId,permissionId) 
+			values
+			<!-- permissionMap就是list里每一项的对象名称，要用“，”分隔每一条数据，最后要“；”结尾 -->
+			<foreach collection="list" item="permissionMap" index="index" separator="," close=";">
+				(#{permissionMap.roleId,jdbcType=BIGINT},#{permissionMap.permissionId,jdbcType=BIGINT})
+			</foreach>
+	</insert>
+	
+	<!-- 删除指定的角色的权限项 -->
+	<delete id="deletePermission" parameterType="map">
+		delete from role_permission where roleId = #{roleId}
+				and permissionId in
+				<foreach collection="permission" item="permissionList" index="index" open="(" separator="," close=")">
+					#{permissionList}
+				</foreach>
+	</delete>
 </mapper>
