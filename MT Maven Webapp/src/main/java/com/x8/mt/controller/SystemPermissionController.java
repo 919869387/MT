@@ -101,24 +101,28 @@ public class SystemPermissionController {
         List<Map<String, Object>> permissionList = new ArrayList<>();
         if (list != null && list.size() > 0) {
         	for(PermissionInfo permissionInfo : list){
-        		Map<String, Object> permissionMap = new HashMap<>();
-        		permissionMap.put("permissionId", permissionInfo.getId());
-        		permissionMap.put("permissionName", permissionInfo.getPermissionName());
+        		
         		
         		//根据权限id查询具有该权限的角色名称
         		List<SystemRole> rolesByPerId = systemroleService.RolesByPerId(permissionInfo.getId());
-        		List<String> rolesNameList = new ArrayList<>();
+        		//List<String> rolesNameList = new ArrayList<>();
         		if(rolesByPerId != null && rolesByPerId.size() > 0){
         			for(SystemRole roles : rolesByPerId){
-            			rolesNameList.add(roles.getRolename());
+        				Map<String, Object> permissionMap = new HashMap<>();
+                		permissionMap.put("permissionId", permissionInfo.getId());
+                		permissionMap.put("permissionName", permissionInfo.getPermissionName());
+                		permissionMap.put("roleName", roles.getRolename());
+            			//rolesNameList.add(roles.getRolename());
+                		
+                		permissionList.add(permissionMap);
         			}
         			responsejson.put("msg", "查询成功");
-        			permissionMap.put("roleName", rolesNameList);
+        			
         		}else {
         			responsejson.put("msg", "该权限还没有被分配");
 				}
 
-        		permissionList.add(permissionMap);
+        		
         		
         	}
         	
