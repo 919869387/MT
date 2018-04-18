@@ -42,6 +42,89 @@ public class MetadataManagementController {
 	Metamodel_hierarchyService metamodel_hierarchyService;
 	@Resource
 	MetadataViewNodeService metadataViewNodeService;
+	
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2017年4月18日
+	 * 作用:根据表元数据id，获取字段元数据
+	 *  
+	 * 参数： metadataid
+	 */
+	@RequestMapping(value = "/getFieldMetadataList", method = RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="metadata",operationDesc="根据表元数据id，获取字段元数据")
+	public JSONObject getFieldMetadataList(HttpServletRequest request,
+			HttpServletResponse response,@RequestBody Map<String, Object> map){
+		JSONObject responsejson = new JSONObject();
+		
+		//检查传参是否正确
+		if(!map.containsKey("metadataid")){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}
+		
+		String metadataId = map.get("metadataid").toString();
+		
+		List<Map<String,Object>> getFieldMetadataList = metadataManagementService.getFieldMetadataList(metadataId);
+		
+		responsejson.put("result", true);
+		responsejson.put("field", getFieldMetadataList);
+		responsejson.put("count",getFieldMetadataList.size());
+		return responsejson;
+	}
+	
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2017年4月18日
+	 * 作用:根据数据库元数据id，获取表元数据
+	 *  
+	 * 参数： metadataid
+	 */
+	@RequestMapping(value = "/getTableMetadataList", method = RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="metadata",operationDesc="根据数据库元数据id,获取表元数据")
+	public JSONObject getTableMetadataList(HttpServletRequest request,
+			HttpServletResponse response,@RequestBody Map<String, Object> map){
+		JSONObject responsejson = new JSONObject();
+		
+		//检查传参是否正确
+		if(!map.containsKey("metadataid")){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}
+		
+		String metadataId = map.get("metadataid").toString();
+		
+		List<Map<String,Object>> getTableMetadataList = metadataManagementService.getTableMetadataList(metadataId);
+		
+		responsejson.put("result", true);
+		responsejson.put("table", getTableMetadataList);
+		responsejson.put("count",getTableMetadataList.size());
+		return responsejson;
+	}
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2017年4月18日
+	 * 作用:获取所有数据库
+	 */
+	@RequestMapping(value = "/getDatabaseMetadataList",method=RequestMethod.GET)
+	@ResponseBody
+	@Log(operationType="metadata",operationDesc="获取所有数据库元数据")
+	public JSONObject getDatabaseMetadataList(HttpServletRequest request,HttpServletResponse response){
+		JSONObject responsejson = new JSONObject();
+		List<Map<String,Object>> getDatabaseMetadataList = metadataManagementService.getDatabaseMetadataList();
+
+		responsejson.put("result", true);
+		responsejson.put("database", getDatabaseMetadataList);
+		responsejson.put("count",getDatabaseMetadataList.size());
+		return responsejson;
+	}
 
 	/**
 	 * 
@@ -329,26 +412,26 @@ public class MetadataManagementController {
 		JSONObject responsejson = new JSONObject();
 
 		//GlobalMethodAndParams.setHttpServletResponse(request, response);
-		
+
 		//增加第一层元数据的逻辑
 		if(map.containsKey("id")){
 			String idStr = map.get("id").toString();
-			
+
 			List<MetadataViewNode> metadataViewNodes= metadataViewNodeService.getMetadataViewNode(idStr);
-			
+
 			List<JSONObject> includeMetaModel = new ArrayList<JSONObject>();
-			
+
 			for(MetadataViewNode metadataViewNode:metadataViewNodes){
 				int modelid = metadataViewNode.getChildmetamodelid();
 				Metamodel_hierarchy metamodel_hierarchy = metamodel_hierarchyService.getMetamodel_hierarchy(modelid);
-				
+
 				JSONObject metamodel = new JSONObject();
 				metamodel.put("modelid", modelid);
 				metamodel.put("name", metamodel_hierarchy.getName());
-				
+
 				includeMetaModel.add(metamodel);
 			}
-			
+
 			responsejson.put("result", true);
 			responsejson.put("metamodelname", metadataViewNodes.get(0).getName());
 			responsejson.put("includeMetaModel", includeMetaModel);
@@ -356,8 +439,8 @@ public class MetadataManagementController {
 			responsejson.put("count", includeMetaModel.size());
 			return responsejson;
 		}
-			
-			
+
+
 		//检查传参是否正确
 		if(!map.containsKey("metamodelId")){
 			responsejson.put("result", false);

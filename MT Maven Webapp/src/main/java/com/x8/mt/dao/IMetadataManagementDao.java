@@ -85,4 +85,20 @@ public interface IMetadataManagementDao {
 	int updateMetadatAttributes(Metadata metadata);
 
 	boolean updataMetadataCheckstatus(Metadata metadata);
+	
+	/**
+	 * 
+	 * 作者:allen 
+	 * 时间:2017年4月18日 
+	 * 作用:获取所有数据库元数据
+	 */
+	List<Map<String, Object>> getDatabaseMetadataList(String metaModelId);
+
+	/**
+	 * 
+	 * 作者:allen 
+	 * 时间:2017年4月18日 
+	 * 作用:获取某一类元数据
+	 */
+	List<Map<String, Object>> getMetadataList(Map<String, Object> map);
 }
