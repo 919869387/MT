@@ -56,6 +56,11 @@ public class GlobalMethodAndParams {
 	public static final String FieldMetamodelId= "32";
 	
 	/**
+	 * 数据库元模型id
+	 */
+	public static final String DatabaseMetamodelId= "10";
+	
+	/**
 	 * 元数据特有数据项字段名
 	 */
 	public static final String Metadata_Attributes= "ATTRIBUTES";

@@ -30,6 +30,34 @@ public class MetadataManagementTest {
 	MetadataManagementController metadataManagementController;
 	
 	@Test
+	public void getFieldMetadataList(){
+		HttpServletRequest request = null;
+		HttpServletResponse response = null;
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("metadataid", 31755);
+		
+		System.out.println(metadataManagementController.getFieldMetadataList(request, response, map));
+	}
+	
+	@Test
+	public void getTableMetadataList(){
+		HttpServletRequest request = null;
+		HttpServletResponse response = null;
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("metadataid", 31754);
+		
+		System.out.println(metadataManagementController.getTableMetadataList(request, response, map));
+	}
+	
+	@Test
+	public void getDatabaseMetadataList(){
+		HttpServletRequest request = null;
+		HttpServletResponse response = null;
+		
+		System.out.println(metadataManagementController.getDatabaseMetadataList(request, response));
+	}
+	
+	@Test
 	public void daleteMetadataInfo(){
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;

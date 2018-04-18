@@ -48,7 +48,51 @@ public class MetadataManagementService {
 	IMetadataTankDao iMetadataTankDao;
 	@Resource
 	IMetaDataDao iMetaDataDao;
+	
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2017年4月18日
+	 * 作用:根据表元数据id，获取字段元数据
+	 */
+	public List<Map<String, Object>> getFieldMetadataList(String metadataId) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("metadataId", metadataId);
+		map.put("medamodelId", GlobalMethodAndParams.FieldMetamodelId);
+		
+		return imetadataManagementDao.getMetadataList(map);
+	}
+	
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2017年4月18日
+	 * 作用:根据数据库元数据id，获取表元数据
+	 */
+	public List<Map<String, Object>> getTableMetadataList(String metadataId) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("metadataId", metadataId);
+		map.put("medamodelId", GlobalMethodAndParams.TableMedamodelId_InDatabase);
+		
+		return imetadataManagementDao.getMetadataList(map);
+	}
 
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2017年4月18日
+	 * 作用:获取所有数据库元数据获取所有数据库元数据
+	 */
+	public List<Map<String,Object>>getDatabaseMetadataList(){
+		return imetadataManagementDao.getDatabaseMetadataList(GlobalMethodAndParams.DatabaseMetamodelId);
+	}
+	
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2017年3月25日
+	 * 作用:判断该元数据是否存在
+	 */
 	public boolean existMetadata(String metadataId) {
 		if(iMetaDataDao.getMetadataById(Integer.parseInt(metadataId))!=null){
 			return true;
@@ -466,5 +510,7 @@ public class MetadataManagementService {
 		Map<String, Object> metadataMap = TransformMetadata.transformMetadataToMap(metadata);
 		return metadataMap;
 	}
+
+	
 
 }
