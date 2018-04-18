@@ -59,7 +59,7 @@ public class SystemuserController {
 	 * 作用:用户登录
 	 * 参数：username、password
 	 */
-	/*@RequestMapping(value = "/login",method=RequestMethod.POST)
+	@RequestMapping(value = "/login",method=RequestMethod.POST)
 	@ResponseBody
 	@Log(operationType="systemusercontroller",operationDesc="用户登录")
 	public JSONObject login(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map) {
@@ -87,7 +87,7 @@ public class SystemuserController {
 			responsejson.put("count",0);
 		}
 		return responsejson;
-	}*/
+	}
 	
 	
 	
@@ -95,7 +95,7 @@ public class SystemuserController {
 	 * 作者：yangyaun 
 	 * 时间：2018年3月14日
 	 * 备注：登录验证
-	 */
+	 *//*
 	@RequestMapping(value = "/login",method=RequestMethod.POST)
 	@ResponseBody
 	@Log(operationType="systemusercontroller",operationDesc="用户登录")
@@ -125,7 +125,7 @@ public class SystemuserController {
 
 		return responsejson;
 	
-	}
+	}*/
 	
 	
 	
