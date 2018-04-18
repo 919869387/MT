@@ -42,7 +42,16 @@ public interface ICollectJobDao {
 	 * 时间:2018年3月14日 
 	 * 作用:根据connectinfoid获取采集任务
 	 */
-	CollectJob getCollectJobByConnectinfoId(int id);
+	List<CollectJob> getCollectJobByConnectinfoId(int id);
+	
+	/**
+	 * 
+	 * 作者:GodDispose 
+	 * 时间:2018年3月14日 
+	 * 作用:根据connectinfoid获取该数据源最近的采集任务
+	 */
+	CollectJob getRecentCollectJobByConnectinfoId(int id);	
+	
 	
 	
 	/**

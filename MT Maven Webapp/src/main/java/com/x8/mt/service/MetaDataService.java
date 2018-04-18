@@ -35,6 +35,21 @@ public class MetaDataService {
 	/**
 	 * 
 	 * 作者:GodDipose
+	 * 时间:2018年4月11日
+	 * 作用:根据采集任务id删除元数据
+	 */
+	public boolean deleteMetadataByCollectJobId(int id) {
+		try{			
+			return iMetadataDao.deleteMetadataByCollectJobId(id) >= 1 ? true : false;
+		}catch(Exception e){
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	/**
+	 * 
+	 * 作者:GodDipose
 	 * 时间:2018年3月14日
 	 * 作用:根据metaModelId查找元数据
 	 */

@@ -66,9 +66,24 @@ public class CollectJobService {
 	 * 时间:2018年3月14日
 	 * 作用:根据connectinfoid查找采集任务
 	 */
-	public CollectJob getCollectJobByConnectinfoId(int id){
+	public List<CollectJob> getCollectJobByConnectinfoId(int id){
 		try{
 			return  iCollectJobDao.getCollectJobByConnectinfoId(id);
+		}catch(Exception e){
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	/**
+	 * 
+	 * 作者:GodDipose
+	 * 时间:2018年3月14日
+	 * 作用:根据connectinfoid查找采集任务
+	 */
+	public CollectJob getRecentCollectJobByConnectinfoId(int id){
+		try{
+			return  iCollectJobDao.getRecentCollectJobByConnectinfoId(id);
 		}catch(Exception e){
 			e.printStackTrace();
 			return null;

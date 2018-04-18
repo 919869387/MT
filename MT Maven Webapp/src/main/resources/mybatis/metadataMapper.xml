@@ -7,6 +7,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		delete from metadata where id = #{id}
 	</delete>
 	
+	<delete id="deleteMetadataByCollectJobId" parameterType="int">
+		delete from metadata where id = #{id}
+	</delete>
+	
 	<update id="updateMetadataDescribeById" parameterType="com.x8.mt.entity.Metadata" >
 		update metadata set desribe = #{DESCRIPTION} where id = #{ID}
 	</update>

@@ -8,6 +8,8 @@ public class Datasource_connectinfo {
 	private String password;
 	private String databasename;
 	private String databasetype;
+	private String repositoryname;
+	private String repositorypwd;
 	private int parentid;
 	
 	public int getId() {
@@ -59,5 +61,19 @@ public class Datasource_connectinfo {
 	public void setParentid(int parentid) {
 		this.parentid = parentid;
 	}
+	public String getRepositoryname() {
+		return repositoryname;
+	}
+	public void setRepositoryname(String repositoryname) {
+		this.repositoryname = repositoryname;
+	}
+	public String getRepositorypwd() {
+		return repositorypwd;
+	}
+	public void setRepositorypwd(String repositorypwd) {
+		this.repositorypwd = repositorypwd;
+	}
+
+	
 	
 }

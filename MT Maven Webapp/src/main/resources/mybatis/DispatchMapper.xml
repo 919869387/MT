@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.x8.mt.dao.IDispatchDao">
+
+	
+	<select id="queryAll" resultType="com.x8.mt.entity.Dispatch">
+		select * from dispatch 
+	</select>
+	
+	<select id="queryByDispatchId" resultType="com.x8.mt.entity.Dispatch">
+		select * from dispatch where dispatchId = #{id}
+	</select>
+
+	<insert id="addDispatch" parameterType="com.x8.mt.entity.Dispatch"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into
+		dispatch(taskname,time,user,status,	intervaltime,lasttime)
+		values(#{taskname}, #{time},#{user},#{status},#{intervaltime},#{lasttime})
+	</insert>
+	
+	<delete id="deleteDispatch" parameterType="int">
+		delete from
+		dispatch where dispatchId=#{id}
+	</delete>
+	
+	<update id="updateDispatch" parameterType="com.x8.mt.entity.Dispatch">
+		update dispatch
+		<trim prefix="set" suffixOverrides=",">
+			<if test="taskname!=null">taskname=#{taskname},</if>
+			<if test="time!=null">time=#{time},</if>
+			<if test="user!=null">user=#{user},</if>
+			<if test="status!=null">status=#{status},</if>
+			<if test="intervaltime!=null">intervaltime=#{intervaltime},</if>
+			<if test="lasttime!=null">lasttime=#{lasttime},</if>
+		</trim>
+		where dispatchId=#{id}
+	</update>
+</mapper>

@@ -402,7 +402,8 @@ public class Datasource_connectinfoController {
 		//确保databasetype传参的枚举类型值
 		if((!map.get("databasetype").toString().equals(GlobalMethodAndParams.databasetype_MYSQL))&&
 				(!map.get("databasetype").toString().equals(GlobalMethodAndParams.databasetype_ORACLE))&&
-					(!map.get("databasetype").toString().equals(GlobalMethodAndParams.databasetype_POSTGRESQL))){
+					(!map.get("databasetype").toString().equals(GlobalMethodAndParams.databasetype_SQLSERVER))&&
+						(!map.get("databasetype").toString().equals(GlobalMethodAndParams.databasetype_POSTGRESQL))){
 			responsejson.put("result", false);
 			responsejson.put("count",0);
 			return responsejson;
@@ -480,19 +481,20 @@ public class Datasource_connectinfoController {
 		
 		String idstr = map.get("id").toString();
 		int id = 0;
-		try {
-			id = Integer.parseInt(idstr);
+		id = Integer.parseInt(idstr);
 		
-			Metadata metadata = metaDataService.getMetadataById(id);
+		Metadata metadata = metaDataService.getMetadataById(id);
+
+		
+		if(connectinfoService.getConnectinfoByName(metadata.getNAME()) != null){
+			responsejson.put("result", false);
+			responsejson.put("description", "数据源名称已经存在");
+			responsejson.put("count",0);
+			return responsejson;
+		}
+		try {
+
 			JSONObject json = JSONObject.fromObject(metadata.getATTRIBUTES());
-			
-			if(connectinfoService.getConnectinfoByName(metadata.getNAME()) != null){
-				responsejson.put("result", false);
-				responsejson.put("description", "数据源名称已经存在");
-				responsejson.put("count",0);
-				return responsejson;
-			}
-			
 			//插入数据源信息记录		
 			Connectinfo connectInfo = new Connectinfo();
 			connectInfo.setName(metadata.getNAME());
@@ -560,7 +562,7 @@ public class Datasource_connectinfoController {
 		int id = 0;
 		try {
 			id = Integer.parseInt(idstr);
-			CollectJob collectJob = collectJobService.getCollectJobByConnectinfoId(id);
+			CollectJob collectJob = collectJobService.getRecentCollectJobByConnectinfoId(id);
 			List<Metadata> metaDatas = metaDataService.getMetadataByMetaModelId(collectJob.getId());
 						
 			JSONArray data = new JSONArray();
