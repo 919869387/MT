@@ -130,6 +130,11 @@ public class GlobalMethodAndParams {
 	public static final String databasetype_ORACLE= "oracle";
 	
 	/**
+	 * 数据库类型oracle
+	 */
+	public static final String databasetype_SQLSERVER= "sqlserver";
+	
+	/**
 	 * kettle连接方式
 	 */
 	public static final String kettleDatabaseMetaAccess_JDBC = "jdbc";

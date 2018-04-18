@@ -402,7 +402,8 @@ public class Datasource_connectinfoController {
 		//确保databasetype传参的枚举类型值
 		if((!map.get("databasetype").toString().equals(GlobalMethodAndParams.databasetype_MYSQL))&&
 				(!map.get("databasetype").toString().equals(GlobalMethodAndParams.databasetype_ORACLE))&&
-					(!map.get("databasetype").toString().equals(GlobalMethodAndParams.databasetype_POSTGRESQL))){
+					(!map.get("databasetype").toString().equals(GlobalMethodAndParams.databasetype_SQLSERVER))&&
+						(!map.get("databasetype").toString().equals(GlobalMethodAndParams.databasetype_POSTGRESQL))){
 			responsejson.put("result", false);
 			responsejson.put("count",0);
 			return responsejson;
@@ -561,7 +562,7 @@ public class Datasource_connectinfoController {
 		int id = 0;
 		try {
 			id = Integer.parseInt(idstr);
-			CollectJob collectJob = collectJobService.getCollectJobByConnectinfoId(id);
+			CollectJob collectJob = collectJobService.getRecentCollectJobByConnectinfoId(id);
 			List<Metadata> metaDatas = metaDataService.getMetadataByMetaModelId(collectJob.getId());
 						
 			JSONArray data = new JSONArray();

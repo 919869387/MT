@@ -352,7 +352,7 @@ public class KettleMetadataCollectController {
 		Connectinfo connectinfo = connectinfoService.getConnectinfoByid(id);
 		
 		//删除以前采集的元数据
-		CollectJob oldCollectJob = collectJobService.getCollectJobByConnectinfoId(id);
+		CollectJob oldCollectJob = collectJobService.getRecentCollectJobByConnectinfoId(id);
 		metaDataService.deleteMetadataById(id);		
 		
 		CollectJob newCollectJob = new CollectJob(name,connectinfoid,mode,checkResult,createDate,creater);			
@@ -363,7 +363,6 @@ public class KettleMetadataCollectController {
 			int mountmodelid = connectinfo.getMountMetaDataId();
 
 			if(mountmodelid == 10){		
-				
 				String json = JSON.toJSONString(map, true);
 				HashMap parseMap = JSON.parseObject(json, HashMap.class);
 				List<com.alibaba.fastjson.JSONObject> tableList = (List<com.alibaba.fastjson.JSONObject>) parseMap.get("multipleSelection");
@@ -464,8 +463,8 @@ public class KettleMetadataCollectController {
 		}
 		
 		try {
-			CollectJob collectJob = collectJobService.getCollectJobByConnectinfoId(id);
-			if(collectJob != null){
+			List<CollectJob> collectJob = collectJobService.getCollectJobByConnectinfoId(id);
+			if(!collectJob.isEmpty()  || collectJob.size() > 0){
 				responsejson.put("result", false);
 				responsejson.put("flag",0);
 				responsejson.put("desciption","数据源已经采集");
@@ -550,6 +549,7 @@ public class KettleMetadataCollectController {
 			responsejson.put("data",data);
 			responsejson.put("count",data.size());
 		} catch (Exception e) {
+			e.printStackTrace();
 			responsejson.put("result", false);
 			responsejson.put("count",0);
 		}

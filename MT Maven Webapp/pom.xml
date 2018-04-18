@@ -199,6 +199,16 @@
 			<version>1.7.21</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+    		<groupId>javax.mail</groupId>
+    		<artifactId>mail</artifactId>
+    		<version>1.4</version>
+		</dependency>
+		<dependency>
+		    <groupId>postgresql</groupId>
+		    <artifactId>postgresql</artifactId>
+		    <version>9.1-901.jdbc4</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<finalName>MT</finalName>

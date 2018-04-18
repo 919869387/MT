@@ -20,6 +20,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<select id="getCollectJobByConnectinfoId" parameterType="int" resultType="com.x8.mt.entity.CollectJob">
 		select * from collectjob where connectinfoid = #{id}
 	</select>
+	
+	<select id="getRecentCollectJobByConnectinfoId" parameterType="int" resultType="com.x8.mt.entity.CollectJob">
+		select * from collectjob where connectinfoid = #{id} order by id desc limit 0,1
+	</select>
 
 	<insert id="insert" parameterType="com.x8.mt.entity.CollectJob"
 		useGeneratedKeys="true" keyProperty="id">
