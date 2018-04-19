@@ -1,5 +1,7 @@
 package com.x8.mt.service;
 
+import java.util.List;
+
 import javax.annotation.Resource;
 
 import org.springframework.stereotype.Service;
@@ -21,5 +23,9 @@ public class MetaDataRelationService {
 			return false;
 		}
 
+	}
+
+	public List<String> getMetadata_relationByMetadataid(int id) {
+		return iMetaDataRelationDao.getSonMetadataID(String.valueOf(id));
 	}
 }
