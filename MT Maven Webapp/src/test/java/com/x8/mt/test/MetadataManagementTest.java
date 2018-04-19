@@ -34,7 +34,7 @@ public class MetadataManagementTest {
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("key", "id");
+		map.put("key", "id1");
 		
 		System.out.println(metadataManagementController.searchMetadata(request, response, map));
 	}
