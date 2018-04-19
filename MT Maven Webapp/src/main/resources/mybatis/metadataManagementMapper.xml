@@ -3,28 +3,47 @@
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.x8.mt.dao.IMetadataManagementDao">
-	
+
+	<select id="getMetadataList" parameterType="Map" resultType="java.util.Map">
+		select t2.id as
+		metadataid,t2.name as metadataname from
+		metadata as t2 where t2.id in
+		(select t1.relatedmetadataid from metadata_relation as t1 where
+		t1.metadataid=#{metadataId} and t1.type='COMPOSITION') and
+		t2.metamodelid=#{medamodelId};
+	</select>
+
+	<select id="getDatabaseMetadataList" resultType="java.util.Map">
+		select id as
+		metadataid,name as metadataname from
+		metadata where
+		metamodelid=#{metaModelId};
+	</select>
+
 	<delete id="daleteMetadata">
 		DELETE FROM metadata WHERE id=#{metadataId}
 	</delete>
-	
+
 	<update id="updateMetadatAttributes" parameterType="com.x8.mt.entity.Metadata">
-		UPDATE metadata
+		UPDATE
+		metadata
 		SET attributes=#{ATTRIBUTES}
 		WHERE id = #{ID};
 	</update>
-	
+
 	<update id="updateMetadata" parameterType="com.x8.mt.entity.Metadata">
 		UPDATE metadata
-		SET name=#{NAME},
+		SET
+		name=#{NAME},
 		description=#{DESCRIPTION},
 		updatetime=#{UPDATETIME},
 		version=#{VERSION}
 		WHERE id = #{ID};
 	</update>
-	
+
 	<update id="updataMetadataCheckstatus" parameterType="com.x8.mt.entity.Metadata">
-		update metadata set checkstatus = #{CHECKSTATUS} where id = #{ID}
+		update
+		metadata set checkstatus = #{CHECKSTATUS} where id = #{ID}
 	</update>
 
 	<!-- allen -->
