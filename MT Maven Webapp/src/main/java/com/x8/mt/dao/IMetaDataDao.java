@@ -54,10 +54,18 @@ public interface IMetaDataDao {
 	/**
 	 * 
 	 * 作者:GodDispose
-	 * 时间:2018年3月12日
-	 * 作用:根据id获取一条Metadata记录
+	 * 时间:2018年4月18日
+	 * 作用:根据元模型id获取一组Metadata记录
 	 */
 	List<Metadata> getMetadataByMetaModelId(int id);
+	
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年3月12日
+	 * 作用:根据采集任务id获取一组Metadata记录
+	 */
+	List<Metadata> getMetadataByCollectJobById(int id);
 	
 	/**
 	 * 

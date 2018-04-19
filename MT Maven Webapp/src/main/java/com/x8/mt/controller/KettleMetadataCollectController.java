@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.x8.mt.common.CalDataSize;
 import com.x8.mt.common.GlobalMethodAndParams;
 import com.x8.mt.common.Log;
 import com.x8.mt.entity.CollectJob;
@@ -377,10 +378,10 @@ public class KettleMetadataCollectController {
 					tables.add(table);
 				}
 				
-				//采集的数据库和表的数量
-				int tableSize = 0;
-				//采集的字段的数量
-				int fieldSize = 0;
+				//采集的数据库和表的数量以及大小
+				String tableSize ;
+				//采集的字段的数量以及大小
+				String fieldSize ;
 				
 				tableSize = kettleMetadataCollectService.collectDataBaseAndTableMetaData(datasource_connectinfo,newCollectJob.getId(),createDate,id,tables);
 				fieldSize = kettleMetadataCollectService.collectFieldMetaData(datasource_connectinfo,newCollectJob.getId(),createDate,id,tables);				
@@ -392,9 +393,13 @@ public class KettleMetadataCollectController {
 					node.put("operationdescribe", table.getOperationDescription());
 					data.add(node);
 				}			
-
-				responsejson.put("tableSize",String.valueOf(tableSize));
-				responsejson.put("fieldSize",String.valueOf(fieldSize));
+				String[] temp = tableSize.split("_");
+				responsejson.put("tableLength",temp[0]);
+				responsejson.put("tableSize",CalDataSize.getPrintSize(Integer.parseInt(temp[1])));
+				
+				temp = fieldSize.split("_");				
+				responsejson.put("fieldLength",temp[0]);
+				responsejson.put("fieldSize",CalDataSize.getPrintSize(Integer.parseInt(temp[1])));
 				responsejson.put("collectionId",newCollectJob.getId());			
 
 			}else if(mountmodelid == 202){
@@ -839,6 +844,13 @@ public class KettleMetadataCollectController {
 		try{
 			List<Metadata> metadatas = metaDataService.getMetadataByMetaModelId(10);
 			JSONArray data = new JSONArray();
+			for(Metadata metadata : metadatas){
+				JSONObject node = new JSONObject();
+				node.put("id", metadata.getID());
+				node.put("label", metadata.getNAME());
+				data.add(node);
+			}
+			metadatas = metaDataService.getMetadataByMetaModelId(202);
 			for(Metadata metadata : metadatas){
 				JSONObject node = new JSONObject();
 				node.put("id", metadata.getID());

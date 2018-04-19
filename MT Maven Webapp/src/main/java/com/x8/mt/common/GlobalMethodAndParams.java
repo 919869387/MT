@@ -132,7 +132,7 @@ public class GlobalMethodAndParams {
 	/**
 	 * 数据库类型oracle
 	 */
-	public static final String databasetype_SQLSERVER= "sqlserver";
+	public static final String databasetype_SQLSERVER= "mssql";
 	
 	/**
 	 * kettle连接方式

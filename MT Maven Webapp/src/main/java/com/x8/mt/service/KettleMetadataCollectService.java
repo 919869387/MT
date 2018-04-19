@@ -66,7 +66,7 @@ public class KettleMetadataCollectService {
 	 * @throws ParseException 
 	 */
 	@Transactional
-	public int collectDataBaseAndTableMetaData(Datasource_connectinfo datasource_connectinfo,int collectjobid,Date createDate,int datasourceId
+	public String collectDataBaseAndTableMetaData(Datasource_connectinfo datasource_connectinfo,int collectjobid,Date createDate,int datasourceId
 			,List<Table> tables) throws KettleException, SQLException, ParseException {
 		int collectCount = 0;//表元数据、字段元数据记录数共同记录
 		database = initKettleEnvironment(datasource_connectinfo);
@@ -164,7 +164,14 @@ public class KettleMetadataCollectService {
 		}
 		shutdownKettleEnvironment(database);
 		
-		return collectCount;
+		long size = 0 ;
+		
+		size += datasource_connectinfo.getDatabasename().getBytes().length;
+		for(String str : tablenames){
+			size += str.getBytes().length;
+		}
+		
+		return collectCount + "_" + size;
 	}
 	
 	/**
@@ -176,7 +183,7 @@ public class KettleMetadataCollectService {
 	 * @throws ParseException 
 	 */
 	@Transactional
-	public int collectFieldMetaData(Datasource_connectinfo datasource_connectinfo,int collectjobid,Date createDate,int datasourceId
+	public String collectFieldMetaData(Datasource_connectinfo datasource_connectinfo,int collectjobid,Date createDate,int datasourceId
 			,List<Table> tables) throws KettleException, SQLException, ParseException {
 		int collectCount = 0;//表元数据、字段元数据记录数共同记录
 		
@@ -185,6 +192,9 @@ public class KettleMetadataCollectService {
 		String[] tablenames = database.getTablenames();//获取数据库中所有表名	
 		MetaDataRelation metadataRelation = new MetaDataRelation();
 		MetadataTank metadataTank = new MetadataTank();
+		
+		int size = 0;
+		
 		for(Table table : tables){
 			RowMetaInterface tableFields = database.getTableFields(table.getName());
 
@@ -237,11 +247,14 @@ public class KettleMetadataCollectService {
 				if(!(metaDataRelationService.insertMetaDataRelation(metadataRelation))){//插入不成功
 					throw new RuntimeException("元数据关系插入失败");
 				}
+				
+				size = size + fieldNameType.getName().getBytes().length * 2
+						+ fieldNameType.getOriginalColumnTypeName().getBytes().length ;
 			}
 		}
 		shutdownKettleEnvironment(database);
 		
-		return collectCount;
+		return collectCount + "_"  + size;
 	}
 	
 	

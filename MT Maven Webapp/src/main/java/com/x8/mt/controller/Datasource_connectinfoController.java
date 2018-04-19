@@ -423,7 +423,9 @@ public class Datasource_connectinfoController {
 		if(map.containsKey("describe")){
 			connectInfo.setDescription(map.get("describe").toString());
 		}
-		connectInfo.setMountMetaDataId(Integer.parseInt(map.get("mountmetadataid").toString()));
+		
+		int metaModelId = Integer.parseInt(map.get("mountmetadataid").toString());
+		connectInfo.setMountMetaDataId(metaModelId);
 		connectInfo.setNeedCheck(1);
 		if(!connectinfoService.insertConnectinfo(connectInfo)){
 			responsejson.put("result", false);
@@ -441,6 +443,10 @@ public class Datasource_connectinfoController {
 		datasource_connectinfo.setDatabasename(map.get("databasename").toString());
 		datasource_connectinfo.setDatabasetype(map.get("databasetype").toString());
 		datasource_connectinfo.setParentid(connectInfo.getId());
+		if(metaModelId == 202){
+			datasource_connectinfo.setRepositoryname(map.get("resourceUserName").toString());
+			datasource_connectinfo.setRepositorypwd(map.get("resourcePassword").toString());
+		}
 		boolean result = datasource_connectinfoService.insertDatasource_connectinfo(datasource_connectinfo);
 		
 		responsejson.put("result", result);
@@ -499,7 +505,7 @@ public class Datasource_connectinfoController {
 			Connectinfo connectInfo = new Connectinfo();
 			connectInfo.setName(metadata.getNAME());
 			connectInfo.setType("database");
-			connectInfo.setMountMetaDataId(10);
+			connectInfo.setMountMetaDataId(metadata.getMETAMODELID());
 			connectInfo.setNeedCheck(1);
 			if(!connectinfoService.insertConnectinfo(connectInfo)){
 				responsejson.put("result", false);
@@ -517,6 +523,11 @@ public class Datasource_connectinfoController {
 			datasource_connectinfo.setDatabasename(json.get("dbname").toString());
 			datasource_connectinfo.setDatabasetype(json.get("dbtype").toString());
 			datasource_connectinfo.setParentid(connectInfo.getId());
+			if(metadata.getMETAMODELID() == 202){
+				datasource_connectinfo.setRepositoryname(map.get("reposuser").toString());
+				datasource_connectinfo.setRepositorypwd(map.get("repospassword").toString());
+			}
+			
 			boolean result = datasource_connectinfoService.insertDatasource_connectinfo(datasource_connectinfo);
 			responsejson.put("result", result);
 			if(result){
@@ -563,7 +574,7 @@ public class Datasource_connectinfoController {
 		try {
 			id = Integer.parseInt(idstr);
 			CollectJob collectJob = collectJobService.getRecentCollectJobByConnectinfoId(id);
-			List<Metadata> metaDatas = metaDataService.getMetadataByMetaModelId(collectJob.getId());
+			List<Metadata> metaDatas = metaDataService.getMetadataByCollectJobById(collectJob.getId());
 						
 			JSONArray data = new JSONArray();
 			for(Metadata metaData : metaDatas){

@@ -53,8 +53,23 @@ public class CollectKettleMetadataTest {
 		}else{
 			System.out.println(2);
 		}
-
 	}
 	
+	@Test
+	public void calString(){
+		int size = 0;
+//		for(String str : tablenames){
+//			size = str.get
+//		    char[] chs = str.toCharArray();
+//		    for(int i = 0; i < chs.length; i++) {
+//		    	size += (chs[i] > 0xff) ? 2 : 1;
+//		    }
+//		}
+		String a = "ddddddd";
+
+		byte[] buf = a.getBytes();
+
+		System.out.println(buf.length+"Byte="+buf.length/1024+"KB" );
+	}	
 
 }

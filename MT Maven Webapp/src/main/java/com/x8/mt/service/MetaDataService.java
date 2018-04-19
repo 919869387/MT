@@ -65,6 +65,21 @@ public class MetaDataService {
 	/**
 	 * 
 	 * 作者:GodDipose
+	 * 时间:2018年4月18日
+	 * 作用:根据采集任务Id查找元数据
+	 */
+	public List<Metadata> getMetadataByCollectJobById(int id) {
+		try{			
+			return iMetadataDao.getMetadataByCollectJobById(id);
+		}catch(Exception e){
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	/**
+	 * 
+	 * 作者:GodDipose
 	 * 时间:2018年3月14日
 	 * 作用:根据id更新元数据描述字段
 	 */
