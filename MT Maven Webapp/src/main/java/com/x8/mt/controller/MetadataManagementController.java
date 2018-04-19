@@ -46,6 +46,38 @@ public class MetadataManagementController {
 	/**
 	 * 
 	 * 作者:allen
+	 * 时间:2017年4月19日
+	 * 作用:查找元数据(元数据name和description中含有该关键字的，展示公共属性)
+	 *  
+	 * 参数： key
+	 */
+	@RequestMapping(value = "/searchMetadata", method = RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="metadata",operationDesc="查找元数据")
+	public JSONObject searchMetadata(HttpServletRequest request,
+			HttpServletResponse response,@RequestBody Map<String, Object> map){
+		JSONObject responsejson = new JSONObject();
+		
+		//检查传参是否正确
+		if(!map.containsKey("key")){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}
+		
+		String key = map.get("key").toString();
+		
+		List<Map<String,Object>> searchMetadataList = metadataManagementService.searchMetadata(key);
+		
+		responsejson.put("result", true);
+		responsejson.put("data", searchMetadataList);
+		responsejson.put("count",searchMetadataList.size());
+		return responsejson;
+	}
+	
+	/**
+	 * 
+	 * 作者:allen
 	 * 时间:2017年4月18日
 	 * 作用:根据表元数据id，获取字段元数据
 	 *  

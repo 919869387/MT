@@ -52,6 +52,37 @@ public class MetadataManagementService {
 	/**
 	 * 
 	 * 作者:allen
+	 * 时间:2018年4月19日
+	 * 作用:查找元数据
+	 */
+	public List<Map<String, Object>> searchMetadata(String key) {
+		List<Map<String, Object>> searchMetadataList = new ArrayList<Map<String, Object>>();
+		List<Metadata> metadataList = imetadataManagementDao.searchMetadata(key);
+		Map<String, Object> map = null;
+		for(Metadata metadata : metadataList){
+			map = new HashMap<String, Object>();
+			map.put("ID", metadata.getID());
+			map.put("NAME", metadata.getNAME());
+			if(null==metadata.getDESCRIPTION()){
+				map.put("DESCRIPTION", "");
+			}else{
+				map.put("DESCRIPTION", metadata.getDESCRIPTION());
+			}
+			map.put("CREATETIME", metadata.getCREATETIME());
+			map.put("UPDATETIME", metadata.getUPDATETIME());
+			map.put("VERSION", metadata.getVERSION());
+			map.put("COLLECTJOBID", metadata.getCOLLECTJOBID());
+			map.put("CHECKSTATUS", metadata.getCHECKSTATUS());
+			map.put("METAMODELID", metadata.getMETAMODELID());
+			
+			searchMetadataList.add(map);
+		}
+		return searchMetadataList;
+	}
+	
+	/**
+	 * 
+	 * 作者:allen
 	 * 时间:2017年4月18日
 	 * 作用:根据表元数据id，获取字段元数据
 	 */

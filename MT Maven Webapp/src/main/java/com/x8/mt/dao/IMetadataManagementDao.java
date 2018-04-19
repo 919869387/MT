@@ -12,6 +12,15 @@ import com.x8.mt.entity.Metadata;
  */
 @Repository
 public interface IMetadataManagementDao {
+	
+	/**
+	 * 
+	 * 作者:allen 
+	 * 时间:2018年4月19日 
+	 * 作用:查找元数据
+	 */
+	List<Metadata> searchMetadata(String key);
+	
     /**
 	 * 
 	 * 作者:allen 

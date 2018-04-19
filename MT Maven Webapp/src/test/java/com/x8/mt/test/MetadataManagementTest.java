@@ -30,6 +30,16 @@ public class MetadataManagementTest {
 	MetadataManagementController metadataManagementController;
 	
 	@Test
+	public void searchMetadata(){
+		HttpServletRequest request = null;
+		HttpServletResponse response = null;
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("key", "id");
+		
+		System.out.println(metadataManagementController.searchMetadata(request, response, map));
+	}
+	
+	@Test
 	public void getFieldMetadataList(){
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
