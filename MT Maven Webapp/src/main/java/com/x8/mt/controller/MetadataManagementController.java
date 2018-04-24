@@ -46,6 +46,143 @@ public class MetadataManagementController {
 	/**
 	 * 
 	 * 作者:allen
+	 * 时间:2018年4月24日
+	 * 作用:删除元数据依赖关系
+	 *  
+	 * 参数：relationid
+	 */
+	@RequestMapping(value = "/deleteMetadataDepend", method = RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="metadata",operationDesc="删除元数据依赖关系")
+	public JSONObject deleteMetadataDepend(HttpServletRequest request,
+			HttpServletResponse response,@RequestBody Map<String, Object> map){
+		JSONObject responsejson = new JSONObject();
+		
+		//检查传参是否正确
+		if(!map.containsKey("relationid")){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}
+		
+		String relationidStr = map.get("relationid").toString();
+		
+		boolean delateResult = metadataManagementService.deleteMetadataDepend(relationidStr);
+		
+		if(delateResult){
+			responsejson.put("result", true);
+			responsejson.put("count",1);
+		}else{
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+		}
+		return responsejson;
+	}
+	
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年4月24日
+	 * 作用:展示元数据依赖关系
+	 *  
+	 * 参数：metadataid
+	 */
+	@RequestMapping(value = "/showMetadataDepend", method = RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="metadata",operationDesc="展示元数据依赖关系")
+	public JSONObject showMetadataDepend(HttpServletRequest request,
+			HttpServletResponse response,@RequestBody Map<String, Object> map){
+		JSONObject responsejson = new JSONObject();
+		
+		//检查传参是否正确
+		if(!map.containsKey("metadataid")){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}
+		
+		String metadataidStr = map.get("metadataid").toString();
+		
+		List<Map<String,Object>> dependMetadataList = metadataManagementService.showMetadataDepend(metadataidStr);
+		
+		responsejson.put("result", true);
+		responsejson.put("data", dependMetadataList);
+		responsejson.put("count",dependMetadataList.size());
+		return responsejson;
+	}
+	
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年4月24日
+	 * 作用:添加元数据依赖
+	 *  
+	 * 参数：sourcemetadataid、targetmetadataid
+	 */
+	@RequestMapping(value = "/addMetadataDepend", method = RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="metadata",operationDesc="添加元数据依赖")
+	public JSONObject addMetadataDepend(HttpServletRequest request,
+			HttpServletResponse response,@RequestBody Map<String, Object> map){
+		JSONObject responsejson = new JSONObject();
+		
+		//检查传参是否正确
+		if(!map.containsKey("sourcemetadataid") || !map.containsKey("targetmetadataid")){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}
+		
+		String sourcemetadataidStr = map.get("sourcemetadataid").toString();
+		String targetmetadataidStr = map.get("targetmetadataid").toString();
+		
+		boolean addResult = metadataManagementService.addMetadataDepend(sourcemetadataidStr,targetmetadataidStr);
+		if(addResult){
+			responsejson.put("result", true);
+			responsejson.put("count",1);
+		}else{
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+		}
+		
+		return responsejson;
+	}
+	
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年4月24日
+	 * 作用:寻找可依赖的元数据
+	 *  
+	 * 参数：metadataid
+	 */
+	@RequestMapping(value = "/getDependMetadata", method = RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="metadata",operationDesc="寻找可依赖的元数据")
+	public JSONObject getDependMetadata(HttpServletRequest request,
+			HttpServletResponse response,@RequestBody Map<String, Object> map){
+		JSONObject responsejson = new JSONObject();
+		
+		//检查传参是否正确
+		if(!map.containsKey("metadataid")){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}
+		
+		String metadataidStr = map.get("metadataid").toString();
+		
+		List<Map<String,Object>> dependMetadataList = metadataManagementService.getDependMetadata(metadataidStr);
+		
+		responsejson.put("result", true);
+		responsejson.put("data", dependMetadataList);
+		responsejson.put("count",dependMetadataList.size());
+		return responsejson;
+	}
+	
+	/**
+	 * 
+	 * 作者:allen
 	 * 时间:2017年4月19日
 	 * 作用:查找元数据(元数据name和description中含有该关键字的，展示公共属性)
 	 *  

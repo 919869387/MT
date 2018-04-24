@@ -4,6 +4,9 @@
 
 	<settings>
 		<setting name="cacheEnabled" value="true" />
+		
+		<!-- 设置后，当字段值为null时也会显示字段 -->
+		<setting name="callSettersOnNulls" value="true"/> 
 	</settings>
 
 </configuration>
