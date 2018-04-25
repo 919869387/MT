@@ -83,6 +83,7 @@ public class DatamapitemsController {
 		for (Datamaplayer datamaplayer : maplayerlist) {
 			List<Datamapitems> mapitemsList = datamapitemsService
 					.getDatamapitemsListByMaplayerId(datamaplayer.getId());
+			System.out.println(mapitemsList.size()+"------------"+datamaplayer.getName());
 			if (mapitemsList.size() == 0) {
 				int count = 0;
 
@@ -159,7 +160,7 @@ public class DatamapitemsController {
 
 				Metadata metadata = metaDataService
 						.getMetadataById(datamapitems.getMetadataid());
-
+//				System.out.println("我被执行了222222222222222222222222222222222222222222222222222222222");
 				JSONObject node = new JSONObject();
 				node.put("id", datamapitems.getId());
 				node.put("x", datamapitems.getPosx());
