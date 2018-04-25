@@ -9,9 +9,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	useGeneratedKeys="true" keyProperty="id">
 		insert into 		
 		etljob(description,status,create_date,createuserid,recentlyrunuserid,recently_run_date
-		,log,metadata_id,type,mappingid)
+		,log,metadata_id,type,mappingid,jobtype)
 		value(#{description},#{status},#{create_date},#{createuserid},#{recentlyrunuserid}
-		,#{recently_run_date},#{log},#{metadata_id},#{type},#{mappingid})
+		,#{recently_run_date},#{log},#{metadata_id},#{type},#{mappingid},#{jobtype})
 	</insert>
 	
 	<update id="update" parameterType="com.x8.mt.entity.ETLJob" >
