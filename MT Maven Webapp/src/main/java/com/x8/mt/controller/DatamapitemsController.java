@@ -259,7 +259,6 @@ public class DatamapitemsController {
 		for (String string : sonTargetMetadataList) {
 			Metadata tableMetadata = metaDataService.getMetadataById(Integer.parseInt(string));
 			Datamapitems datamapitems = new Datamapitems();
-//			datamapitems.setId(count);
 			datamapitems.setMaplayerid(2);
 			datamapitems.setMetadataid(tableMetadata.getID());
 			datamapitems.setPosx(400);
@@ -289,7 +288,6 @@ public class DatamapitemsController {
 		for (String sourceTableid : sonMetadataList) {
 			Metadata tableMetadata = metaDataService.getMetadataById(Integer.parseInt(sourceTableid));
 			Datamapitems datamapitems = new Datamapitems();
-//			datamapitems.setId(count);
 			datamapitems.setMaplayerid(2);
 			datamapitems.setMetadataid(tableMetadata.getID());
 			datamapitems.setPosx(400);
@@ -337,7 +335,6 @@ public class DatamapitemsController {
 							link.put("sourceid", datamapitemsService.getDatamapitemsIDByMetadataId(tableMetadata.getID()).getId());
 							link.put("targetid", datamapitemsService.getDatamapitemsIDByMetadataId(Integer.parseInt(targetTableid)).getId());
 							links.add(link);
-							
 						}
 					}
 				}
