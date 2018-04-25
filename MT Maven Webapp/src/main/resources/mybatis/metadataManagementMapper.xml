@@ -100,7 +100,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 	<update id="updataMetadataCheckstatus" parameterType="com.x8.mt.entity.Metadata">
 		update
-		metadata set checkstatus = #{CHECKSTATUS} where id = #{ID}
+		metadata set checkstatus = #{CHECKSTATUS} where id in (
+			select id from (
+				select id from metadata where collectjobid = #{ID}
+			) as temp
+		)
 	</update>
 
 	<!-- allen -->

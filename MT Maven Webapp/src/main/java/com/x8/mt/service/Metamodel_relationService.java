@@ -16,7 +16,9 @@ public class Metamodel_relationService {
 
 	/**
 	 * 
-	 * 作者:itcoder 时间:2018年4月10日 作用:获得所有的依赖关系
+	 * 作者:itcoder 
+	 * 时间:2018年4月10日 
+	 * 作用:获得所有的依赖关系
 	 */
 	public List<Metamodel_relation> getDependencyRelationByMetamodelid(int metamodelid) {
 		return iMetamodel_relationDao.getDependencyRelationByMetamodelid(metamodelid);
