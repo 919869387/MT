@@ -104,7 +104,7 @@ public class KettleMetadataCollectController {
 			metadata.setCHECKSTATUS(checkstatusStr);
 			metadata.setID(id);
 			result = metaDataService.updateMetadataCheckstatus(metadata);
-
+			System.out.println(result);
 			if(result==true){
 				responsejson.put("result", result);
 				responsejson.put("count", 1);
