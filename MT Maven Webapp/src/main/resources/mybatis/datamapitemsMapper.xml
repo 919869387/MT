@@ -8,4 +8,27 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		select * from datamapitems where maplayerid=#{id}
 	</select>
 	
+	<insert id="insertDatamapitems" parameterType="com.x8.mt.entity.Datamapitems" useGeneratedKeys="true" keyProperty="id">
+		insert 
+		into datamapitems(maplayerid,metadataid,posx,posy,width,height,backgroundcolor,fontcolor) 
+		values(
+		#{maplayerid},
+		#{metadataid},
+		#{posx},
+		#{posy},
+		#{width},
+		#{height},
+		#{backgroundcolor},
+		#{fontcolor}
+		);
+	</insert>
+	
+	<select id="getDatamapitemsIDByMetadataId" parameterType="int" resultType="com.x8.mt.entity.Datamapitems">
+		select * from datamapitems where metadataid = #{id}
+	</select>
+	
+	<select id="getDatamapitemsMetadataidById" parameterType="int">
+		select metadataid from datamapitems where id = #{id}
+	</select>
+	
 </mapper>

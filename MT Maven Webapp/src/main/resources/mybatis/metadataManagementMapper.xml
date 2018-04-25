@@ -4,12 +4,56 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.x8.mt.dao.IMetadataManagementDao">
 
+	<delete id="deleteMetadataDepend" >
+		DELETE FROM metadata_relation WHERE id=#{relationid}
+	</delete>
+
+	<select id="showMetadataDepend" resultType="java.util.Map">
+		select t1.id as
+		relationid,t2.id as targetmetadataid,t2.name as
+		targetmetadataname,t2.description as description from metadata as t2
+		inner join
+		(select id,relatedmetadataid from metadata_relation where
+		metadataid=#{metadataId} and type='DEPENDENCY') t1
+		on t2.id =
+		t1.relatedmetadataid
+	</select>
+
+	<insert id="addMetadataDepend" useGeneratedKeys="true"
+		keyProperty="ID" parameterType="Map">
+		insert into
+		metadata_relation(metadataid,relatedmetadataid,type)
+		values(#{metadataid},#{relatedmetadataid},'DEPENDENCY')
+	</insert>
+
+	<select id="getDependMetadata" resultType="java.util.Map">
+		select t3.id as
+		metadataid,t3.name as metadataname,t3.description as description from
+		metadata as t3 where t3.metamodelid in (select t2.relatedmetamodelid
+		from
+		metamodel_relation as t2 where t2.metamodelid in (select
+		t1.metamodelid
+		from metadata as t1 where t1.id=#{metadataId}) and
+		t2.type='DEPENDENCY') and t3.id not in (select t4.relatedmetadataid
+		from metadata_relation as t4 where t4.metadataid=#{metadataId} and
+		t4.type='DEPENDENCY');
+	</select>
+
+	<select id="searchMetadata" resultType="com.x8.mt.entity.Metadata">
+		select * from metadata
+		where name like "%"#{key}"%" or description like "%"#{key}"%";
+	</select>
+
 	<select id="getMetadataList" parameterType="Map" resultType="java.util.Map">
 		select t2.id as
-		metadataid,t2.name as metadataname from
+		metadataid,t2.name as metadataname
+		<if test="medamodelId == 32">,t2.description as description </if>
+		from
 		metadata as t2 where t2.id in
-		(select t1.relatedmetadataid from metadata_relation as t1 where
-		t1.metadataid=#{metadataId} and t1.type='COMPOSITION') and
+		(select t1.relatedmetadataid from
+		metadata_relation as t1 where
+		t1.metadataid=#{metadataId} and
+		t1.type='COMPOSITION') and
 		t2.metamodelid=#{medamodelId};
 	</select>
 

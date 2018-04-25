@@ -12,6 +12,15 @@ import com.x8.mt.entity.Metadata;
  */
 @Repository
 public interface IMetadataManagementDao {
+	
+	/**
+	 * 
+	 * 作者:allen 
+	 * 时间:2018年4月19日 
+	 * 作用:查找元数据
+	 */
+	List<Metadata> searchMetadata(String key);
+	
     /**
 	 * 
 	 * 作者:allen 
@@ -101,4 +110,36 @@ public interface IMetadataManagementDao {
 	 * 作用:获取某一类元数据
 	 */
 	List<Map<String, Object>> getMetadataList(Map<String, Object> map);
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年4月24日
+	 * 作用:寻找可依赖的元数据
+	 */
+	List<Map<String, Object>> getDependMetadata(String metadataidStr);
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年4月24日
+	 * 作用:添加元数据依赖
+	 */
+	int addMetadataDepend(Map<String, Object> map);
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年4月24日
+	 * 作用:展示元数据依赖关系
+	 */
+	List<Map<String, Object>> showMetadataDepend(String metadataidStr);
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年4月24日
+	 * 作用:删除元数据依赖关系
+	 */
+	int deleteMetadataDepend(String relationidStr);
 }

@@ -22,6 +22,20 @@ public class DatamapitemsService {
 	public List<Datamapitems> getDatamapitemsListByMaplayerId(Integer id) {
 		return iDatamapitemsDao.getDatamapitemsListByMaplayerId(id);
 	}
+
+	public void insertDatamapitems(Datamapitems datamapitems) {
+		iDatamapitemsDao.insertDatamapitems(datamapitems);
+		
+	}
+
+	public Datamapitems getDatamapitemsIDByMetadataId(int id) {
+		return iDatamapitemsDao.getDatamapitemsIDByMetadataId(id);
+	}
+
+	public int getDatamapitemsMetadataidById(int sourceid) {
+		return iDatamapitemsDao.getDatamapitemsMetadataidById(sourceid);
+	}
+
 	
 	
 }

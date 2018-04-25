@@ -24,4 +24,12 @@ public interface IMetaDataRelationDao {
 	 * 作用:根据metadataId,找到COMPOSITION关系的儿子元数据id
 	 */
 	List<String> getSonMetadataID(String metadataId);
+
+	/**
+	 * 
+	 * 作者:itcoder
+	 * 时间:2018年4月23日
+	 * 作用:根据metadataId,找到DEPENCY关系的元数据id
+	 */
+	List<Integer> getDependencyRelatedMetadataidList(int sourceMetadataid);
 }

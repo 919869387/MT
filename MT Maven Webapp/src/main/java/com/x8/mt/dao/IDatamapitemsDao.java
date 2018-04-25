@@ -9,6 +9,12 @@ public interface IDatamapitemsDao {
 	List<Datamapitems> queryDatamap();
 
 	List<Datamapitems> getDatamapitemsListByMaplayerId(Integer id);
+
+	void insertDatamapitems(Datamapitems datamapitems);
+
+	Datamapitems getDatamapitemsIDByMetadataId(int id);
+
+	int getDatamapitemsMetadataidById(int sourceid);
 	
 	
 }

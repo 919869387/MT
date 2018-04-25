@@ -15,7 +15,7 @@ public interface IMetamodel_relationDao {
 	 * 时间:2018年4月10日 
 	 * 作用:得到依赖关系列表
 	 */
-	List<Metamodel_relation> getDependencyRelationList();
+	List<Metamodel_relation> getDependencyRelationByMetamodelid(int metamodelid);
 	
 	/**
 	 * 
