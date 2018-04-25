@@ -48,7 +48,7 @@ public class MetadataManagementService {
 	IMetadataTankDao iMetadataTankDao;
 	@Resource
 	IMetaDataDao iMetaDataDao;
-	
+
 	/**
 	 * 
 	 * 作者:allen
@@ -63,23 +63,19 @@ public class MetadataManagementService {
 			map = new HashMap<String, Object>();
 			map.put("ID", metadata.getID());
 			map.put("NAME", metadata.getNAME());
-			if(null==metadata.getDESCRIPTION()){
-				map.put("DESCRIPTION", "");
-			}else{
-				map.put("DESCRIPTION", metadata.getDESCRIPTION());
-			}
+			map.put("DESCRIPTION", metadata.getDESCRIPTION());
 			map.put("CREATETIME", metadata.getCREATETIME());
 			map.put("UPDATETIME", metadata.getUPDATETIME());
 			map.put("VERSION", metadata.getVERSION());
 			map.put("COLLECTJOBID", metadata.getCOLLECTJOBID());
 			map.put("CHECKSTATUS", metadata.getCHECKSTATUS());
 			map.put("METAMODELID", metadata.getMETAMODELID());
-			
+
 			searchMetadataList.add(map);
 		}
 		return searchMetadataList;
 	}
-	
+
 	/**
 	 * 
 	 * 作者:allen
@@ -90,10 +86,10 @@ public class MetadataManagementService {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("metadataId", metadataId);
 		map.put("medamodelId", GlobalMethodAndParams.FieldMetamodelId);
-		
+
 		return imetadataManagementDao.getMetadataList(map);
 	}
-	
+
 	/**
 	 * 
 	 * 作者:allen
@@ -104,7 +100,7 @@ public class MetadataManagementService {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("metadataId", metadataId);
 		map.put("medamodelId", GlobalMethodAndParams.TableMedamodelId_InDatabase);
-		
+
 		return imetadataManagementDao.getMetadataList(map);
 	}
 
@@ -117,7 +113,7 @@ public class MetadataManagementService {
 	public List<Map<String,Object>>getDatabaseMetadataList(){
 		return imetadataManagementDao.getDatabaseMetadataList(GlobalMethodAndParams.DatabaseMetamodelId);
 	}
-	
+
 	/**
 	 * 
 	 * 作者:allen
@@ -160,7 +156,7 @@ public class MetadataManagementService {
 
 		return true;
 	}
-	
+
 	/**
 	 * 
 	 * 作者:allen
@@ -177,11 +173,11 @@ public class MetadataManagementService {
 
 		List<String> attributesField = imetadataManagementDao.getAttributesField(metaModelId);
 		JSONObject attributes = TransformMetadata.createAttributes(map, attributesField);
-		
+
 		Metadata metadata = new Metadata();
 		metadata.setID(Integer.parseInt(map.get("ID").toString()));
 		metadata.setATTRIBUTES(attributes.toString());
-		
+
 		if(!(imetadataManagementDao.updateMetadatAttributes(metadata)>0)){
 			throw new RuntimeException("updateMetadatAttributes Error");
 		}
@@ -211,7 +207,7 @@ public class MetadataManagementService {
 
 		//1.将元数据在metadata表修改
 		Metadata metadata = iMetaDataDao.getMetadataById(Integer.parseInt(map.get("ID").toString()));
-		
+
 		metadata.setNAME(map.get("NAME").toString());
 		metadata.setDESCRIPTION(map.get("DESCRIPTION").toString());
 
@@ -223,7 +219,7 @@ public class MetadataManagementService {
 		if(!(imetadataManagementDao.updateMetadata(metadata)>0)){
 			throw new RuntimeException("updateMetadata Error");
 		}
-		
+
 		//2.加入metadata_tank表
 		MetadataTank metadataTank = new MetadataTank();
 		metadataTank.setCHECKSTATUS(metadata.getCHECKSTATUS());
@@ -289,7 +285,7 @@ public class MetadataManagementService {
 
 		//2.加入metadata_relation表
 		int metadataId = metadata.getID();
-		
+
 		if(!parentMetadataIdStr.equals("0")){
 			//parentMetadataId!=0,说明添加不是第一层元数据
 			MetaDataRelation metaDataRelation = new MetaDataRelation();
@@ -542,6 +538,54 @@ public class MetadataManagementService {
 		return metadataMap;
 	}
 
-	
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年4月24日
+	 * 作用:寻找可依赖的元数据
+	 */
+	public List<Map<String, Object>> getDependMetadata(String metadataidStr) {
+		return imetadataManagementDao.getDependMetadata(metadataidStr);
+	}
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年4月24日
+	 * 作用:添加元数据依赖
+	 */
+	public boolean addMetadataDepend(String metadataid,String relatedmetadataid) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("metadataid", metadataid);
+		map.put("relatedmetadataid", relatedmetadataid);
+
+		if(imetadataManagementDao.addMetadataDepend(map)>0){
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年4月24日
+	 * 作用:展示元数据依赖关系
+	 */
+	public List<Map<String, Object>> showMetadataDepend(String metadataidStr) {
+		return imetadataManagementDao.showMetadataDepend(metadataidStr);
+	}
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年4月24日
+	 * 作用:删除元数据依赖关系
+	 */
+	public boolean deleteMetadataDepend(String relationidStr) {
+		if(imetadataManagementDao.deleteMetadataDepend(relationidStr)>0){
+			return true;
+		}
+		return false;
+	}
 
 }

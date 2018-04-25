@@ -29,6 +29,48 @@ public class MetadataManagementTest {
 	@Autowired
 	MetadataManagementController metadataManagementController;
 	
+	
+	@Test
+	public void deleteMetadataDepend(){
+		HttpServletRequest request = null;
+		HttpServletResponse response = null;
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("relationid", 82417);
+		
+		System.out.println(metadataManagementController.deleteMetadataDepend(request, response, map));
+	}
+	
+	@Test
+	public void showMetadataDepend(){
+		HttpServletRequest request = null;
+		HttpServletResponse response = null;
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("metadataid", 2070);
+		
+		System.out.println(metadataManagementController.showMetadataDepend(request, response, map));
+	}
+	
+	@Test
+	public void addMetadataDepend(){
+		HttpServletRequest request = null;
+		HttpServletResponse response = null;
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("sourcemetadataid", 2070);
+		map.put("targetmetadataid", 22742);
+		
+		System.out.println(metadataManagementController.addMetadataDepend(request, response, map));
+	}
+	
+	@Test
+	public void getDependMetadata(){
+		HttpServletRequest request = null;
+		HttpServletResponse response = null;
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("metadataid", 2070);
+		
+		System.out.println(metadataManagementController.getDependMetadata(request, response, map));
+	}
+	
 	@Test
 	public void searchMetadata(){
 		HttpServletRequest request = null;
@@ -44,7 +86,7 @@ public class MetadataManagementTest {
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("metadataid", 31755);
+		map.put("metadataid", 39125);
 		
 		System.out.println(metadataManagementController.getFieldMetadataList(request, response, map));
 	}
@@ -54,7 +96,7 @@ public class MetadataManagementTest {
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("metadataid", 31754);
+		map.put("metadataid", 39124);
 		
 		System.out.println(metadataManagementController.getTableMetadataList(request, response, map));
 	}
