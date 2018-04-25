@@ -473,18 +473,18 @@ public class ETLJobService {
 			int x=50,y =50;
 			
 			JobEntrySpecial jobEntrySpecial = new JobEntrySpecial( "START", true, false );
-			jobEntrySpecial.setRepeat(true);
-			jobEntrySpecial.setSchedulerType(1);	//0 no,1 interval,2 day,3 week,4 month
+			jobEntrySpecial.setRepeat((boolean)map.get("isRepeat"));
+			jobEntrySpecial.setSchedulerType((int)map.get("SchedulerType"));	//0 no,1 interval,2 day,3 week,4 month
 			//以下两个方法只会在设置为INTERVAL的时候用
-			jobEntrySpecial.setIntervalSeconds(20);
-			jobEntrySpecial.setIntervalMinutes(0);
+			jobEntrySpecial.setIntervalSeconds((int)map.get("intervalSeconds"));
+			jobEntrySpecial.setIntervalMinutes((int)map.get("intervalMinutes"));
 			
 			//选用2或者以上会用到一下方法
-			jobEntrySpecial.setHour(0);
-			jobEntrySpecial.setMinutes(0);
+			jobEntrySpecial.setHour((int)map.get("hour"));
+			jobEntrySpecial.setMinutes((int)map.get("minutes"));
 			
-			jobEntrySpecial.setDayOfMonth(0);
-			jobEntrySpecial.setWeekDay(0);
+			jobEntrySpecial.setWeekDay((int)map.get("day"));
+			jobEntrySpecial.setDayOfMonth((int)map.get("week"));
 			
 		    JobEntryCopy jobEntry = new JobEntryCopy();
 		    jobEntry.setObjectId( null );

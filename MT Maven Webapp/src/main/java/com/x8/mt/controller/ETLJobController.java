@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
+import org.apache.commons.collections.map.HashedMap;
 import org.pentaho.di.core.exception.KettleException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -113,17 +114,44 @@ public class ETLJobController {
 		JSONObject responsejson = new JSONObject();
 		GlobalMethodAndParams.setHttpServletResponse(request, response);
 		//检查传参是否正确
-		if(!(map.containsKey("id") && map.containsKey("isRepeat") && map.containsKey("SchedulerType"))){
+		if(!(map.containsKey("id") 
+				&& map.containsKey("isRepeat") 
+				&& map.containsKey("SchedulerType"))){
 			responsejson.put("description", "参数不正确");
 			responsejson.put("result", false);
 			return responsejson;
 		}
 		
-		int type = 0;
 		boolean isRepeat = false;
-		//int 
+		int SchedulerType = 0;
+		int intervalSeconds = 0;
+		int intervalMinutes = 0;
+		int hour = 0;
+		int minutes = 0;
+		int day = 0;
+		int week = 0;
+		
 		try{
-			type = Integer.parseInt(map.get("SchedulerType").toString());
+			ETLJob etlJob = etlJobService.getETLJobById(Integer.parseInt(map.get("id").toString()));
+			SchedulerType = Integer.parseInt(map.get("SchedulerType").toString());
+			isRepeat = Integer.parseInt(map.get("isRepeat").toString()) == 1 ? true :false;
+			intervalSeconds = Integer.parseInt(map.get("intervalSeconds").toString());
+			intervalMinutes = Integer.parseInt(map.get("intervalMinutes").toString());
+			hour = Integer.parseInt(map.get("hour").toString());
+			minutes = Integer.parseInt(map.get("minutes").toString());
+			day = Integer.parseInt(map.get("day").toString());
+			week = Integer.parseInt(map.get("week").toString());
+			
+			Map dataMap = new HashedMap();
+			map.put("SchedulerType", SchedulerType);
+			map.put("isRepeat", isRepeat);
+			map.put("intervalSeconds", intervalSeconds);
+			map.put("intervalMinutes", intervalMinutes);
+			map.put("hour", hour);
+			map.put("minutes", minutes);
+			map.put("day", day);
+			map.put("week", week);
+			etlJobService.saveSchedule(metaDataService.getMetadataById(etlJob.getMappingid()).getNAME(), dataMap);
 			
 		}catch(Exception e){
 			responsejson.put("description", "运行出错");
