@@ -588,4 +588,62 @@ public class MetadataManagementService {
 		return false;
 	}
 
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年4月25日
+	 * 作用:得到历史版本元数据的公共属性
+	 */
+	public List<Map<String, Object>> getHistoryMetadataCommonInfo(String metadataidStr) {
+		List<Map<String, Object>> historyMetadataMapList = new ArrayList<Map<String, Object>>();
+		List<MetadataTank> historyMetadataList = imetadataManagementDao.getHistoryMetadataCommonInfo(metadataidStr);
+		Map<String, Object> map = null;
+		for(MetadataTank metadataTank : historyMetadataList){
+			map = new HashMap<String, Object>();
+			map.put("tankid", metadataTank.getID());
+			map.put("ID", metadataTank.getKeyid());
+			map.put("NAME", metadataTank.getNAME());
+			map.put("DESCRIPTION", metadataTank.getDESCRIPTION());
+			map.put("CREATETIME", metadataTank.getCREATETIME());
+			map.put("UPDATETIME", metadataTank.getUPDATETIME());
+			map.put("VERSION", metadataTank.getVERSION());
+			map.put("COLLECTJOBID", metadataTank.getCOLLECTJOBID());
+			map.put("CHECKSTATUS", metadataTank.getCHECKSTATUS());
+			map.put("METAMODELID", metadataTank.getMETAMODELID());
+
+			historyMetadataMapList.add(map);
+		}
+		return historyMetadataMapList;
+	}
+	
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年4月25日
+	 * 作用:得到历史版本元数据的私有属性
+	 */
+	public JSONObject getHistoryMetadataPrivateInfo(String tankidStr) {
+		String privateInfo = imetadataManagementDao.getHistoryMetadataPrivateInfo(tankidStr);
+		return JSONObject.fromObject(privateInfo);
+	}
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年4月25日
+	 * 作用:得到元模型私有属性
+	 */
+	public Map<String,Object> getMetamodelPrivateInfo(String metamodelidStr) {
+		List<Metamodel_datatype> metamodel_datatypes = imetadataManagementDao.getMetamodelPrivateInfo(metamodelidStr);
+		
+		Map<String,Object> metamodelInfo = new HashMap();
+		Metamodel_datatype metamodel_datatype = null;
+		for(int i=0;i<metamodel_datatypes.size();i++){
+			metamodel_datatype = metamodel_datatypes.get(i);
+			metamodelInfo.put(metamodel_datatype.getName(), metamodel_datatype.getDesribe());
+		}
+		
+		return metamodelInfo;
+	}
+
 }
