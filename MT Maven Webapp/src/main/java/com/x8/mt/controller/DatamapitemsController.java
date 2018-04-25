@@ -110,7 +110,7 @@ public class DatamapitemsController {
 						node.put("flag", "db");
 						data.add(node);
 						Datamapitems datamapitems = new Datamapitems();
-						datamapitems.setId(count);
+//						datamapitems.setId(count);
 						datamapitems.setMaplayerid(1);
 						datamapitems.setMetadataid(metadata.getID());
 						datamapitems.setPosx(800);
@@ -151,7 +151,7 @@ public class DatamapitemsController {
 					node.put("flag", "sys");
 					data.add(node);
 					Datamapitems datamapitems = new Datamapitems();
-					datamapitems.setId(count);
+//					datamapitems.setId(count);
 					datamapitems.setMaplayerid(1);
 					datamapitems.setMetadataid(metadata.getID());
 					datamapitems.setPosx(400);
@@ -243,17 +243,108 @@ public class DatamapitemsController {
 
 		JSONArray data = new JSONArray();
 		JSONArray links = new JSONArray();
+		int count = 0;
 		
 		String sourceidStr = map.get("sourceid").toString();
 		int sourceid = Integer.parseInt(sourceidStr);
-		String targetidStr = map.get("sourceid").toString();
+		String targetidStr = map.get("targetid").toString();
 		int targetid = Integer.parseInt(targetidStr);
 		
 		int sourceMetadataid = datamapitemsService.getDatamapitemsMetadataidById(sourceid);
+		int targetMetadataid = datamapitemsService.getDatamapitemsMetadataidById(targetid);
+		//获取数据库下的表id列表
+		List<String> sonMetadataList = metaDataRelationService.getMetadata_relationByMetadataid(sourceMetadataid);
+		List<String> sonTargetMetadataList = metaDataRelationService.getMetadata_relationByMetadataid(targetMetadataid);
+		int num = 0;
+		for (String string : sonTargetMetadataList) {
+			Metadata tableMetadata = metaDataService.getMetadataById(Integer.parseInt(string));
+			Datamapitems datamapitems = new Datamapitems();
+//			datamapitems.setId(count);
+			datamapitems.setMaplayerid(2);
+			datamapitems.setMetadataid(tableMetadata.getID());
+			datamapitems.setPosx(400);
+			datamapitems.setPosy(110 * num++);
+			datamapitems.setWidth(100);
+			datamapitems.setHeight(100);
+			datamapitems.setBackgroundcolor("rgba(48, 208, 198, 0.5)");
+			datamapitems.setFontcolor("#fff");
+			datamapitemsService.insertDatamapitems(datamapitems);
+			
+			JSONObject node = new JSONObject();
+			node.put("id", datamapitemsService.getDatamapitemsIDByMetadataId(tableMetadata.getID()).getId());
+			node.put("x", 400);
+			node.put("y", 110 * num);
+			node.put("status", tableMetadata.getCHECKSTATUS());
+			node.put("name", tableMetadata.getNAME());
+			node.put("bgcolor", "rgba(48, 208, 198, 0.5)");
+			node.put("fontcolor", "#fff");
+			node.put("width", 100);
+			node.put("height", 100);
+			node.put("flag", "db");
+			data.add(node);
+		}
 		
+		//遍历元数据表查询该表是否映射了其他数据库中的表，如果有则获取其表id，数据库id。
 		
+		for (String sourceTableid : sonMetadataList) {
+			Metadata tableMetadata = metaDataService.getMetadataById(Integer.parseInt(sourceTableid));
+			Datamapitems datamapitems = new Datamapitems();
+//			datamapitems.setId(count);
+			datamapitems.setMaplayerid(2);
+			datamapitems.setMetadataid(tableMetadata.getID());
+			datamapitems.setPosx(400);
+			datamapitems.setPosy(110 * num);
+			datamapitems.setWidth(100);
+			datamapitems.setHeight(100);
+			datamapitems.setBackgroundcolor("rgba(48, 208, 198, 0.5)");
+			datamapitems.setFontcolor("#fff");
+			datamapitemsService.insertDatamapitems(datamapitems);
+			
+			JSONObject node = new JSONObject();
+			node.put("id", datamapitemsService.getDatamapitemsIDByMetadataId(tableMetadata.getID()).getId());
+			node.put("x", 400);
+			node.put("y", 110 * num);
+			node.put("status", tableMetadata.getCHECKSTATUS());
+			node.put("name", tableMetadata.getNAME());
+			node.put("bgcolor", "rgba(48, 208, 198, 0.5)");
+			node.put("fontcolor", "#fff");
+			node.put("width", 100);
+			node.put("height", 100);
+			node.put("flag", "db");
+			data.add(node);
+			
+			List<Metadata> mappingList = metaDataService.getMetadataByMetaModelId(Integer.parseInt(GlobalMethodAndParams.MetaDataMappingModelId));
+			for (Metadata metadata : mappingList) {
+				String attributes = metadata.getATTRIBUTES();
+				String[] key_values = attributes.split(",");
+				String sourcetableid = null;
+				String targettableid = null;
+				for (String string : key_values) {
+					//剥离出来sourcetableid对应的值，与sourceTableid比较看是否相等
+					if(string.contains("sourcetablid")){
+						sourcetableid = string.substring(17, string.length()-1);
+					}
+					if(string.contains("targettableid")){
+						targettableid = string.substring(17,string.length()-2);
+					}
+				}
+				
+				if(sourceTableid.equals(sourcetableid)){
+					for(String targetTableid : sonTargetMetadataList){
+						if(targettableid.equals(targetTableid)){
+							//是指定两个数据库的表映射对应关系，放入JSONObject中返回
+							JSONObject link = new JSONObject();
+							link.put("sourceid", datamapitemsService.getDatamapitemsIDByMetadataId(tableMetadata.getID()).getId());
+							link.put("targetid", datamapitemsService.getDatamapitemsIDByMetadataId(Integer.parseInt(targetTableid)).getId());
+							links.add(link);
+							
+						}
+					}
+				}
+			}
+		}
+		responsejson.put("nodes", data);
+		responsejson.put("links", links);
 		return responsejson;
-		
 	}
-
 }

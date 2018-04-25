@@ -46,6 +46,11 @@ public class GlobalMethodAndParams {
 	public static final String PublicMetamodelId= "2";
 	
 	/**
+	 * 元数据映射对应元模型，metamodelid
+	 */
+	public static final String MetaDataMappingModelId= "100";
+	
+	/**
 	 * 系统元模型id
 	 */
 	public static final Integer SystemMedamodelId_InDatabase= 3;
