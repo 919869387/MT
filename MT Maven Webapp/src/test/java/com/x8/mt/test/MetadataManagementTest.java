@@ -29,6 +29,26 @@ public class MetadataManagementTest {
 	@Autowired
 	MetadataManagementController metadataManagementController;
 	
+	@Test
+	public void getHistoryMetadataPrivateInfo(){
+		HttpServletRequest request = null;
+		HttpServletResponse response = null;
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("tankid", 80932);
+		map.put("metamodelid", 10);
+		
+		System.out.println(metadataManagementController.getHistoryMetadataPrivateInfo(request, response, map));
+	}
+	
+	@Test
+	public void getHistoryMetadataCommonInfo(){
+		HttpServletRequest request = null;
+		HttpServletResponse response = null;
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("metadataid", 82836);
+		
+		System.out.println(metadataManagementController.getHistoryMetadataCommonInfo(request, response, map));
+	}
 	
 	@Test
 	public void deleteMetadataDepend(){

@@ -5,6 +5,8 @@ import java.util.Map;
 import org.springframework.stereotype.Repository;
 
 import com.x8.mt.entity.Metadata;
+import com.x8.mt.entity.MetadataTank;
+import com.x8.mt.entity.Metamodel_datatype;
 /**
  * 作者： Administrator
  * 时间：2018年3月15日
@@ -142,4 +144,28 @@ public interface IMetadataManagementDao {
 	 * 作用:删除元数据依赖关系
 	 */
 	int deleteMetadataDepend(String relationidStr);
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年4月25日
+	 * 作用:得到历史版本元数据的公共属性
+	 */
+	List<MetadataTank> getHistoryMetadataCommonInfo(String metadataidStr);
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年4月25日
+	 * 作用:得到历史版本元数据的私有属性
+	 */
+	String getHistoryMetadataPrivateInfo(String tankidStr);
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年4月25日
+	 * 作用:得到元模型私有属性
+	 */
+	List<Metamodel_datatype> getMetamodelPrivateInfo(String metamodelidStr);
 }

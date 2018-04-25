@@ -1,6 +1,7 @@
 package com.x8.mt.controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,89 @@ public class MetadataManagementController {
 	Metamodel_hierarchyService metamodel_hierarchyService;
 	@Resource
 	MetadataViewNodeService metadataViewNodeService;
+	
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年4月25日
+	 * 作用:得到历史版本元数据的私有属性
+	 *  
+	 * 参数：tankid、metamodelid
+	 */
+	@RequestMapping(value = "/getHistoryMetadataPrivateInfo", method = RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="metadata",operationDesc="得到历史版本元数据的私有属性")
+	public JSONObject getHistoryMetadataPrivateInfo(HttpServletRequest request,
+			HttpServletResponse response,@RequestBody Map<String, Object> map){
+		JSONObject responsejson = new JSONObject();
+		
+		//检查传参是否正确
+		if(!map.containsKey("tankid") || !map.containsKey("metamodelid")){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}
+		
+		String tankidStr = map.get("tankid").toString();
+		String metamodelidStr = map.get("metamodelid").toString();
+		
+		List<Map<String,Object>> historyMetadataPrivateInfoList = new ArrayList();
+		
+		JSONObject historyMetadataPrivateInfo = metadataManagementService.getHistoryMetadataPrivateInfo(tankidStr);
+		Map<String,Object> metamodelInfo = metadataManagementService.getMetamodelPrivateInfo(metamodelidStr);
+		
+		Iterator it = historyMetadataPrivateInfo.entrySet().iterator(); 
+		Map<String,Object> privateInfo = null;
+		while (it.hasNext()) {
+			Entry entry = (Map.Entry) it.next();  
+			String key = (String) entry.getKey();  
+			String cnKey = metamodelInfo.get(key).toString();
+			Object value = entry.getValue(); 
+
+			privateInfo = new HashMap();
+			privateInfo.put("key", cnKey);
+			privateInfo.put("value", value);
+			
+			historyMetadataPrivateInfoList.add(privateInfo);
+		} 
+		
+		responsejson.put("result", true);
+		responsejson.put("PrivateInfo",historyMetadataPrivateInfoList);
+		responsejson.put("count",1);
+		return responsejson;
+	}
+	
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年4月25日
+	 * 作用:得到历史版本元数据的公共属性
+	 *  
+	 * 参数：metadataid
+	 */
+	@RequestMapping(value = "/getHistoryMetadataCommonInfo", method = RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="metadata",operationDesc="得到历史版本元数据的公共属性")
+	public JSONObject getHistoryMetadataCommonInfo(HttpServletRequest request,
+			HttpServletResponse response,@RequestBody Map<String, Object> map){
+		JSONObject responsejson = new JSONObject();
+		
+		//检查传参是否正确
+		if(!map.containsKey("metadataid")){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}
+		
+		String metadataidStr = map.get("metadataid").toString();
+		
+		List<Map<String,Object>> historyMetadataCommonInfoList = metadataManagementService.getHistoryMetadataCommonInfo(metadataidStr);
+		
+		responsejson.put("result", true);
+		responsejson.put("CommonInfo",historyMetadataCommonInfoList);
+		responsejson.put("count",historyMetadataCommonInfoList.size());
+		return responsejson;
+	}
 	
 	/**
 	 * 
@@ -342,7 +426,7 @@ public class MetadataManagementController {
 	/**
 	 * 
 	 * 作者:allen
-	 * 时间:2017年3月24日
+	 * 时间:2018年3月24日
 	 * 作用:修改元数据信息
 	 *  	1.将元数据在metadata表修改
 	 *  	2.修改后的记录加入metadata_tank表
