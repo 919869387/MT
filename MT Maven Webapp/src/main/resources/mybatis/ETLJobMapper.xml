@@ -23,24 +23,34 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</update>
 	
 	<select id="getRowCount" resultType="int">
-		select count(*) from
-		etljob;
+		select count(*) from etljob
+		where jobtype = {type}
 	</select>
 	
 	<select id="selectByParams" resultType="com.x8.mt.entity.ETLJob"
 		parameterType="map">
 		select * from etljob
+		where jobtype = #{jobtype}
 		order by create_date desc
 		limit ${offset},${size}
 	</select>
 	
+	<select id="getETLJobtoSchedule" resultType="com.x8.mt.entity.ETLJob"
+		parameterType="map">
+		select * from etljob
+		where jobtype = #{jobtype}
+		order by recently_run_date desc
+	</select>
+	
 	<delete id="deleteETLJob" parameterType="int">
-	delete from etljob
-	where id = #{id}
+		delete from etljob
+		where id = #{id}
+		and jobtype = {type}
 	</delete>
 	
 	<delete id="deleteETLJobs" parameterType="List">
-        delete from etljob where id in
+        delete from etljob where jobtype = {type}
+        and id in
         <foreach item="ETLJobItem" collection="array" index="index" open="(" separator="," close=")">
             #{ETLJobItem}
         </foreach>

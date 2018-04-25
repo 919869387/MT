@@ -113,7 +113,7 @@ public class CollectJobService {
 	 */
 	public boolean isExistName(String name){
 		try{
-			return  iCollectJobDao.isExistName(name) != null? true:false;
+			return  (iCollectJobDao.isExistName(name) == null)? true:false;
 		}catch(Exception e){
 			e.printStackTrace();
 			return false;

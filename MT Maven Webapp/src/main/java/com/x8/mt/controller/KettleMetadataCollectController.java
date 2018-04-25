@@ -354,7 +354,9 @@ public class KettleMetadataCollectController {
 		
 		//删除以前采集的元数据
 		CollectJob oldCollectJob = collectJobService.getRecentCollectJobByConnectinfoId(id);
-		metaDataService.deleteMetadataById(id);		
+		if(oldCollectJob != null){
+			metaDataService.deleteMetadataByCollectJobId(oldCollectJob.getId());		
+		}
 		
 		CollectJob newCollectJob = new CollectJob(name,connectinfoid,mode,checkResult,createDate,creater);			
 		collectJobService.insertCollectJob(newCollectJob);				
@@ -413,6 +415,7 @@ public class KettleMetadataCollectController {
 					node.put("operationdescribe", table.getOperationDescription());
 					data.add(node);
 				}	
+				responsejson.put("collectionId",newCollectJob.getId());	
 			}
 			
 			responsejson.put("result", true);
@@ -532,7 +535,7 @@ public class KettleMetadataCollectController {
 			responsejson.put("description", "采集名称不能为空");
 			responsejson.put("count",0);
 			return responsejson;
-		}else if(collectJobService.isExistName(name)){
+		}else if(!collectJobService.isExistName(name)){
 			responsejson.put("result", false);
 			responsejson.put("description", "采集名称已经存在");
 			responsejson.put("count",0);
@@ -540,8 +543,10 @@ public class KettleMetadataCollectController {
 		}
 		
 		try {
-			Datasource_connectinfo datasource_connectinfo = datasource_connectinfoService.getDatasource_connectinfoListByparentid(id);			
-			List<Table> tables = kettleMetadataCollectService.getTables(datasource_connectinfo);
+			Connectinfo connectinfo = connectinfoService.getConnectinfoByid(id);
+			Datasource_connectinfo datasource_connectinfo = datasource_connectinfoService.getDatasource_connectinfoListByparentid(id);	
+			//CollectJob collectJob = collectJobService.getRecentCollectJobByConnectinfoId(id);
+			List<Table> tables = kettleMetadataCollectService.getTables(datasource_connectinfo,connectinfo.getMountMetaDataId(),0);
 			JSONArray data = new JSONArray();
 			for(Table table : tables){
 				JSONObject node = new JSONObject();

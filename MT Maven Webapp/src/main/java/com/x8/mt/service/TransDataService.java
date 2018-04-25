@@ -13,13 +13,17 @@ import org.pentaho.di.core.ObjectLocationSpecificationMethod;
 import org.pentaho.di.core.SQLStatement;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.core.exception.KettleFileException;
 import org.pentaho.di.core.exception.KettleStepException;
+import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.vfs.KettleVFS;
 import org.pentaho.di.core.xml.XMLHandler;
+import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobHopMeta;
 import org.pentaho.di.job.JobMeta;
+import org.pentaho.di.job.entries.special.JobEntrySpecial;
 import org.pentaho.di.job.entries.sql.JobEntrySQL;
 import org.pentaho.di.job.entries.trans.JobEntryTrans;
 import org.pentaho.di.job.entry.JobEntryCopy;
@@ -36,6 +40,7 @@ import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.springframework.stereotype.Service;
 
 import com.x8.mt.common.GlobalMethodAndParams;
+import com.x8.mt.entity.Datasource_connectinfo;
 import com.x8.mt.entity.ETLJob;
 import com.x8.mt.entity.ETLJobParam;
 
@@ -101,7 +106,6 @@ public class TransDataService {
 		
 		//String[] fieldDatabase = {"iid","iname"};
 		String[] fieldDatabase = job.getFieldDatabase().split(",");
-
 		tableOutputMeta.setFieldDatabase(fieldDatabase);
 
 
@@ -137,58 +141,80 @@ public class TransDataService {
 //			}
 //		};
 		
-		File file = new File(GlobalMethodAndParams.TRANS_NAME);
+		File file = new File(tableName + ".ktr");
 		 if (file.exists() && file.isFile()) {
 	         if (file.delete()) {}
 		 }
 		
 		String xml = XMLHandler.getXMLHeader() + transMeta.getXML();
-		DataOutputStream dos = new DataOutputStream(KettleVFS.getOutputStream(GlobalMethodAndParams.TRANS_NAME,true));
+		DataOutputStream dos = new DataOutputStream(KettleVFS.getOutputStream(tableName+ ".ktr",true));
 		dos.write(xml.getBytes(Const.XML_ENCODING));
 		dos.close();
 		
 		KettleEnvironment.shutdown();
 	}
 	
-	
-	/**
-	 * 
+	/*
 	 * 作者:GodDispose
-	 * 时间:2017年12月12日
+	 * 时间:2018年4月19日
 	 * 作用:动态生成作业，并返回
-	 * @throws KettleException 
-	 * @throws IOException 
-	 * @throws UnsupportedEncodingException 
 	 */
-	public Job generateJobMeta(ETLJobParam job) throws KettleException, UnsupportedEncodingException, IOException{
-		KettleEnvironment.init();
-		generateTransMeta(job);
-		JobMeta jobMeta = new JobMeta();
-		jobMeta.setName("jobMeta");
-		int x=50,y =50;
+	public boolean saveJob(ETLJobParam job) throws Exception{
+		try{			
+			KettleEnvironment.init();
+			generateTransMeta(job);
+			JobMeta jobMeta = new JobMeta();
+			jobMeta.setName("jobMeta");
+			int x=50,y =50;
+			
+			JobEntrySpecial jobEntrySpecial = new JobEntrySpecial( "START", true, false );			
+			
+		    JobEntryCopy jobEntry = new JobEntryCopy();
+		    jobEntry.setObjectId( null );
+		    jobEntry.setEntry( jobEntrySpecial );
+		    jobEntry.setLocation( 50, 50 );
+		    jobEntry.setDrawn( false );
+		    jobEntry.setDescription( BaseMessages.getString( JobMeta.class, "JobMeta.StartJobEntry.Description" ) );
+		    
+			JobEntryCopy startCopy = jobEntry;
+			startCopy.setLocation(x, y);
+			startCopy.setDrawn();
+			jobMeta.addJobEntry(startCopy);
+			JobEntryCopy lastCopy = startCopy;
+			
+			JobEntryTrans jobEntryTrans = new JobEntryTrans();
+			jobEntryTrans.setSpecificationMethod(ObjectLocationSpecificationMethod.FILENAME);
+			jobEntryTrans.setFileName(job.getTarget_table()+ ".ktr");
+			
+			JobEntryCopy transCopy = new JobEntryCopy(jobEntryTrans);
+			transCopy.setName("Execute" + job.getTarget_table()+ ".ktr");
+			x+=100;
+			transCopy.setLocation(x, y);
+			transCopy.setDrawn();
+			jobMeta.addJobEntry(transCopy);
+			JobHopMeta transHop = new JobHopMeta(lastCopy,transCopy);
+			jobMeta.addJobHop(transHop);
+			lastCopy = transCopy;
+			jobMeta.setObjectId(new LongObjectId(new Long(1)));
+			
+			String jobName = job.getTarget_table()+ ".kjb";
+			File file = new File(jobName);
+			if (file.exists() && file.isFile()) {
+				if (file.delete()) {}
+			}
+			
+			String xml = XMLHandler.getXMLHeader() + jobMeta.getXML();
+			DataOutputStream dos = new DataOutputStream(KettleVFS.getOutputStream(jobName,true));
+			dos.write(xml.getBytes(Const.XML_ENCODING));
+			dos.close();
+			
+			KettleEnvironment.shutdown();
+			
+			return true;
+		}catch(Exception e){
+			e.printStackTrace();
+			return  false;
+		}
 		
-		JobEntryCopy startCopy = JobMeta.createStartEntry();
-		startCopy.setLocation(x, y);
-		startCopy.setDrawn();
-		jobMeta.addJobEntry(startCopy);
-		JobEntryCopy lastCopy = startCopy;
-		
-		JobEntryTrans jobEntryTrans = new JobEntryTrans();
-		jobEntryTrans.setSpecificationMethod(ObjectLocationSpecificationMethod.FILENAME);
-		jobEntryTrans.setFileName(GlobalMethodAndParams.TRANS_NAME);
-		
-		JobEntryCopy transCopy = new JobEntryCopy(jobEntryTrans);
-		transCopy.setName("Execute" + GlobalMethodAndParams.TRANS_NAME);
-		x+=100;
-		transCopy.setLocation(x, y);
-		transCopy.setDrawn();
-		jobMeta.addJobEntry(transCopy);
-		JobHopMeta transHop = new JobHopMeta(lastCopy,transCopy);
-		jobMeta.addJobHop(transHop);
-		lastCopy = transCopy;
-		jobMeta.setObjectId(new LongObjectId(new Long(1)));
-		
-
-		return  new Job(null,jobMeta);
 	}
 }

@@ -2,7 +2,6 @@ package com.x8.mt.service;
 
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -18,7 +17,6 @@ import org.pentaho.di.core.exception.KettleDatabaseException;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
-import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.repository.LongObjectId;
 import org.pentaho.di.repository.ObjectId;
@@ -329,7 +327,7 @@ public class KettleMetadataCollectService {
                JobMeta jobMeta = kettleDatabaseRepository.loadJob(jobNames[i],directory,null,null);
 
 	       		Metadata metadataKettleJob = new Metadata();
-	       		metadataKettleJob.setNAME(datasource_connectinfo.getDatabasename());
+	       		metadataKettleJob.setNAME(jobNames[i]);
 	       		metadataKettleJob.setCOLLECTJOBID(collectjobid);
 	       		metadataKettleJob.setMETAMODELID(203);
 	       		metadataKettleJob.setCREATETIME(createDate);
@@ -452,19 +450,44 @@ public class KettleMetadataCollectService {
 	 * 
 	 */
 	@Transactional
-	public List<Table> getTables(Datasource_connectinfo datasource_connectinfo) throws KettleException {
+	public List<Table> getTables(Datasource_connectinfo datasource_connectinfo,int metaModelId,int collectJobId) throws KettleException {
 		List<Table> tables = new ArrayList<>();
-		database = initKettleEnvironment(datasource_connectinfo);
-
-		String[] tablenames = database.getTablenames();//获取数据库中所有表名
 		
-		shutdownKettleEnvironment(database);
-		for(String tablename : tablenames){
-			Table table = new Table();
-			table.setName(tablename);
-			table.setOperationDescription(null);
-			table.setOperationName(null);
-			tables.add(table);
+		if(metaModelId == 10){
+//			List<Metadata> metaDatas = iMetaDataDao.getMetadataByCollectJobById(collectJobId);			
+//			Map<String, Integer> map = new HashMap<String, Integer>();
+//			for(Metadata metaData : metaDatas){
+//				map.put(metaData.getNAME(), 1);
+//			}
+			
+			database = initKettleEnvironment(datasource_connectinfo);
+			String[] tablenames = database.getTablenames();//获取数据库中所有表名
+			
+			shutdownKettleEnvironment(database);
+			for(String tablename : tablenames){
+				//if(map.get(tablename) == null){					
+					Table table = new Table();
+					table.setName(tablename);
+					table.setOperationDescription(null);
+					table.setOperationName(null);
+					tables.add(table);
+				//}
+			}
+		}else if(metaModelId == 202){			
+			KettleDatabaseRepository kettleDatabaseRepository = connectKettleDatabaseRepository(datasource_connectinfo);
+		    ObjectId objectId = new LongObjectId(new Long(0));
+		    RepositoryDirectoryInterface directory = kettleDatabaseRepository.findDirectory(objectId);
+		     
+		    String[] jobNames = kettleDatabaseRepository.getJobNames(objectId, false);
+			for(String jobName : jobNames){
+	            JobMeta jobMeta = kettleDatabaseRepository.loadJob(jobName,directory,null,null);
+
+				Table table = new Table();
+				table.setName(jobName);
+				table.setOperationDescription(jobMeta.getDescription());
+				table.setOperationName(null);
+				tables.add(table);
+			}
 		}
 		
 		return tables;

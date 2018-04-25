@@ -22,6 +22,8 @@ public class ETLJob {
 	private int metadata_id;
 	private String type;
 	private int mappingid;
+	private int jobtype;
+	
 	public int getId() {
 		return id;
 	}
@@ -87,6 +89,12 @@ public class ETLJob {
 	}
 	public void setMappingid(int mappingid) {
 		this.mappingid = mappingid;
+	}
+	public int getJobtype() {
+		return jobtype;
+	}
+	public void setJobtype(int jobtype) {
+		this.jobtype = jobtype;
 	}
 
 }
