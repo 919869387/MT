@@ -120,16 +120,6 @@ public class DatamapitemsController {
 						datamapitems.setBackgroundcolor("rgba(48, 208, 198, 0.5)");;
 						datamapitems.setFontcolor("#fff");;
 						datamapitemsService.insertDatamapitems(datamapitems);
-						//获取元数据就能获取连接
-//						List<String> metaDataRelationList = metaDataRelationService.getMetadata_relationByMetadataid(metadata.getID());
-//						if(metaDataRelationList.size()!=0){
-//							for (String metaDataRelationID : metaDataRelationList) {
-//								JSONObject link = new JSONObject();
-//								link.put("sourceid", metadata.getID());
-//								link.put("targetid", Integer.parseInt(metaDataRelationID));
-//								links.add(link);
-//							}
-//						}
 					}
 				}
 
@@ -161,21 +151,7 @@ public class DatamapitemsController {
 					datamapitems.setBackgroundcolor("rgba(48, 208, 198, 0.5)");
 					datamapitems.setFontcolor("#fff");
 					datamapitemsService.insertDatamapitems(datamapitems);
-					//获取元数据就能获取连接
-//					List<String> metaDataRelationList = metaDataRelationService.getMetadata_relationByMetadataid(metadata.getID());
-//					if(metaDataRelationList.size()!=0){
-//						for (String metaDataRelationID : metaDataRelationList) {
-//							JSONObject link = new JSONObject();
-//							link.put("sourceid", metadata.getID());
-//							link.put("targetid", Integer.parseInt(metaDataRelationID));
-//							links.add(link);
-//						}
-//					}
 				}
-				
-//				responsejson.put("nodes", data);
-//				responsejson.put("links", links);
-//				return responsejson;
 			}
 			
 			// 当datamapitems有数据的时候
@@ -203,11 +179,11 @@ public class DatamapitemsController {
 								.getMetadataid());
 				//查询关联元数据在图元表中对应的id
 				for (String string : metadata_relationidList) {
-					Datamapitems targetDatamapitems = datamapitemsService.getDatamapitemsIDByMetadataId(Integer.parseInt(string));
-					if(targetDatamapitems!=null){
+					List<Datamapitems> targetDatamapitems = datamapitemsService.getDatamapitemsIDByMetadataId(Integer.parseInt(string));
+					if(targetDatamapitems.size()!=0){
 						JSONObject link = new JSONObject();
 						link.put("sourceid", datamapitems.getId());
-						link.put("targetid", targetDatamapitems.getId());
+						link.put("targetid", targetDatamapitems.get(0).getId());
 						links.add(link);
 					}
 				}
@@ -270,7 +246,7 @@ public class DatamapitemsController {
 			datamapitemsService.insertDatamapitems(datamapitems);
 			
 			JSONObject node = new JSONObject();
-			node.put("id", datamapitemsService.getDatamapitemsIDByMetadataId(tableMetadata.getID()).getId());
+			node.put("id", datamapitemsService.getDatamapitemsIDByMetadataId(tableMetadata.getID()).get(0).getId());
 			node.put("x", 400);
 			node.put("y", 110 * num);
 			node.put("status", tableMetadata.getCHECKSTATUS());
@@ -299,7 +275,7 @@ public class DatamapitemsController {
 			datamapitemsService.insertDatamapitems(datamapitems);
 			
 			JSONObject node = new JSONObject();
-			node.put("id", datamapitemsService.getDatamapitemsIDByMetadataId(tableMetadata.getID()).getId());
+			node.put("id", datamapitemsService.getDatamapitemsIDByMetadataId(tableMetadata.getID()).get(0).getId());
 			node.put("x", 400);
 			node.put("y", 110 * num);
 			node.put("status", tableMetadata.getCHECKSTATUS());
@@ -332,8 +308,8 @@ public class DatamapitemsController {
 						if(targettableid.equals(targetTableid)){
 							//是指定两个数据库的表映射对应关系，放入JSONObject中返回
 							JSONObject link = new JSONObject();
-							link.put("sourceid", datamapitemsService.getDatamapitemsIDByMetadataId(tableMetadata.getID()).getId());
-							link.put("targetid", datamapitemsService.getDatamapitemsIDByMetadataId(Integer.parseInt(targetTableid)).getId());
+							link.put("sourceid", datamapitemsService.getDatamapitemsIDByMetadataId(tableMetadata.getID()).get(0).getId());
+							link.put("targetid", datamapitemsService.getDatamapitemsIDByMetadataId(Integer.parseInt(targetTableid)).get(0).getId());
 							links.add(link);
 						}
 					}

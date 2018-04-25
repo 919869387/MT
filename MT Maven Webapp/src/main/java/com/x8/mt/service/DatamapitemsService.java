@@ -28,7 +28,7 @@ public class DatamapitemsService {
 		
 	}
 
-	public Datamapitems getDatamapitemsIDByMetadataId(int id) {
+	public List<Datamapitems> getDatamapitemsIDByMetadataId(int id) {
 		return iDatamapitemsDao.getDatamapitemsIDByMetadataId(id);
 	}
 

@@ -12,7 +12,7 @@ public interface IDatamapitemsDao {
 
 	void insertDatamapitems(Datamapitems datamapitems);
 
-	Datamapitems getDatamapitemsIDByMetadataId(int id);
+	List<Datamapitems> getDatamapitemsIDByMetadataId(int id);
 
 	int getDatamapitemsMetadataidById(int sourceid);
 	
