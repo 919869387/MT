@@ -1,5 +1,6 @@
 package com.x8.mt.test;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -7,6 +8,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +30,56 @@ public class MetadataManagementTest {
 	MetadataManagementService metadataManagementService;
 	@Autowired
 	MetadataManagementController metadataManagementController;
+	
+	@Test
+	public void addTableFieldMappingMetadata(){
+		HttpServletRequest request = null;
+		HttpServletResponse response = null;
+		List<Map<String, Object>> list = new ArrayList();
+		
+		Map<String, Object> map1 = new HashMap<String, Object>();
+		map1.put("metamodelId", 100);
+		map1.put("parentMetadataId", 83328);
+		map1.put("NAME", "表字段映射元数据1");
+		map1.put("DESCRIPTION", "表字段映射元数据测试");
+		map1.put("mappingtype", "DIRECT");
+		map1.put("sourcetableid", 83237);
+		map1.put("sourcefieldid", 83239);
+		map1.put("targettableid", 83250);
+		map1.put("targetfieldid", 83259);
+		
+		Map<String, Object> map2 = new HashMap<String, Object>();
+		map2.put("metamodelId", 100);
+		map2.put("parentMetadataId", 83328);
+		map2.put("NAME", "表字段映射元数据2");
+		map2.put("DESCRIPTION", "表字段映射元数据测试");
+		map2.put("mappingtype", "DIRECT");
+		map2.put("sourcetableid", 83237);
+		map2.put("sourcefieldid", 83240);
+		map2.put("targettableid", 83250);
+		map2.put("targetfieldid", 83260);
+		
+		list.add(map1);
+		list.add(map2);
+		
+		System.out.println(metadataManagementController.addTableFieldMappingMetadata(request, response, list));
+	}
+	
+	@Test
+	public void addTableMappingMetadata(){
+		HttpServletRequest request = null;
+		HttpServletResponse response = null;
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("metamodelId", 99);
+		map.put("parentMetadataId", 0);
+		map.put("NAME", "表映射元数据1");
+		map.put("DESCRIPTION", "表映射元数据测试");
+		map.put("mappingtype", "DIRECT");
+		map.put("sourcetableid", 83238);
+		map.put("targettableid", 83251);
+		
+		System.out.println(metadataManagementController.addMetadataStepThree(request, response, map));
+	}
 	
 	@Test
 	public void getHistoryMetadataPrivateInfo(){
