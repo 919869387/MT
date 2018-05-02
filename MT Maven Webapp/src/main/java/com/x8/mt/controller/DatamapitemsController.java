@@ -1,5 +1,6 @@
 package com.x8.mt.controller;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,12 +18,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.alibaba.fastjson.JSON;
 import com.x8.mt.common.GlobalMethodAndParams;
 import com.x8.mt.common.Log;
 import com.x8.mt.entity.Datamapitems;
 import com.x8.mt.entity.Datamaplayer;
-import com.x8.mt.entity.MetaDataRelation;
 import com.x8.mt.entity.Metadata;
 import com.x8.mt.entity.Metamodel_hierarchy;
 import com.x8.mt.entity.Metamodel_relation;
@@ -71,7 +70,8 @@ public class DatamapitemsController {
 		// return responsejson;
 		// }
 		GlobalMethodAndParams.setHttpServletResponse(request, response);
-
+		
+		HashMap<Integer,Integer> countMap = new HashMap<>();
 		JSONArray data = new JSONArray();
 		JSONArray links = new JSONArray();
 
@@ -164,7 +164,7 @@ public class DatamapitemsController {
 			
 			// 当datamapitems有数据的时候
 			for (Datamapitems datamapitems : mapitemsList) {
-
+				
 				Metadata metadata = metaDataService
 						.getMetadataById(datamapitems.getMetadataid());
 //				System.out.println("我被执行了222222222222222222222222222222222222222222222222222222222");
@@ -195,39 +195,41 @@ public class DatamapitemsController {
 						links.add(link);
 					}
 				}
-				//db之间的关系，数据库没有存储，手动编写彼此的关系。数据库之间的对应关系
-				List<Metadata> tableMappingList = metaDataService
-						.getMetadataByMetaModelIdNoNull(Integer
-								.parseInt(GlobalMethodAndParams.MetaDataTableMappingModelId));
-				for (Metadata mappingMetadata : tableMappingList) {
-					String json = mappingMetadata.getATTRIBUTES();
-					JSONObject json1 = JSONObject.fromObject(json);
-					
-//					int sourcetableid = (int) json1.get("sourcetableid");
-//					int targettableid = (int) json1.get("targettableid");
-					Object sourcetableid = json1.get("sourcetableid");
-					Object targettableid = json1.get("targettableid");
-					
-					Metadata sourcMetadata = metaDataService.getMetadataById(Integer.parseInt(sourcetableid.toString()));
-					Metadata targetMetadata = metaDataService.getMetadataById(Integer.parseInt(targettableid.toString()));
-					
-					int sourceMetadataid = metaDataRelationService.getMetadataidByRelatedmetadataid(sourcMetadata.getID());
-					List<Datamapitems> sourceDatamapitems = datamapitemsService.getDatamapitemsIDByMetadataId(sourceMetadataid);
-					
-					int targetMetadataid = metaDataRelationService.getMetadataidByRelatedmetadataid(targetMetadata.getID());
-					List<Datamapitems> targetDatamapitems = datamapitemsService.getDatamapitemsIDByMetadataId(targetMetadataid);
-					
-					System.out.println("metadata的attributes属性为："+json1.toString());
-					System.out.println("源表对应的数据库id："
-							+ sourceMetadataid + "     目标表对应的数据库id："
-							+ targetMetadataid
-					);
-					
-					JSONObject link = new JSONObject();
-					link.put("sourceid", sourceDatamapitems.get(0).getId());
-					link.put("targetid", targetDatamapitems.get(0).getId());
-					links.add(link);
-				}
+				
+			}
+			//db之间的关系，数据库没有存储，手动编写彼此的关系。数据库之间的对应关系
+			List<Metadata> tableMappingList = metaDataService
+					.getMetadataByMetaModelIdNoNull(Integer
+							.parseInt(GlobalMethodAndParams.MetaDataTableMappingModelId));
+			System.out.println(tableMappingList.size()+":元数据表映射列表的总个数");
+			for (Metadata mappingMetadata : tableMappingList) {
+				String json = mappingMetadata.getATTRIBUTES();
+				JSONObject json1 = JSONObject.fromObject(json);
+				
+//				int sourcetableid = (int) json1.get("sourcetableid");
+//				int targettableid = (int) json1.get("targettableid");
+				Object sourcetableid = json1.get("sourcetableid");
+				Object targettableid = json1.get("targettableid");
+				
+				Metadata sourcMetadata = metaDataService.getMetadataById(Integer.parseInt(sourcetableid.toString()));
+				Metadata targetMetadata = metaDataService.getMetadataById(Integer.parseInt(targettableid.toString()));
+				
+				int sourceMetadataid = metaDataRelationService.getMetadataidByRelatedmetadataid(sourcMetadata.getID());
+				List<Datamapitems> sourceDatamapitems = datamapitemsService.getDatamapitemsIDByMetadataId(sourceMetadataid);
+				
+				int targetMetadataid = metaDataRelationService.getMetadataidByRelatedmetadataid(targetMetadata.getID());
+				List<Datamapitems> targetDatamapitems = datamapitemsService.getDatamapitemsIDByMetadataId(targetMetadataid);
+				
+//				System.out.println("metadata的attributes属性为："+json1.toString());
+//				System.out.println("源表对应的数据库id："
+//						+ sourceMetadataid + "     目标表对应的数据库id："
+//						+ targetMetadataid
+//				);
+				
+				JSONObject link = new JSONObject();
+				link.put("sourceid", sourceDatamapitems.get(0).getId());
+				link.put("targetid", targetDatamapitems.get(0).getId());
+				links.add(link);
 			}
 			
 
