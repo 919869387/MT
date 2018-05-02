@@ -139,7 +139,7 @@ public class SystemuserController {
 	 * 备注：在浏览器没有请求过服务器(没有session)，就直接请求登出方法的时候，
 	 * 	该方法返回error路径。前段在这个方法的ajax里的error中需要写逻辑
 	 */
-	/*@RequestMapping(value = "/logout", method = RequestMethod.GET)  
+	@RequestMapping(value = "/logout", method = RequestMethod.GET)  
 	@ResponseBody
 	@Log(operationType="systemusercontroller",operationDesc="用户登出")
 	public JSONObject logout(HttpServletRequest request,HttpServletResponse response) {		
@@ -155,7 +155,7 @@ public class SystemuserController {
 			responsejson.put("count",0);
 		}
 		return responsejson;  
-	}*/
+	}
 	
 	/**
 	 * 作者：yangyuan
@@ -173,8 +173,8 @@ public class SystemuserController {
 		JSONObject responsejson = new JSONObject();
 		//获取参数信息
 		String username = map.get("name").toString();
-		String password = map.get("password").toString();
-		String rePassword = map.get("rePassword").toString();
+		//String password = map.get("password").toString();
+		String rePassword = map.get("password").toString();
 		
 	
 		try {
@@ -184,8 +184,8 @@ public class SystemuserController {
 			//判断查询结果并做处理
 			if(systemUser != null){
 				//获取原始密码密文
-				String MDPassword = systemUser.getPassword();
-				System.out.println("用户对象****的加密密码"+MDPassword);
+				//String MDPassword = systemUser.getPassword();
+				//System.out.println("用户对象****的加密密码"+MDPassword);
 				//获取盐
 				String salt = systemUser.getSalt();
 				//将新密码加密
@@ -194,13 +194,13 @@ public class SystemuserController {
 			    System.out.println("新密码加密后**"+MD5RePassword2); 
 				
 				//将用户输入的原始密码加密后与数据库密码做比对
-				Md5Hash md5Hash = new Md5Hash(password, salt, 1);
-				String md5Password = md5Hash.toString();
-				System.out.println("手动加密密码***"+md5Password);
-				//判断密码是否正确
-				if(md5Password.equals(MDPassword)){
-					//密码正确，则修改原始密码
-					System.out.println("密码比较正确，，，，");
+//				Md5Hash md5Hash = new Md5Hash(password, salt, 1);
+//				String md5Password = md5Hash.toString();
+//				System.out.println("手动加密密码***"+md5Password);
+//				//判断密码是否正确
+//				if(md5Password.equals(MDPassword)){
+//					//密码正确，则修改原始密码
+//					System.out.println("密码比较正确，，，，");
 					SystemUser systemuser2 = new SystemUser();
 					systemuser2.setUsername(username);
 					systemuser2.setPassword(MD5RePassword2);
@@ -215,10 +215,10 @@ public class SystemuserController {
 						responsejson.put("msg", "修改失败");
 					}
 					
-				}else{
-					responsejson.put("state", false);
-					responsejson.put("msg", "原始密码输入错误");
-			  }
+//				}else{
+//					responsejson.put("state", false);
+//					responsejson.put("msg", "原始密码输入错误");
+//			  }
 			}else{
 				responsejson.put("state", false);
 				responsejson.put("msg", "用户不存在");

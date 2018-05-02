@@ -50,7 +50,7 @@
 	<!-- 会话管理器 -->
 	<bean id="sessionManager" class="com.x8.mt.shiro.SessionManager">
 		<!-- session的失效时长，单位毫秒 -->
-        <property name="globalSessionTimeout" value="30000"/>
+        <property name="globalSessionTimeout" value="300000000000"/>
         <!-- 删除失效的session -->
         <property name="deleteInvalidSessions" value="true"/>
 	</bean>

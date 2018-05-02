@@ -29,24 +29,24 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	
 	<!-- 查询权限列表 -->
 	<select id="findPermissionList" resultType="com.x8.mt.entity.PermissionInfo">
-		select * from permission_info
+		select * from permission_info where resType = 'permission'
 	</select>
 	
 	<!-- 根据权限名称模糊查询权限 -->
 	<select id="findPermissionByPname" parameterType="String" resultType="com.x8.mt.entity.PermissionInfo">
-		select * from permission_info where permissionName = #{permissionName}
+		select * from permission_info where permissionName = #{permissionName} and resType = 'permission'
 	</select>
 	
 	<!-- 根据角色名称查询给角色具有的权限 -->
 	<select id="findPermissionByRoleName" parameterType="String" resultType="com.x8.mt.entity.PermissionInfo">
-		select * from permission_info where id in 
+		select * from permission_info where resType = 'permission'  and id in 
 			(select permissionId from role_permission where roleId in
 				(select id from systemrole where rolename = #{roleName}))
 	</select>
 	
 	<!-- 根据角色名称查询角色没有的权限项 -->
 	<select id="roleNoPermission" parameterType="String" resultType="com.x8.mt.entity.PermissionInfo">
-		select * from permission_info where id not in 
+		select * from permission_info where resType = 'permission' and id not in 
 			(select permissionId from role_permission where roleId in
 				(select id from systemrole where rolename = #{roleName}))
 	</select>
@@ -69,4 +69,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 					#{permissionList}
 				</foreach>
 	</delete>
+	
+	<!-- 根据用户名查询权限标签 -->
+	<select id="selectPerCodeByUserName" parameterType="String" resultType="com.x8.mt.entity.PermissionInfo">
+		select * from permission_info where resType = 'permission' and id in
+			(select permissionId from role_permission where roleId in
+				(select roleId from user_role where userId in
+					(select id from systemuser where username=#{username})))
+	</select>
 </mapper>
