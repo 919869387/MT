@@ -646,4 +646,20 @@ public class MetadataManagementService {
 		return metamodelInfo;
 	}
 
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年4月26日
+	 * 作用:添加表字段映射元数据
+	 */
+	@Transactional
+	public boolean addTableFieldMappingMetadata(List<Map<String, Object>> list) {
+		for(Map<String, Object> map:list){
+			if(!addMetadata(map)){
+				throw new RuntimeException("addTableFieldMappingMetadata Error");
+			}
+		}
+		return true;
+	}
+
 }
