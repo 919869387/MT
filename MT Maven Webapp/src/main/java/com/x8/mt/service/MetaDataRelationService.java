@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.x8.mt.dao.IMetaDataRelationDao;
 import com.x8.mt.entity.MetaDataRelation;
+import com.x8.mt.entity.Metadata;
 
 @Service
 public class MetaDataRelationService {
@@ -35,7 +36,23 @@ public class MetaDataRelationService {
 		return iMetaDataRelationDao.getSonMetadataID(String.valueOf(id));
 	}
 
+	/**
+	 * 
+	 * 作者:itcoder
+	 * 时间:2018年5月2日
+	 * 作用:根据sourceMetadataid,找到存在依赖（“DEPENDENCY”）关系的关系元数据
+	 */
 	public List<Integer> getDependencyRelatedMetadataidList(int sourceMetadataid) {
 		return iMetaDataRelationDao.getDependencyRelatedMetadataidList(sourceMetadataid);
+	}
+
+	/**
+	 * 
+	 * 作者:itcoder
+	 * 时间:2018年5月2日
+	 * 作用:根据relatedmetadataid,找到metadataid
+	 */
+	public int getMetadataidByRelatedmetadataid(int i) {
+		return iMetaDataRelationDao.getMetadataidByRelatedmetadataid(i);
 	}
 }

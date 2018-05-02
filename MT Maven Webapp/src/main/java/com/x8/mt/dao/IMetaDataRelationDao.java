@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Repository;
 
 import com.x8.mt.entity.MetaDataRelation;
+import com.x8.mt.entity.Metadata;
 
 @Repository
 public interface IMetaDataRelationDao {
@@ -32,4 +33,12 @@ public interface IMetaDataRelationDao {
 	 * 作用:根据metadataId,找到DEPENCY关系的元数据id
 	 */
 	List<Integer> getDependencyRelatedMetadataidList(int sourceMetadataid);
+
+	/**
+	 * 
+	 * 作者:itcoder
+	 * 时间:2018年5月2日
+	 * 作用:根据relatedmetadataid,找到metadataid
+	 */
+	int getMetadataidByRelatedmetadataid(int i);
 }

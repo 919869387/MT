@@ -5,7 +5,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 <mapper namespace="com.x8.mt.dao.IDatamaplayerDao">	
 	
 	<select id="getDatamaplayerList" resultType="com.x8.mt.entity.Datamaplayer">
-		select * from datamaplayer
+		select * from datamaplayer where id  = 1;
 	</select>
 	
 </mapper>

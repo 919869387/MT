@@ -138,6 +138,21 @@ public class MetaDataService {
 	public boolean updateMetadataCheckstatus(Metadata metadata) {
 		return imetadataManagementDao.updataMetadataCheckstatus(metadata);
 	}
+
+	/**
+	 * 
+	 * 作者:itcoder
+	 * 时间:2018年5月2日
+	 * 作用:根据metaModelId查找元数据
+	 */
+	public List<Metadata> getMetadataByMetaModelIdNoNull(int id) {
+		try{			
+			return iMetadataDao.getMetadataByMetaModelIdNoNull(id);
+		}catch(Exception e){
+			e.printStackTrace();
+			return null;
+		}
+	}
 	
 	
 }

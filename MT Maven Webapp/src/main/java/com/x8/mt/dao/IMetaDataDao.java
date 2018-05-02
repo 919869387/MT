@@ -74,6 +74,14 @@ public interface IMetaDataDao {
 	 * 作用:根据Map获取一组Metadata记录
 	 */
 	List<Metadata> 	getMetadataByMap(@Param("key")String key,@Param("value")String value);
+
+	/**
+	 * 
+	 * 作者:itcoder
+	 * 时间:2018年5月2日
+	 * 作用:根据元模型id获取一组Metadata记录
+	 */
+	List<Metadata> getMetadataByMetaModelIdNoNull(int id);
 	
 
 }

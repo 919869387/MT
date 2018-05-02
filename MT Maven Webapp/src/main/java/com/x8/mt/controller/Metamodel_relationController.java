@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.x8.mt.common.GlobalMethodAndParams;
 import com.x8.mt.common.Log;
+import com.x8.mt.entity.Metamodel_hierarchy;
 import com.x8.mt.entity.Metamodel_relation;
 import com.x8.mt.service.Metamodel_hierarchyService;
 import com.x8.mt.service.Metamodel_relationService;
@@ -33,6 +34,42 @@ public class Metamodel_relationController {
 	Metamodel_relationService metamodel_relationService;
 	@Resource
 	Metamodel_hierarchyService metamodel_hierarchyService;
+	
+	/**
+	 * 
+	 * 作者:itcoder 
+	 * 时间:2018年5月2日 
+	 * 作用:获得所有的可以添加依赖关系的自定义元模型
+	 */
+	@RequestMapping(value = "/getAvailableMetamodel", method = RequestMethod.GET)
+	@ResponseBody
+	@Log(operationType = "getAvailableMetamodel", operationDesc = "获得所有的可以添加依赖关系的自定义元模型")
+	public JSONObject getAvailableMetamodel(
+			HttpServletRequest request, HttpServletResponse response) {
+		JSONObject responsejson = new JSONObject();
+
+		// if(!GlobalMethodAndParams.checkLogin()){
+		// responsejson.put("result", false);
+		// responsejson.put("count",0);
+		// return responsejson;
+		// }
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
+
+		JSONArray data = new JSONArray();
+		
+		List<Metamodel_hierarchy> metamodelList = metamodel_hierarchyService.getAvailableMetamodel();
+		for (Metamodel_hierarchy metamodel_hierarchy : metamodelList) {
+			JSONObject node = new JSONObject();
+			node.put("metamodelid",metamodel_hierarchy.getId());
+			node.put("metamodelname",metamodel_hierarchy.getName());
+			data.add(node);
+		}
+		
+		responsejson.put("result", true);
+		responsejson.put("data", data);
+		responsejson.put("count", 1);
+		return responsejson;
+	}
 
 	/**
 	 * 

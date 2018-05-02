@@ -192,4 +192,8 @@ public class Metamodel_hierarchyService {
 			return null;
 		}
 	}
+
+	public List<Metamodel_hierarchy> getAvailableMetamodel() {
+		return iMetamodel_hierarchyDao.getAvailableMetamodel();
+	}
 }

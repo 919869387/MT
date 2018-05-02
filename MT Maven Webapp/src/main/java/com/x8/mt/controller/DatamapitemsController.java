@@ -12,10 +12,12 @@ import net.sf.json.JSONObject;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSON;
 import com.x8.mt.common.GlobalMethodAndParams;
 import com.x8.mt.common.Log;
 import com.x8.mt.entity.Datamapitems;
@@ -73,6 +75,7 @@ public class DatamapitemsController {
 		JSONArray data = new JSONArray();
 		JSONArray links = new JSONArray();
 
+		//获取第一层数据地图图层id=1
 		List<Datamaplayer> maplayerlist = datamaplayerService
 				.getDatamaplayerList();
 		if (maplayerlist == null) {
@@ -84,18 +87,22 @@ public class DatamapitemsController {
 			List<Datamapitems> mapitemsList = datamapitemsService
 					.getDatamapitemsListByMaplayerId(datamaplayer.getId());
 			System.out.println(mapitemsList.size()+"------------"+datamaplayer.getName());
+			//如果datamapitems表数据为空，关联查询多张表，初始化数据地图，初始数据地图，连线无法显示
 			if (mapitemsList.size() == 0) {
 				int count = 0;
 
 				Metamodel_hierarchy sysMetamodel = metamodel_hierarchyService
 						.getMetamodel_hierarchy(GlobalMethodAndParams.SystemMedamodelId_InDatabase);
+				//获得系统元模型下的元模型关系
 				List<Metamodel_relation> dbRelatedMetamodelList = metamodel_relationService
 						.getDependencyRelationByMetamodelid(sysMetamodel
 								.getId());
 				for (Metamodel_relation metamodel_relation : dbRelatedMetamodelList) {
+					System.out.println(metamodel_relation.getRelatedmetamodelid()+"-----------------------");
 					List<Metadata> dbMetadataList = metaDataService
-							.getMetadataByMetaModelId(metamodel_relation
+							.getMetadataByMetaModelIdNoNull(metamodel_relation
 									.getRelatedmetamodelid());
+					//遍历数据库元数据列表
 					for (Metadata metadata : dbMetadataList) {
 						System.out.println(metadata.getID()+"---"+"db");
 						JSONObject node = new JSONObject();
@@ -188,6 +195,30 @@ public class DatamapitemsController {
 						links.add(link);
 					}
 				}
+				List<Metadata> tableMappingList = metaDataService.getMetadataByMetaModelIdNoNull(Integer.parseInt(GlobalMethodAndParams.MetaDataTableMappingModelId));
+				for (Metadata mappingMetadata : tableMappingList) {
+					String json = mappingMetadata.getATTRIBUTES();
+					JSONObject json1 = JSONObject.fromObject(json);
+					System.out.println(json1.toString());
+//					int sourcetableid = (int) json1.get("sourcetableid");
+//					int targettableid = (int) json1.get("targettableid");
+					Object sourcetableid = json1.get("sourcetableid");
+					Object targettableid = json1.get("targettableid");
+					
+					Metadata sourcMetadata = metaDataService.getMetadataById(Integer.parseInt(sourcetableid.toString()));
+					Metadata targetMetadata = metaDataService.getMetadataById(Integer.parseInt(sourcetableid.toString()));
+					
+					int sourceMetadataid = metaDataRelationService.getMetadataidByRelatedmetadataid(sourcMetadata.getID());
+					List<Datamapitems> sourceDatamapitems = datamapitemsService.getDatamapitemsIDByMetadataId(sourceMetadataid);
+					
+					int targetMetadataid = metaDataRelationService.getMetadataidByRelatedmetadataid(targetMetadata.getID());
+					List<Datamapitems> targetDatamapitems = datamapitemsService.getDatamapitemsIDByMetadataId(targetMetadataid);
+					
+					JSONObject link = new JSONObject();
+					link.put("sourceid", sourceDatamapitems.get(0).getId());
+					link.put("targetid", targetDatamapitems.get(0).getId());
+					links.add(link);
+				}
 			}
 			
 
@@ -208,7 +239,7 @@ public class DatamapitemsController {
 	@ResponseBody
 	@Log(operationType = "getSecondDatamap", operationDesc = "获取第二层数据地图")
 	public JSONObject getSecondDatamap(HttpServletRequest request,
-			HttpServletResponse response,Map<String,Object> map) {
+			HttpServletResponse response,@RequestBody Map<String,Object> map) {
 		JSONObject responsejson = new JSONObject();
 
 		// if(!GlobalMethodAndParams.checkLogin()){
@@ -221,6 +252,11 @@ public class DatamapitemsController {
 		JSONArray data = new JSONArray();
 		JSONArray links = new JSONArray();
 		int count = 0;
+		if(!(map.containsKey("sourceid")&&map.containsKey("targetid"))){
+			responsejson.put("nodes", data);
+			responsejson.put("links", links);
+			return responsejson;
+		}
 		
 		String sourceidStr = map.get("sourceid").toString();
 		int sourceid = Integer.parseInt(sourceidStr);
@@ -302,19 +338,19 @@ public class DatamapitemsController {
 					if(string.contains("targettableid")){
 						targettableid = string.substring(17,string.length()-2);
 					}
-				}
-				
-				if(sourceTableid.equals(sourcetableid)){
-					for(String targetTableid : sonTargetMetadataList){
-						if(targettableid.equals(targetTableid)){
-							//是指定两个数据库的表映射对应关系，放入JSONObject中返回
-							JSONObject link = new JSONObject();
-							link.put("sourceid", datamapitemsService.getDatamapitemsIDByMetadataId(tableMetadata.getID()).get(0).getId());
-							link.put("targetid", datamapitemsService.getDatamapitemsIDByMetadataId(Integer.parseInt(targetTableid)).get(0).getId());
-							links.add(link);
+					if(sourceTableid.equals(sourcetableid)){
+						for(String targetTableid : sonTargetMetadataList){
+							if(targettableid.equals(targetTableid)){
+								//是指定两个数据库的表映射对应关系，放入JSONObject中返回
+								JSONObject link = new JSONObject();
+								link.put("sourceid", datamapitemsService.getDatamapitemsIDByMetadataId(tableMetadata.getID()).get(0).getId());
+								link.put("targetid", datamapitemsService.getDatamapitemsIDByMetadataId(Integer.parseInt(targetTableid)).get(0).getId());
+								links.add(link);
+							}
 						}
 					}
 				}
+				
 			}
 		}
 		responsejson.put("nodes", data);
