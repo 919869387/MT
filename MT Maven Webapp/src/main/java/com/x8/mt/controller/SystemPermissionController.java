@@ -7,7 +7,11 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.session.Session;
+import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -346,8 +350,54 @@ public class SystemPermissionController {
 	}
 	
 	
-	
-	
+	/**
+	 * 作者：yangyuan
+	 * 时间：2018年4月11日
+	 * 备注：权限判断
+	 */
+	@RequestMapping(value="/Permission", method=RequestMethod.POST)
+	@ResponseBody
+	//@Log(operationType="systemPermissionController",operationDesc="权限判断")
+	public JSONObject permission(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map){
+		
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
+		
+		JSONObject responsejson = new JSONObject();
+		
+		int permissionid = Integer.parseInt(map.get("permissionName").toString());
+		
+		//获取用户名
+		String username = map.get("username").toString();
+//		String username = null;
+//		try {
+//			Subject subject = SecurityUtils.getSubject();  
+//			Session session = subject.getSession();
+//			username = session.getAttribute("username").toString();
+//		} catch (Exception e) {
+//		}
+//		HttpSession session = request.getSession();
+//		String username = (String) session.getAttribute("username");
+		
+		//调用service层方法，查询权限
+		List<PermissionInfo> perCodeInfos = permissionInfoService.findPerCodeByUserName(username);
+		if (perCodeInfos != null ) {
+			for (PermissionInfo permissionInfo : perCodeInfos) {
+				if (permissionid == permissionInfo.getId()) {
+					responsejson.put("status", true);
+					responsejson.put("msg", "有权限，允许访问");
+					break;
+				}else {
+					responsejson.put("status", false);
+					responsejson.put("msg", "没有权限，不允许访问");
+				}
+			}
+			
+		}else {
+			responsejson.put("status", false);
+			responsejson.put("msg", "没有权限，不允许访问");
+		}
+		return responsejson;
+	}
 	
 	
 }

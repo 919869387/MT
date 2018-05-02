@@ -56,4 +56,7 @@ public interface PermissionInfoDao {
 	 * 删除指定的角色权限项
 	 */
 	int deletePermission(Map<String, Object> perMap);
+	
+	//根据用户名查询权限
+	List<PermissionInfo> selectPerCodeByUserName(String username);
 }

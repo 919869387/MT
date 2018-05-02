@@ -65,4 +65,10 @@ public class PermissionInfoService {
 		int deletePermission = permissionInfoDao.deletePermission(perMap);
 		return deletePermission;
 	}
+	
+	//根据用户名查询权限标签
+	public List<PermissionInfo> findPerCodeByUserName(String username){
+		List<PermissionInfo> permissionInfos = permissionInfoDao.selectPerCodeByUserName(username);
+		return permissionInfos;
+	}
 }
