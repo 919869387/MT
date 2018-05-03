@@ -27,7 +27,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		select * from datamapitems where metadataid = #{id}
 	</select>
 	
-	<select id="getDatamapitemsMetadataidById" parameterType="int">
+	<select id="getDatamapitemsMetadataidById" parameterType="java.lang.Integer" resultType = "java.lang.Integer">
 		select metadataid from datamapitems where id = #{id}
 	</select>
 	

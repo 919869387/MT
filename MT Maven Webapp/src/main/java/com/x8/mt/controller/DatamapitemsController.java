@@ -63,7 +63,7 @@ public class DatamapitemsController {
 	public JSONObject getDatamap(HttpServletRequest request,
 			HttpServletResponse response) {
 		JSONObject responsejson = new JSONObject();
-
+		HashMap<String,Integer> map = new HashMap<>();
 		// if(!GlobalMethodAndParams.checkLogin()){
 		// responsejson.put("result", false);
 		// responsejson.put("count",0);
@@ -227,9 +227,14 @@ public class DatamapitemsController {
 //				);
 				
 				JSONObject link = new JSONObject();
-				link.put("sourceid", sourceDatamapitems.get(0).getId());
-				link.put("targetid", targetDatamapitems.get(0).getId());
-				links.add(link);
+				int sourceid = sourceDatamapitems.get(0).getId();
+				int targetid = targetDatamapitems.get(0).getId();
+				if(map.get(sourceid+""+targetid)==null){
+					map.put(sourceid+""+targetid, 1);
+					link.put("sourceid", sourceid);
+					link.put("targetid", targetid);
+					links.add(link);
+				}
 			}
 			
 
