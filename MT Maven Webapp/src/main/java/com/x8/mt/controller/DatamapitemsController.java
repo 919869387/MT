@@ -278,7 +278,7 @@ public class DatamapitemsController {
 		int sourceid = Integer.parseInt(sourceidStr);
 		String targetidStr = map.get("targetid").toString();
 		int targetid = Integer.parseInt(targetidStr);
-		
+		//根据图元表的id，获得元数据id
 		int sourceMetadataid = datamapitemsService.getDatamapitemsMetadataidById(sourceid);
 		int targetMetadataid = datamapitemsService.getDatamapitemsMetadataidById(targetid);
 		//获取数据库下的表id列表
@@ -339,34 +339,25 @@ public class DatamapitemsController {
 			node.put("height", 100);
 			node.put("flag", "db");
 			data.add(node);
-			
-			List<Metadata> mappingList = metaDataService.getMetadataByMetaModelId(Integer.parseInt(GlobalMethodAndParams.MetaDataMappingModelId));
+			//找到所有的99对应的表映射元数据列表
+			List<Metadata> mappingList = metaDataService.getMetadataByMetaModelId(Integer.parseInt(GlobalMethodAndParams.MetaDataTableMappingModelId));
 			for (Metadata metadata : mappingList) {
 				String attributes = metadata.getATTRIBUTES();
-				String[] key_values = attributes.split(",");
-				String sourcetableid = null;
-				String targettableid = null;
-				for (String string : key_values) {
-					//剥离出来sourcetableid对应的值，与sourceTableid比较看是否相等
-					if(string.contains("sourcetablid")){
-						sourcetableid = string.substring(17, string.length()-1);
-					}
-					if(string.contains("targettableid")){
-						targettableid = string.substring(17,string.length()-2);
-					}
-					if(sourceTableid.equals(sourcetableid)){
-						for(String targetTableid : sonTargetMetadataList){
-							if(targettableid.equals(targetTableid)){
-								//是指定两个数据库的表映射对应关系，放入JSONObject中返回
-								JSONObject link = new JSONObject();
-								link.put("sourceid", datamapitemsService.getDatamapitemsIDByMetadataId(tableMetadata.getID()).get(0).getId());
-								link.put("targetid", datamapitemsService.getDatamapitemsIDByMetadataId(Integer.parseInt(targetTableid)).get(0).getId());
-								links.add(link);
-							}
-						}
-					}
+				JSONObject json1 = JSONObject.fromObject(attributes);
+				if(json1.containsKey("sourcetablid")){
+					Object sourcetablidObj = json1.get("sourcetablid");
+					int sourcetablid = Integer.parseInt(sourcetablidObj.toString());
+					
+					Object targettableidObj = json1.get("targettableid");
+					int targettableid = Integer.parseInt(targettableidObj.toString());
+					
+					
+					JSONObject link = new JSONObject();
+					link.put("sourceid", datamapitemsService.getDatamapitemsIDByMetadataId(sourcetablid));
+					link.put("targetid", datamapitemsService.getDatamapitemsIDByMetadataId(targettableid));
+					links.add(link);
+					
 				}
-				
 			}
 		}
 		responsejson.put("nodes", data);
