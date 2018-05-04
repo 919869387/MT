@@ -24,7 +24,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	
 	<select id="getRowCount" resultType="int">
 		select count(*) from etljob
-		where jobtype = {type}
+		where jobtype = #{type}
 	</select>
 	
 	<select id="selectByParams" resultType="com.x8.mt.entity.ETLJob"

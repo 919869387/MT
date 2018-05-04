@@ -252,4 +252,10 @@ public class MetadataManagementTest {
 
 		System.out.println("两个时间相差"+interval+"秒");//会打印出相差3秒
 	}
+	
+	@Test
+	public void test(){
+		System.out.println("\"92016\"");
+		System.out.println("\"92016\"".replace("\"",""));
+	}
 }

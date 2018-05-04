@@ -326,25 +326,25 @@ public class ETLJobController {
 					data.add(etljobJson);
 				}
 			}else{
-				if(etlJob.getStatus().equals("NewCreate")){
-					etljobJson.put("target_table_id", etlJob.getId());
-					etljobJson.put("target_table",  metaDataService.getMetadataById(etlJob.getMetadata_id()).getNAME());
-					etljobJson.put("description", etlJob.getDescription());
-					etljobJson.put("create_date",  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(etlJob.getCreate_date()));
-					etljobJson.put("recently_run_date","");
-					etljobJson.put("status",etlJob.getStatus());
-					etljobJson.put("log","该任务刚刚新建");					
-					data.add(etljobJson);
-				}else{
-					etljobJson.put("target_table_id", etlJob.getId());
-					etljobJson.put("target_table",  metaDataService.getMetadataById(etlJob.getMetadata_id()).getNAME());
-					etljobJson.put("description", etlJob.getDescription());
-					etljobJson.put("create_date",  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(etlJob.getCreate_date()));
-					etljobJson.put("recently_run_date", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(etlJob.getRecently_run_date()));
-					etljobJson.put("status", etlJob.getStatus());
-					etljobJson.put("log", etlJob.getLog());
-					data.add(etljobJson);
-				}
+//				if(etlJob.getStatus().equals("NewCreate")){
+//					etljobJson.put("target_table_id", etlJob.getId());
+//					etljobJson.put("target_table",  metaDataService.getMetadataById(etlJob.getMetadata_id()).getNAME());
+//					etljobJson.put("description", etlJob.getDescription());
+//					etljobJson.put("create_date",  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(etlJob.getCreate_date()));
+//					etljobJson.put("recently_run_date","");
+//					etljobJson.put("status",etlJob.getStatus());
+//					etljobJson.put("log","该任务刚刚新建");					
+//					data.add(etljobJson);
+//				}else{
+//					etljobJson.put("target_table_id", etlJob.getId());
+//					etljobJson.put("target_table",  metaDataService.getMetadataById(etlJob.getMetadata_id()).getNAME());
+//					etljobJson.put("description", etlJob.getDescription());
+//					etljobJson.put("create_date",  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(etlJob.getCreate_date()));
+//					etljobJson.put("recently_run_date", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(etlJob.getRecently_run_date()));
+//					etljobJson.put("status", etlJob.getStatus());
+//					etljobJson.put("log", etlJob.getLog());
+//					data.add(etljobJson);
+//				}
 			}
 		}
 		responsejson.put("result", true);
