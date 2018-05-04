@@ -63,7 +63,86 @@ public class MetadataAnalysisController {
 		List<Map<String,String>> nodesList = new ArrayList<Map<String, String>>();
 		List<Map<String,String>> linksList = new ArrayList<Map<String, String>>();
 		
-		metadataAnalysisService.fieldImpact(yingxiangidStr,nodesList,linksList);
+		metadataAnalysisService.fieldAnalysis(yingxiangidStr,nodesList,linksList,false);//false时为影响分析
+		
+		JSONObject data = new JSONObject();
+		data.put("nodes", nodesList);
+		data.put("links", linksList);
+		
+		responsejson.put("result", true);
+		responsejson.put("data",data);
+		responsejson.put("count",1);
+		return responsejson;
+	}
+	
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年5月4日
+	 * 作用:字段血统分析
+	 *  
+	 * 参数：xuetongid
+	 */
+	@RequestMapping(value = "/fieldBlood", method = RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="metadataAnalysis",operationDesc="字段血统分析")
+	public JSONObject fieldBlood(HttpServletRequest request,
+			HttpServletResponse response,@RequestBody Map<String, Object> map){
+		JSONObject responsejson = new JSONObject();
+		
+		//检查传参是否正确
+		if(!map.containsKey("xuetongid")){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}
+		
+		String xuetongidStr = map.get("xuetongid").toString();
+		
+		List<Map<String,String>> nodesList = new ArrayList<Map<String, String>>();
+		List<Map<String,String>> linksList = new ArrayList<Map<String, String>>();
+		
+		metadataAnalysisService.fieldAnalysis(xuetongidStr,nodesList,linksList,true);//为true时为血统分析
+		
+		JSONObject data = new JSONObject();
+		data.put("nodes", nodesList);
+		data.put("links", linksList);
+		
+		responsejson.put("result", true);
+		responsejson.put("data",data);
+		responsejson.put("count",1);
+		return responsejson;
+	}
+	
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年5月4日
+	 * 作用:字段全链分析
+	 *  
+	 * 参数：quanlianid
+	 */
+	@RequestMapping(value = "/fieldChain", method = RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="metadataAnalysis",operationDesc="字段全链分析")
+	public JSONObject fieldChain(HttpServletRequest request,
+			HttpServletResponse response,@RequestBody Map<String, Object> map){
+		JSONObject responsejson = new JSONObject();
+		
+		//检查传参是否正确
+		if(!map.containsKey("quanlianid")){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}
+		
+		String quanlianidStr = map.get("quanlianid").toString();
+		
+		List<Map<String,String>> nodesList = new ArrayList<Map<String, String>>();
+		List<Map<String,String>> linksList = new ArrayList<Map<String, String>>();
+		
+		metadataAnalysisService.fieldAnalysis(quanlianidStr,nodesList,linksList,false);//false时为影响分析
+		metadataAnalysisService.fieldAnalysis(quanlianidStr,nodesList,linksList,true);//为true时为血统分析
 		
 		JSONObject data = new JSONObject();
 		data.put("nodes", nodesList);

@@ -48,19 +48,19 @@ public class MetadataManagementTest {
 		map1.put("targettableid", 83250);
 		map1.put("targetfieldid", 83259);
 		
-		Map<String, Object> map2 = new HashMap<String, Object>();
-		map2.put("metamodelId", 100);
-		map2.put("parentMetadataId", 83328);
-		map2.put("NAME", "表字段映射元数据2");
-		map2.put("DESCRIPTION", "表字段映射元数据测试");
-		map2.put("mappingtype", "DIRECT");
-		map2.put("sourcetableid", 83237);
-		map2.put("sourcefieldid", 83240);
-		map2.put("targettableid", 83250);
-		map2.put("targetfieldid", 83260);
+//		Map<String, Object> map2 = new HashMap<String, Object>();
+//		map2.put("metamodelId", 100);
+//		map2.put("parentMetadataId", 83328);
+//		map2.put("NAME", "表字段映射元数据2");
+//		map2.put("DESCRIPTION", "表字段映射元数据测试");
+//		map2.put("mappingtype", "DIRECT");
+//		map2.put("sourcetableid", 83237);
+//		map2.put("sourcefieldid", 83240);
+//		map2.put("targettableid", 83250);
+//		map2.put("targetfieldid", 83260);
 		
 		list.add(map1);
-		list.add(map2);
+		//list.add(map2);
 		
 		System.out.println(metadataManagementController.addTableFieldMappingMetadata(request, response, list));
 	}
