@@ -26,6 +26,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		select * from metadata where metamodelid=#{id} and collectjobid is NULL
 	</select>
 	
+	<select id="getMetadataByMetaModelIdNoNull" resultType="com.x8.mt.entity.Metadata">
+		select * from metadata where metamodelid=#{id}
+	</select>
+	
 	<select id="getMetadataByCollectJobById" resultType="com.x8.mt.entity.Metadata">
 		select * from metadata where collectjobid=#{id}
 	</select>

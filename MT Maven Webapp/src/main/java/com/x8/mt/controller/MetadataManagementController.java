@@ -47,6 +47,51 @@ public class MetadataManagementController {
 	/**
 	 * 
 	 * 作者:allen
+	 * 时间:2018年4月26日
+	 * 作用:添加表映射元数据--就用addMetadataStepThree
+	 *  
+	 * 参数：metamodelId、parentMetadataId、NAME、DESCRIPTION、
+	 * mappingtype、sourcetableid、targettableid
+	 */
+	
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年4月26日
+	 * 作用:添加表字段映射元数据
+	 * 
+	 * 参数：metamodelId、parentMetadataId、NAME、DESCRIPTION、
+	 * mappingtype、sourcetableid、sourcefieldid、targettableid、targetfieldid
+	 */
+	@RequestMapping(value = "/addTableFieldMappingMetadata", method = RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="metadata",operationDesc="添加表字段映射元数据")
+	public JSONObject addTableFieldMappingMetadata(HttpServletRequest request,
+			HttpServletResponse response,@RequestBody List<Map<String, Object>> list){
+		JSONObject responsejson = new JSONObject();
+		
+		//检查传参是否正确
+		if(list.size()==0){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}
+		
+		boolean result = metadataManagementService.addTableFieldMappingMetadata(list);
+		
+		if(result){
+			responsejson.put("result", true);
+			responsejson.put("count", list.size());
+		}else{
+			responsejson.put("result", false);
+			responsejson.put("count", 0);
+		}
+		return responsejson;
+	}
+	
+	/**
+	 * 
+	 * 作者:allen
 	 * 时间:2018年4月25日
 	 * 作用:得到历史版本元数据的私有属性
 	 *  

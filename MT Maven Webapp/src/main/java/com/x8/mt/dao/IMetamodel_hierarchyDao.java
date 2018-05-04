@@ -93,4 +93,6 @@ public interface IMetamodel_hierarchyDao {
 	 * 作用:查询所有元模型
 	 */
 	List<Metamodel_hierarchy> getMetamodel_packageByType();
+
+	List<Metamodel_hierarchy> getAvailableMetamodel();
 }

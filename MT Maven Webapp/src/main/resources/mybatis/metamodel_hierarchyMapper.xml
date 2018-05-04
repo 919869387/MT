@@ -69,4 +69,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		metamodel_hierarchy where mountnode = 1
 	</select>
 
+	<select id="getAvailableMetamodel" resultType="com.x8.mt.entity.Metamodel_hierarchy">
+		select * from
+		metamodel_hierarchy where id > 1000
+	</select>
+
 </mapper>
