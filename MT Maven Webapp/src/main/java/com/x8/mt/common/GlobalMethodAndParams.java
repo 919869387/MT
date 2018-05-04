@@ -12,6 +12,11 @@ import org.apache.shiro.subject.Subject;
 public class GlobalMethodAndParams {
 	
 	/**
+	 * 源字段编号,字段名
+	 */
+	public static final String JSONKey_sourcefieldid= "$.sourcefieldid";
+	
+	/**
 	 * 组合关系名
 	 */
 	public static final String COMPOSITION= "COMPOSITION";

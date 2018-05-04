@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.x8.mt.dao.IMetadataAnalysisDao">
+
+	<select id="getMetadataByJson" parameterType="Map"
+		resultType="com.x8.mt.entity.Metadata">
+		select * from metadata where
+		json_extract(attributes,#{key})=#{value};
+	</select>
+
+	<select id="getCompositionMetadata" resultType="com.x8.mt.entity.Metadata">
+		select * from
+		metadata where id in (select metadataid from metadata_relation where
+		relatedmetadataid=#{relatedmetadataid} and type='COMPOSITION');
+	</select>
+	
+	<select id="getMetadataById" resultType="com.x8.mt.entity.Metadata">
+		select * from metadata where id=#{id}
+	</select>
+
+</mapper>
