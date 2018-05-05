@@ -290,16 +290,19 @@ public class DatamapitemsController {
 		int num = 0;
 		for (String string : sonTargetMetadataList) {
 			Metadata tableMetadata = metaDataService.getMetadataById(Integer.parseInt(string));
-			Datamapitems datamapitems = new Datamapitems();
-			datamapitems.setMaplayerid(2);
-			datamapitems.setMetadataid(tableMetadata.getID());
-			datamapitems.setPosx(400);
-			datamapitems.setPosy(110 * num++);
-			datamapitems.setWidth(100);
-			datamapitems.setHeight(100);
-			datamapitems.setBackgroundcolor("rgba(48, 208, 198, 0.5)");
-			datamapitems.setFontcolor("#fff");
-			datamapitemsService.insertDatamapitems(datamapitems);
+			boolean isExist = datamapitemsService.isExist(tableMetadata.getID());
+			if(!isExist){
+				Datamapitems datamapitems = new Datamapitems();
+				datamapitems.setMaplayerid(2);
+				datamapitems.setMetadataid(tableMetadata.getID());
+				datamapitems.setPosx(400);
+				datamapitems.setPosy(110 * num++);
+				datamapitems.setWidth(100);
+				datamapitems.setHeight(100);
+				datamapitems.setBackgroundcolor("rgba(48, 208, 198, 0.5)");
+				datamapitems.setFontcolor("#fff");
+				datamapitemsService.insertDatamapitems(datamapitems);
+			}
 			
 			JSONObject node = new JSONObject();
 			node.put("id", datamapitemsService.getDatamapitemsIDByMetadataId(tableMetadata.getID()).get(0).getId());
@@ -319,16 +322,19 @@ public class DatamapitemsController {
 		
 		for (String sourceTableid : sonMetadataList) {
 			Metadata tableMetadata = metaDataService.getMetadataById(Integer.parseInt(sourceTableid));
-			Datamapitems datamapitems = new Datamapitems();
-			datamapitems.setMaplayerid(2);
-			datamapitems.setMetadataid(tableMetadata.getID());
-			datamapitems.setPosx(400);
-			datamapitems.setPosy(110 * num);
-			datamapitems.setWidth(100);
-			datamapitems.setHeight(100);
-			datamapitems.setBackgroundcolor("rgba(48, 208, 198, 0.5)");
-			datamapitems.setFontcolor("#fff");
-			datamapitemsService.insertDatamapitems(datamapitems);
+			boolean isExist = datamapitemsService.isExist(tableMetadata.getID());
+			if(!isExist){
+				Datamapitems datamapitems = new Datamapitems();
+				datamapitems.setMaplayerid(2);
+				datamapitems.setMetadataid(tableMetadata.getID());
+				datamapitems.setPosx(400);
+				datamapitems.setPosy(110 * num);
+				datamapitems.setWidth(100);
+				datamapitems.setHeight(100);
+				datamapitems.setBackgroundcolor("rgba(48, 208, 198, 0.5)");
+				datamapitems.setFontcolor("#fff");
+				datamapitemsService.insertDatamapitems(datamapitems);
+			}
 			
 			JSONObject node = new JSONObject();
 			node.put("id", datamapitemsService.getDatamapitemsIDByMetadataId(tableMetadata.getID()).get(0).getId());

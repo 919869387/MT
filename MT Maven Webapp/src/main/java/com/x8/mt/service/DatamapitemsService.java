@@ -36,6 +36,15 @@ public class DatamapitemsService {
 		return iDatamapitemsDao.getDatamapitemsMetadataidById(sourceid);
 	}
 
+	public boolean isExist(int id) {
+		boolean result = false;
+		int numbers = iDatamapitemsDao.isExist(id);
+		if(numbers>0){
+			result = true;
+		}
+		return result;
+	}
+
 	
 	
 }
