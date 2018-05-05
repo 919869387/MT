@@ -110,6 +110,8 @@ public class Metamodel_relationController {
 
 			for (Metamodel_relation metamodel_relation : dependencyRelationList) {
 				JSONObject json = new JSONObject();
+				json.put(
+						"relationid",metamodel_relation.getId());
 				json.put("metamodelid",
 						metamodel_relation.getRelatedmetamodelid());
 				json.put(

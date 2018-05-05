@@ -78,11 +78,12 @@ public class DatamapitemsController {
 		//获取第一层数据地图图层id=1
 		List<Datamaplayer> maplayerlist = datamaplayerService
 				.getDatamaplayerList();
-		if (maplayerlist == null) {
+		if (maplayerlist.size() == 0) {
 			responsejson.put("nodes", data);
 			responsejson.put("links", links);
 			return responsejson;
 		}
+		System.out.println(maplayerlist.size());
 		for (Datamaplayer datamaplayer : maplayerlist) {
 			List<Datamapitems> mapitemsList = datamapitemsService
 					.getDatamapitemsListByMaplayerId(datamaplayer.getId());
@@ -167,7 +168,7 @@ public class DatamapitemsController {
 				
 				Metadata metadata = metaDataService
 						.getMetadataById(datamapitems.getMetadataid());
-//				System.out.println("我被执行了222222222222222222222222222222222222222222222222222222222");
+//				System.out.println(datamapitems.getId());
 				JSONObject node = new JSONObject();
 				node.put("id", datamapitems.getId());
 				node.put("x", datamapitems.getPosx());
@@ -188,7 +189,7 @@ public class DatamapitemsController {
 				//查询关联元数据在图元表中对应的id
 				for (String string : metadata_relationidList) {
 					List<Datamapitems> targetDatamapitems = datamapitemsService.getDatamapitemsIDByMetadataId(Integer.parseInt(string));
-					if(targetDatamapitems.size()!=0){
+					if(targetDatamapitems.size()!=0 && targetDatamapitems.get(0).getMaplayerid()==1){
 						JSONObject link = new JSONObject();
 						link.put("sourceid", datamapitems.getId());
 						link.put("targetid", targetDatamapitems.get(0).getId());
@@ -206,6 +207,7 @@ public class DatamapitemsController {
 				String json = mappingMetadata.getATTRIBUTES();
 				JSONObject json1 = JSONObject.fromObject(json);
 				
+//				System.out.println("1111111111111");
 //				int sourcetableid = (int) json1.get("sourcetableid");
 //				int targettableid = (int) json1.get("targettableid");
 				Object sourcetableid = json1.get("sourcetableid");
@@ -220,6 +222,7 @@ public class DatamapitemsController {
 				int targetMetadataid = metaDataRelationService.getMetadataidByRelatedmetadataid(targetMetadata.getID());
 				List<Datamapitems> targetDatamapitems = datamapitemsService.getDatamapitemsIDByMetadataId(targetMetadataid);
 				
+				System.out.println(sourcMetadata.getNAME()+"+++"+targetMetadata.getNAME());
 //				System.out.println("metadata的attributes属性为："+json1.toString());
 //				System.out.println("源表对应的数据库id："
 //						+ sourceMetadataid + "     目标表对应的数据库id："
@@ -341,6 +344,7 @@ public class DatamapitemsController {
 			data.add(node);
 			//找到所有的99对应的表映射元数据列表
 			List<Metadata> mappingList = metaDataService.getMetadataByMetaModelId(Integer.parseInt(GlobalMethodAndParams.MetaDataTableMappingModelId));
+			System.out.println(mappingList.size());
 			for (Metadata metadata : mappingList) {
 				String attributes = metadata.getATTRIBUTES();
 				JSONObject json1 = JSONObject.fromObject(attributes);
