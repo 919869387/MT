@@ -1,11 +1,8 @@
 package com.x8.mt.controller;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -65,13 +62,18 @@ public class MetadataAnalysisController {
 		
 		metadataAnalysisService.fieldAnalysis(yingxiangidStr,nodesList,linksList,false);//false时为影响分析
 		
-		JSONObject data = new JSONObject();
-		data.put("nodes", nodesList);
-		data.put("links", linksList);
-		
-		responsejson.put("result", true);
-		responsejson.put("data",data);
-		responsejson.put("count",1);
+		if(nodesList.size()==0){//说明传入的元数据id不存在
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+		}else{
+			JSONObject data = new JSONObject();
+			data.put("nodes", nodesList);
+			data.put("links", linksList);
+			
+			responsejson.put("result", true);
+			responsejson.put("data",data);
+			responsejson.put("count",1);
+		}
 		return responsejson;
 	}
 	
@@ -104,13 +106,18 @@ public class MetadataAnalysisController {
 		
 		metadataAnalysisService.fieldAnalysis(xuetongidStr,nodesList,linksList,true);//为true时为血统分析
 		
-		JSONObject data = new JSONObject();
-		data.put("nodes", nodesList);
-		data.put("links", linksList);
-		
-		responsejson.put("result", true);
-		responsejson.put("data",data);
-		responsejson.put("count",1);
+		if(nodesList.size()==0){//说明传入的元数据id不存在
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+		}else{
+			JSONObject data = new JSONObject();
+			data.put("nodes", nodesList);
+			data.put("links", linksList);
+			
+			responsejson.put("result", true);
+			responsejson.put("data",data);
+			responsejson.put("count",1);
+		}
 		return responsejson;
 	}
 	
@@ -144,13 +151,18 @@ public class MetadataAnalysisController {
 		metadataAnalysisService.fieldAnalysis(quanlianidStr,nodesList,linksList,false);//false时为影响分析
 		metadataAnalysisService.fieldAnalysis(quanlianidStr,nodesList,linksList,true);//为true时为血统分析
 		
-		JSONObject data = new JSONObject();
-		data.put("nodes", nodesList);
-		data.put("links", linksList);
-		
-		responsejson.put("result", true);
-		responsejson.put("data",data);
-		responsejson.put("count",1);
+		if(nodesList.size()==0){//说明传入的元数据id不存在
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+		}else{
+			JSONObject data = new JSONObject();
+			data.put("nodes", nodesList);
+			data.put("links", linksList);
+			
+			responsejson.put("result", true);
+			responsejson.put("data",data);
+			responsejson.put("count",1);
+		}
 		return responsejson;
 	}
 }

@@ -110,7 +110,9 @@ public class MetadataAnalysisService {
 	 * 作用:内部方法，添加节点
 	 */
 	private void addNode(Metadata metadata,List<Map<String, String>> nodesList){
-
+		if(metadata==null){
+			return;
+		}
 		String status = null;
 		if(metadata.getMETAMODELID()==32){
 			status="字段类型";
