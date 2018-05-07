@@ -1,5 +1,6 @@
 package com.x8.mt.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -66,6 +67,42 @@ public class SystemroleController {
 		}
 		return responsejson;
 	}
+	
+	
+	
+	/**
+	 * 作者：yangyuan
+	 * 时间：2018年3月2日
+	 * 备注：查询所有角色名称
+	 */
+	@RequestMapping(value = "/selectAllRoleName",method=RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="systemrolecontroller",operationDesc="查询所有角色名称")
+	public JSONObject selectAllSystemRolesName(HttpServletRequest request,HttpServletResponse response){
+		//解决跨域问题
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
+				
+		//创建一个JSON对象
+		JSONObject responsejson = new JSONObject();
+		
+		List<SystemRole> systemRoles = systemroleService.selectALLSystemRoles();
+		List<String> roleName = new ArrayList<String>();
+		
+		if(systemRoles == null){
+			responsejson.put("status", false);
+			responsejson.put("msg", "没有角色信息");
+			responsejson.put("data", roleName);
+		}else{
+			for(SystemRole role : systemRoles){
+				roleName.add(role.getRolename());
+			}
+			responsejson.put("status", true);
+			responsejson.put("msg", "查询成功");
+			responsejson.put("data", roleName);
+		}
+		return responsejson;
+	}
+	
 	
 	/**
 	 * 作者：yangyuan
