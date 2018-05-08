@@ -424,7 +424,7 @@ public class DatamapitemsController {
 			boolean isExist = datamapitemsService.isExist(tableMetadata.getID());
 			if(!isExist){
 				Datamapitems datamapitems = new Datamapitems();
-				datamapitems.setMaplayerid(2);
+				datamapitems.setMaplayerid(3);
 				datamapitems.setMetadataid(tableMetadata.getID());
 				datamapitems.setPosx(400);
 				datamapitems.setPosy(110 * num++);
