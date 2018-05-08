@@ -28,6 +28,7 @@ import com.x8.mt.entity.Metamodel_hierarchy;
 import com.x8.mt.service.MetadataManagementService;
 import com.x8.mt.service.MetadataViewNodeService;
 import com.x8.mt.service.Metamodel_hierarchyService;
+import com.x8.mt.service.SystemLogService;
 /**
  * 作者： allen
  * 时间：2018年3月15日
@@ -43,6 +44,38 @@ public class MetadataManagementController {
 	Metamodel_hierarchyService metamodel_hierarchyService;
 	@Resource
 	MetadataViewNodeService metadataViewNodeService;
+	@Resource
+	SystemLogService systemLogService;
+	
+	/**
+	 * 
+	 * 作者:itcoder
+	 * 时间:2018年5月5日
+	 * 作用:得到指定用户等出后元数据变更数目
+	 *  
+	 * 参数：用户名systemusername
+	 */
+	@RequestMapping(value = "/getModifedMetadataNumbers", method = RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="metadata",operationDesc="得到历史版本元数据的公共属性")
+	public JSONObject getModifedMetadataNumbers(HttpServletRequest request, HttpServletResponse response,@RequestBody Map<String,String> map) {
+		JSONObject responsejson = new JSONObject();
+		
+		//检测参数是否正确
+		if(!map.containsKey("systemusername")||map.get("systemusername").trim().equals("")){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}
+		
+		String systemusername = map.get("systemusername");
+		
+		int count = systemLogService.getModifiedNumbers(systemusername);
+		
+		responsejson.put("result", true);
+		responsejson.put("count",count);
+		return responsejson;
+	}
 	
 	/**
 	 * 

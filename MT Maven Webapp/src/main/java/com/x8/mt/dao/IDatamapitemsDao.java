@@ -15,6 +15,8 @@ public interface IDatamapitemsDao {
 	List<Datamapitems> getDatamapitemsIDByMetadataId(int id);
 
 	int getDatamapitemsMetadataidById(int sourceid);
+
+	int isExist(int id);
 	
 	
 }

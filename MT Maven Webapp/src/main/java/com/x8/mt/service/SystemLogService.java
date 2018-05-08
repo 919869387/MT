@@ -138,6 +138,15 @@ public class SystemLogService {
 		return iSystemLogDao.getRowCountByCon(systemLog);
 	}
 
+	/**
+	 * 作者：itcoder
+	 * 时间：2018年5月5日
+	 * 备注：根据用户名查询到的登出时间，查询距离上次登陆元数据变更的总数
+	 */
+	public int getModifiedNumbers(String systemusername) {
+		return iSystemLogDao.getModifiedNumbers(systemusername);
+	}
+
 	
 
 }
