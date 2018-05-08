@@ -1,6 +1,7 @@
 package com.x8.mt.controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -86,7 +87,7 @@ public class SystemroleController {
 		JSONObject responsejson = new JSONObject();
 		
 		List<SystemRole> systemRoles = systemroleService.selectALLSystemRoles();
-		List<String> roleName = new ArrayList<String>();
+		List<Map<String, Object>> roleName = new ArrayList<Map<String,Object>>();
 		
 		if(systemRoles == null){
 			responsejson.put("status", false);
@@ -94,7 +95,9 @@ public class SystemroleController {
 			responsejson.put("data", roleName);
 		}else{
 			for(SystemRole role : systemRoles){
-				roleName.add(role.getRolename());
+				Map<String, Object> map = new HashMap<String, Object>();
+				map.put("roleName", role.getRolename());
+				roleName.add(map);
 			}
 			responsejson.put("status", true);
 			responsejson.put("msg", "查询成功");
