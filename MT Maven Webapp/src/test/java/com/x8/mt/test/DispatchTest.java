@@ -1,30 +1,20 @@
 package com.x8.mt.test;
 
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.collections.map.HashedMap;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pentaho.di.core.KettleEnvironment;
-import org.pentaho.di.job.Job;
-import org.pentaho.di.job.JobMeta;
-import org.pentaho.di.job.entries.special.JobEntrySpecial;
-import org.pentaho.di.job.entry.JobEntryCopy;
-import org.pentaho.di.repository.LongObjectId;
-import org.pentaho.di.repository.ObjectId;
-import org.pentaho.di.repository.RepositoryDirectoryInterface;
-import org.pentaho.di.repository.kdr.KettleDatabaseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.x8.mt.entity.Datasource_connectinfo;
-import com.x8.mt.entity.Dispatch;
-import com.x8.mt.entity.Metadata;
 import com.x8.mt.service.DispatchService;
+import com.x8.mt.service.ETLJobService;
+import com.x8.mt.service.MetaDataService;
 
 @RunWith(SpringJUnit4ClassRunner.class) 
 @ContextConfiguration({"classpath*:applicationContext.xml"}) 
@@ -36,6 +26,10 @@ import com.x8.mt.service.DispatchService;
 public class DispatchTest {
 	@Autowired
 	DispatchService dispatchService;
+	@Autowired
+	ETLJobService eTLJobService;
+	@Autowired
+	MetaDataService metaDataService;
 
 
 //	@Test	
@@ -100,13 +94,21 @@ public class DispatchTest {
 	}
 	
 	@Test
-	public void testDate() throws Exception{
-		String date = "2016-08-15T16:00:00.000Z";
+	public void testDate() throws Exception{		
+		Map dataMap = new HashedMap();
+		dataMap.put("schedulerType", 2);
+		String date = "2018-05-08T12:32:25.000Z";
 		date = date.replace("Z", " UTC");
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS Z");
 		Date d = format.parse(date);
-		System.out.println(date);
-		System.out.println(d.toString());
-		System.out.println(d);
+		String[] daytime = d.toString().split(" ");
+		String[] time = daytime[3].split(":");
+		int hour = Integer.parseInt(time[0]);
+		int minutes = Integer.parseInt(time[1]);
+		dataMap.put("hour", hour);
+		dataMap.put("minutes", minutes);
+		dataMap.put("description", "haha");
+		
+		eTLJobService.saveSchedule(metaDataService.getMetadataById(83250).getNAME(),dataMap);
 	}
 }

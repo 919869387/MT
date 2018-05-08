@@ -120,15 +120,15 @@ public class ETLJobService {
 	public boolean stopETLSchedule(int id){
 		if(theSchedule.containsKey(id + " Schedule")){
 			((Job)theSchedule.get(id + " Schedule")).stopAll();
-			
+			System.out.println("停止");
 			Dispatch dispatch = new Dispatch();
 			dispatch.setDispatchid(id);
 			dispatch.setStatus(3);
 			iDispatchDao.updateDispatch(dispatch);
 		
 			return true;
-		}		
-		else return false;		
+		}
+		return false;		
 	}
 	
 	public int getRowCount(int type){
@@ -266,14 +266,16 @@ public class ETLJobService {
 			JobMeta jobMeta = new JobMeta(dispatch.getName()+ ".kjb", null);
 			Job job = new Job(null,jobMeta);		
 			
-			theSchedule.put(dispatch.getDispatchid() + "Schedule",job);
-			job.start();				
-			job.waitUntilFinished();
-			
+			theSchedule.put(dispatch.getDispatchid() + " Schedule",job);
 			dispatch.setStatus(2);
 			SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			dispatch.setRecenttime(sdf.parse(sdf.format(new Date())));
 			iDispatchDao.updateDispatch(dispatch);
+			
+			job.start();				
+			job.waitUntilFinished();
+			
+
 		}else if(dispatch.getType().equals("EXTERNAL")){
 			Metadata metadata = iMetaDataDao.getMetadataById(Integer.parseInt(dispatch.getJobname()));
 			Datasource_connectinfo res = datasource_connectinfoService.getDatasource_connectinfoListByparentid(
@@ -287,7 +289,7 @@ public class ETLJobService {
 			
 			Job job = new Job(kettleDatabaseRepository,jobMeta);
 			
-			theSchedule.put(dispatch.getDispatchid() + "Schedule",job);
+			theSchedule.put(dispatch.getDispatchid() + " Schedule",job);
 			job.start();
 			job.waitUntilFinished();
 			
@@ -461,6 +463,7 @@ public class ETLJobService {
 			
 			String jobName = name + " Schedule"+".kjb";
 			File file = new File(jobName);
+			System.out.println(jobName);
 			if (file.exists() && file.isFile()) {
 				if (file.delete()) {}
 			}
