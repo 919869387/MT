@@ -64,7 +64,7 @@ public class KettleMetadataCollectService {
 	 * @throws ParseException 
 	 */
 	@Transactional
-	public String collectDataBaseAndTableMetaData(Datasource_connectinfo datasource_connectinfo,int collectjobid,Date createDate,int datasourceId
+	public String collectDataBaseAndTableMetaData(Datasource_connectinfo datasource_connectinfo,int collectjobid,Date createDate
 			,List<Table> tables) throws KettleException, SQLException, ParseException {
 		int collectCount = 0;//表元数据、字段元数据记录数共同记录
 		database = initKettleEnvironment(datasource_connectinfo);
@@ -181,7 +181,7 @@ public class KettleMetadataCollectService {
 	 * @throws ParseException 
 	 */
 	@Transactional
-	public String collectFieldMetaData(Datasource_connectinfo datasource_connectinfo,int collectjobid,Date createDate,int datasourceId
+	public String collectFieldMetaData(Datasource_connectinfo datasource_connectinfo,int collectjobid,Date createDate
 			,List<Table> tables) throws KettleException, SQLException, ParseException {
 		int collectCount = 0;//表元数据、字段元数据记录数共同记录
 		
@@ -265,7 +265,7 @@ public class KettleMetadataCollectService {
 	 */
 	@Transactional
 	public List<Table> collectKettleJob(Datasource_connectinfo datasource_connectinfo
-			,int collectjobid,Date createDate,int datasourceId,String repositoryName) throws KettleException {
+			,int collectjobid,Date createDate,String repositoryName) throws KettleException {
 		KettleDatabaseRepository kettleDatabaseRepository = connectKettleDatabaseRepository(datasource_connectinfo);
        //绑定根目录
        //RepositoryDirectoryInterface directory =kettleDatabaseRepository.loadRepositoryDirectoryTree();

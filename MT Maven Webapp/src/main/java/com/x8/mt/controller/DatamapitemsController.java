@@ -367,8 +367,8 @@ public class DatamapitemsController {
 				System.out.println(targettableid+"---"+sourcetablid);
 				
 				JSONObject link = new JSONObject();
-				link.put("sourceid", datamapitemsService.getDatamapitemsIDByMetadataId(sourcetablid));
-				link.put("targetid", datamapitemsService.getDatamapitemsIDByMetadataId(targettableid));
+				link.put("sourceid", datamapitemsService.getDatamapitemsIDByMetadataId(sourcetablid).get(0).getId());
+				link.put("targetid", datamapitemsService.getDatamapitemsIDByMetadataId(targettableid).get(0).getId());
 				links.add(link);
 				
 			}
@@ -498,8 +498,8 @@ public class DatamapitemsController {
 				System.out.println(targettableid+"---"+sourcetablid);
 				
 				JSONObject link = new JSONObject();
-				link.put("sourceid", datamapitemsService.getDatamapitemsIDByMetadataId(sourcetablid));
-				link.put("targetid", datamapitemsService.getDatamapitemsIDByMetadataId(targettableid));
+				link.put("sourceid", datamapitemsService.getDatamapitemsIDByMetadataId(sourcetablid).get(0).getId());
+				link.put("targetid", datamapitemsService.getDatamapitemsIDByMetadataId(targettableid).get(0).getId());
 				links.add(link);
 				
 			}

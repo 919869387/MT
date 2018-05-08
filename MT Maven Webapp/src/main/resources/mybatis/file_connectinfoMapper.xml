@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.x8.mt.dao.IFile_connectinfoDao">
+	
+	<select id="getFile_connectinfoByid" resultType="com.x8.mt.entity.File_connectinfo">
+		select * from file_connectinfo where id=#{id}
+	</select>
+	
+	<select id="getFile_connectinfo" resultType="com.x8.mt.entity.File_connectinfo">
+		select * from file_connectinfo
+	</select>
+	
+	<insert id="insert" parameterType="com.x8.mt.entity.File_connectinfo"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into
+		file_connectinfo(path, filename, size,filetype,parentid)
+		values(#{path}, #{filename},#{size},#{filetype}, #{parentid})
+	</insert>
+	
+	<select id="getFile_connectinfoListByparentid" resultType="com.x8.mt.entity.File_connectinfo">
+		select * from file_connectinfo where parentid=#{parentid}
+	</select>
+
+	<delete id="delete" parameterType="int">
+		delete from
+		file_connectinfo where id=#{id}
+	</delete>
+
+	<update id="update" parameterType="com.x8.mt.entity.File_connectinfo">
+		update file_connectinfo
+		<trim prefix="set" suffixOverrides=",">
+			<if test="path!=null">path=#{path},</if>
+			<if test="filename!=null">filename=#{filename},</if>
+			<if test="size!=null">size=#{size},</if>
+			<if test="filetype!=null">filetype=#{filetype},</if>
+		</trim>
+		where parentid=#{parentid}
+	</update>
+</mapper>
