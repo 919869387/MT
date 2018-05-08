@@ -45,6 +45,10 @@ public class DatamapitemsService {
 		return result;
 	}
 
+	public int updateDatamapitems(Datamapitems datamapitems) {
+		return iDatamapitemsDao.updateDatamapitems(datamapitems);
+	}
+
 	
 	
 }

@@ -457,7 +457,7 @@ public class DatamapitemsController {
 			boolean isExist = datamapitemsService.isExist(tableMetadata.getID());
 			if(!isExist){
 				Datamapitems datamapitems = new Datamapitems();
-				datamapitems.setMaplayerid(2);
+				datamapitems.setMaplayerid(3);
 				datamapitems.setMetadataid(tableMetadata.getID());
 				datamapitems.setPosx(800);
 				datamapitems.setPosy(110 * num++);
@@ -506,6 +506,55 @@ public class DatamapitemsController {
 		}
 		responsejson.put("nodes", data);
 		responsejson.put("links", links);
+		return responsejson;
+	}
+	
+	/**
+	 * 
+	 * 作者:itcoder 
+	 * 时间:2018年5月8日 
+	 * 作用:修改数据地图图元位置
+	 * 参数：JSONArray
+	 */
+	@RequestMapping(value = "/modifyDatamapPosition", method = RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType = "modifyDatamapPosition", operationDesc = "修改数据地图图元位置")
+	public JSONObject modifyDatamapPosition(HttpServletRequest request,
+			HttpServletResponse response,@RequestBody String jsonStr) {
+		JSONObject responsejson = new JSONObject();
+
+		// if(!GlobalMethodAndParams.checkLogin()){
+		// responsejson.put("result", false);
+		// responsejson.put("count",0);
+		// return responsejson;
+		// }
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
+		boolean result = false;
+		int count = 0;
+		
+		JSONArray paramArray = JSONArray.fromObject(jsonStr);
+		for (int i = 0; i < paramArray.size(); i++) {
+			JSONObject node = paramArray.getJSONObject(i);
+			int id = node.getInt("id");
+			int posx = node.getInt("posx");
+			int posy = node.getInt("posy");
+			Datamapitems datamapitems = new Datamapitems();
+			datamapitems.setPosx(posx);
+			datamapitems.setPosy(posy);
+			datamapitems.setId(id);
+			count += datamapitemsService.updateDatamapitems(datamapitems);
+		}
+		
+		if(count==paramArray.size()){
+			result = true;
+		}
+		if(result){
+			responsejson.put("result", result);
+			responsejson.put("count", 1);
+		}else{
+			responsejson.put("result", result);
+			responsejson.put("count", 0);
+		}
 		return responsejson;
 	}
 	
