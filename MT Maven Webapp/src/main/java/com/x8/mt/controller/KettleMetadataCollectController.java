@@ -15,6 +15,9 @@ import javax.servlet.http.HttpServletResponse;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.session.Session;
+import org.apache.shiro.subject.Subject;
 import org.pentaho.di.core.exception.KettleException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -30,12 +33,15 @@ import com.x8.mt.common.Log;
 import com.x8.mt.entity.CollectJob;
 import com.x8.mt.entity.Connectinfo;
 import com.x8.mt.entity.Datasource_connectinfo;
+import com.x8.mt.entity.File_connectinfo;
 import com.x8.mt.entity.Metadata;
 import com.x8.mt.entity.Metamodel_datatype;
 import com.x8.mt.entity.Table;
 import com.x8.mt.service.CollectJobService;
 import com.x8.mt.service.ConnectinfoService;
 import com.x8.mt.service.Datasource_connectinfoService;
+import com.x8.mt.service.FileMetadataCollectService;
+import com.x8.mt.service.File_connectinfoService;
 import com.x8.mt.service.KettleMetadataCollectService;
 import com.x8.mt.service.MetaDataService;
 import com.x8.mt.service.Metamodel_datatypeService;
@@ -48,9 +54,13 @@ public class KettleMetadataCollectController {
 	@Resource
 	Datasource_connectinfoService datasource_connectinfoService;
 	@Resource
+	File_connectinfoService file_connectinfoService;
+	@Resource
 	ConnectinfoService connectinfoService;
 	@Resource
 	KettleMetadataCollectService kettleMetadataCollectService;
+	@Resource
+	FileMetadataCollectService fileMetadataCollectService;
 	@Resource
 	MetaDataService metaDataService;
 	@Resource
@@ -347,9 +357,11 @@ public class KettleMetadataCollectController {
 			createDate = sdf.parse(sdf.format(new Date()));
 		}catch(Exception e){}
 		//获取当前的用户名
-		String creater = "admin";
+		Subject subject = SecurityUtils.getSubject();  
+		Session session = subject.getSession();
+		String creater = session.getAttribute("username").toString();
 		//获取数据源的详细连接信息
-		Datasource_connectinfo datasource_connectinfo = datasource_connectinfoService.getDatasource_connectinfoListByparentid(id);		
+	
 		Connectinfo connectinfo = connectinfoService.getConnectinfoByid(id);
 		
 		//删除以前采集的元数据
@@ -365,7 +377,8 @@ public class KettleMetadataCollectController {
 			//表示接下来采集的是数据库元数据，即对应的元模型Id为10
 			int mountmodelid = connectinfo.getMountMetaDataId();
 
-			if(mountmodelid == 10){		
+			if(mountmodelid == 10){	
+				Datasource_connectinfo datasource_connectinfo = datasource_connectinfoService.getDatasource_connectinfoListByparentid(id);	
 				String json = JSON.toJSONString(map, true);
 				HashMap parseMap = JSON.parseObject(json, HashMap.class);
 				List<com.alibaba.fastjson.JSONObject> tableList = (List<com.alibaba.fastjson.JSONObject>) parseMap.get("multipleSelection");
@@ -385,8 +398,8 @@ public class KettleMetadataCollectController {
 				//采集的字段的数量以及大小
 				String fieldSize ;
 				
-				tableSize = kettleMetadataCollectService.collectDataBaseAndTableMetaData(datasource_connectinfo,newCollectJob.getId(),createDate,id,tables);
-				fieldSize = kettleMetadataCollectService.collectFieldMetaData(datasource_connectinfo,newCollectJob.getId(),createDate,id,tables);				
+				tableSize = kettleMetadataCollectService.collectDataBaseAndTableMetaData(datasource_connectinfo,newCollectJob.getId(),createDate,tables);
+				fieldSize = kettleMetadataCollectService.collectFieldMetaData(datasource_connectinfo,newCollectJob.getId(),createDate,tables);				
 				
 				for(Table table : tables){
 					JSONObject node = new JSONObject();
@@ -405,8 +418,9 @@ public class KettleMetadataCollectController {
 				responsejson.put("collectionId",newCollectJob.getId());			
 
 			}else if(mountmodelid == 202){
+				Datasource_connectinfo datasource_connectinfo = datasource_connectinfoService.getDatasource_connectinfoListByparentid(id);	
 				String repositoryName = connectinfo.getName();				
-				List<Table> tables = kettleMetadataCollectService.collectKettleJob(datasource_connectinfo,newCollectJob.getId(),createDate,id,repositoryName);
+				List<Table> tables = kettleMetadataCollectService.collectKettleJob(datasource_connectinfo,newCollectJob.getId(),createDate,repositoryName);
 			
 				for(Table table : tables){
 					JSONObject node = new JSONObject();
@@ -416,6 +430,23 @@ public class KettleMetadataCollectController {
 					data.add(node);
 				}	
 				responsejson.put("collectionId",newCollectJob.getId());	
+			}else if(mountmodelid == 110){
+				File_connectinfo file_connectinfo = file_connectinfoService.getFile_connectinfoListByparentid(id);
+				String filename = file_connectinfo.getFilename();
+				if(file_connectinfo.getFiletype() == 1){					
+					fileMetadataCollectService.collectExcelMetaData(filename,newCollectJob.getId(),createDate);
+				}else if(file_connectinfo.getFiletype() == 2){
+					fileMetadataCollectService.collectJSONMetadata(filename,newCollectJob.getId(),createDate);
+				}else if(file_connectinfo.getFiletype() == 3){
+					//fileMetadataCollectService.collectXmlMetadata(filename,newCollectJob.getId(),createDate);
+				}else if(file_connectinfo.getFiletype() == 4){
+					fileMetadataCollectService.collectTXTMetadata(filename, ";",newCollectJob.getId(),createDate);;
+				}
+				JSONObject node = new JSONObject();
+				node.put("tablename", file_connectinfo.getFilename());
+				node.put("operationname", null);
+				node.put("operationdescribe", null);
+				data.add(node);
 			}
 			
 			responsejson.put("result", true);

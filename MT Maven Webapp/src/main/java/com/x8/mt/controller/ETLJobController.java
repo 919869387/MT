@@ -15,6 +15,9 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import org.apache.commons.collections.map.HashedMap;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.session.Session;
+import org.apache.shiro.subject.Subject;
 import org.pentaho.di.core.exception.KettleException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -73,6 +76,10 @@ public class ETLJobController {
 			return responsejson;
 		}
 		
+		Subject subject = SecurityUtils.getSubject();  
+		Session session = subject.getSession();
+		String creater = session.getAttribute("username").toString();
+		
 		Metadata metadata = new Metadata();
 		metadata.setNAME(metaDataService.getMetadataById(Integer.parseInt((String)map.get("target_table_id"))).getNAME());
 		metadata.setMETAMODELID(203);
@@ -92,7 +99,7 @@ public class ETLJobController {
 				etlJob.setDescription((String)map.get("description"));
 			}
 			etlJob.setCreate_date(new Date());
-			etlJob.setCreateuserid(systemuserService.selectUser("admin").getId());
+			etlJob.setCreateuserid(systemuserService.selectUser(creater).getId());
 			etlJob.setType("LOCAL");
 			etlJob.setStatus("NewCreate");	
 			etlJob.setJobtype(Integer.parseInt((String)map.get("type")));
@@ -225,6 +232,11 @@ public class ETLJobController {
 			return responsejson;
 		}
 		
+		//获取当前的用户名
+		Subject subject = SecurityUtils.getSubject();  
+		Session session = subject.getSession();
+		String creater = session.getAttribute("username").toString();		
+		
 		int id = 1;
 		
 		try{
@@ -250,7 +262,7 @@ public class ETLJobController {
 					etlJob.setDescription((String) map.get("description"));
 				}
 				etlJob.setCreate_date(new Date());
-				etlJob.setCreateuserid(systemuserService.selectUser("admin").getId());
+				etlJob.setCreateuserid(systemuserService.selectUser(creater).getId());
 				etlJob.setType("EXTERNAL");
 				etlJob.setStatus("NewCreate");
 				etlJob.setJobtype(0);

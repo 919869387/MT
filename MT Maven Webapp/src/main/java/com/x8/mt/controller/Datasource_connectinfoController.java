@@ -17,16 +17,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.x8.mt.common.CalDataSize;
 import com.x8.mt.common.GlobalMethodAndParams;
 import com.x8.mt.common.Log;
 import com.x8.mt.entity.CollectJob;
 import com.x8.mt.entity.Connectinfo;
 import com.x8.mt.entity.Datasource_connectinfo;
+import com.x8.mt.entity.File_connectinfo;
 import com.x8.mt.entity.Metadata;
-import com.x8.mt.entity.Metamodel_datatype;
 import com.x8.mt.service.CollectJobService;
 import com.x8.mt.service.ConnectinfoService;
 import com.x8.mt.service.Datasource_connectinfoService;
+import com.x8.mt.service.File_connectinfoService;
 import com.x8.mt.service.MetaDataService;
 import com.x8.mt.service.Metamodel_datatypeService;
 
@@ -36,6 +38,8 @@ import com.x8.mt.service.Metamodel_datatypeService;
 public class Datasource_connectinfoController {
 	@Resource
 	Datasource_connectinfoService datasource_connectinfoService;
+	@Resource
+	File_connectinfoService file_connectinfoService;
 	@Resource
 	ConnectinfoService connectinfoService;	
 	@Resource
@@ -203,6 +207,81 @@ public class Datasource_connectinfoController {
 	/**
 	 * 
 	 * 作者:GodDispose
+	 * 时间:2018年5月8日
+	 * 作用:根据数据库元数据ID获取所用文件连接信息
+	 * 参数：id
+	 */
+	@RequestMapping(value = "/getFile_Connectinfo",method=RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="file_connectinfo",operationDesc="根据数据库元数据ID获取所用文件连接信息")
+	public JSONObject getFile_Connectinfo(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map){
+		JSONObject responsejson = new JSONObject();
+
+//		if(!GlobalMethodAndParams.checkLogin()){
+//			responsejson.put("result", false);
+//			responsejson.put("count",0);
+//			return responsejson;
+//		}
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
+		
+		//检查传参是否正确
+		if(!map.containsKey("id")){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}
+
+		String idStr = map.get("id").toString();
+		int id = 0;
+		try {
+			id = Integer.parseInt(idStr);
+		} catch (Exception e) {
+		}
+		
+		JSONArray data = new JSONArray();
+		File_connectinfo file_connectinfo = file_connectinfoService.getFile_connectinfoListByparentid(id);
+		
+		JSONObject file_connectinfoId = new JSONObject();
+		file_connectinfoId.put("key","ID");
+		file_connectinfoId.put("value", file_connectinfo.getParentid());
+		data.add(file_connectinfoId);
+		
+		JSONObject path = new JSONObject();
+		path.put("key","文件路径");
+		path.put("value", file_connectinfo.getPath());
+		data.add(path);
+		
+		JSONObject filename = new JSONObject();
+		filename.put("key","文件名");
+		filename.put("value", file_connectinfo.getFilename());
+		data.add(filename);
+		
+		JSONObject size = new JSONObject();
+		size.put("key","文件大小");
+		size.put("value", file_connectinfo.getSize());
+		data.add(size);
+		
+		JSONObject type = new JSONObject();
+		type.put("key","文件类型");
+		if(file_connectinfo.getFiletype() == 1){
+			type.put("value","EXCEL");
+		}else if (file_connectinfo.getFiletype() == 2){
+			type.put("value","JSON");
+		}else {
+			type.put("value", file_connectinfo.getFiletype() == 3 ? "XML" :"TXT");
+		}
+		data.add(type);
+		
+		responsejson.put("result", true);
+		responsejson.put("data", data);
+		//获取记录数，为日志所用
+		responsejson.put("count", 1);
+		return responsejson;
+	}
+	
+	/**
+	 * 
+	 * 作者:GodDispose
 	 * 时间:2018年3月14日
 	 * 作用:更新一条Datasource_connectinfo记录
 	 * 参数：id,url、port、username、password、databasename、databasetype、parentid
@@ -272,6 +351,61 @@ public class Datasource_connectinfoController {
 	}
 
 	/**
+		 * 
+		 * 作者:GodDispose
+		 * 时间:2018年5月8日
+		 * 作用:更新文件数据源
+		 * 参数：name、filename、filetype、desribe（可选）
+		 * 		filetype--enum(1,2,3,4)
+		 */
+		@RequestMapping(value = "/updateFile_connectinfo",method=RequestMethod.POST)
+		@ResponseBody
+		@Log(operationType="connectinfo",operationDesc="更新文件数据源")
+		public JSONObject updateFile_connectinfo(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map){
+			JSONObject responsejson = new JSONObject();
+			
+	//		if(!GlobalMethodAndParams.checkLogin()){
+	//			responsejson.put("result", false);
+	//			responsejson.put("count",0);
+	//			return responsejson;
+	//		}
+			GlobalMethodAndParams.setHttpServletResponse(request, response);
+			
+			//检查传参是否正确
+			if(!map.containsKey("id")){
+				responsejson.put("result", false);
+				responsejson.put("count",0);
+				return responsejson;
+			}
+			
+			//更新文件数据源连接信息记录
+			File_connectinfo file_connectinfo = new File_connectinfo();
+			file_connectinfo.setParentid(Integer.parseInt(map.get("id").toString()));;
+			if(map.containsKey("filename")){
+				file_connectinfo.setFilename(map.get("filename").toString());
+			}
+			if(map.containsKey("filetype")){
+				file_connectinfo.setFiletype(Integer.parseInt(map.get("filetype").toString()));
+			}
+			if(map.containsKey("size")){
+				file_connectinfo.setSize(map.get("size").toString());
+			}
+			
+			boolean result = file_connectinfoService.insertFile_connectinfo(file_connectinfo);
+			
+			responsejson.put("result", result);
+			if(result){
+				responsejson.put("count",1);
+			}else{
+				responsejson.put("count",0);
+			}
+			
+			return responsejson;
+		}
+
+
+
+	/**
 	 * 
 	 * 作者:GodDispose
 	 * 时间:2018年3月14日
@@ -306,14 +440,14 @@ public class Datasource_connectinfoController {
 		if(map.containsKey("describe")){
 			connectinfo.setDescription(map.get("describe").toString());
 		}			
-			boolean result = connectinfoService.updateConnectinfoNameOrDescriptionById(connectinfo);
+		boolean result = connectinfoService.updateConnectinfoNameOrDescriptionById(connectinfo);
 			
-			responsejson.put("result", result);
-			if(result){
-				responsejson.put("count",1);
-			}else{
-				responsejson.put("count",0);
-			}
+		responsejson.put("result", result);
+		if(result){
+			responsejson.put("count",1);
+		}else{
+			responsejson.put("count",0);
+		}
 
 		return responsejson;
 	}
@@ -426,6 +560,7 @@ public class Datasource_connectinfoController {
 		
 		int metaModelId = Integer.parseInt(map.get("mountmetadataid").toString());
 		connectInfo.setMountMetaDataId(metaModelId);
+		//connectInfo.setNeedCheck(Integer.parseInt(map.get("checkstatus").toString()));
 		connectInfo.setNeedCheck(1);
 		if(!connectinfoService.insertConnectinfo(connectInfo)){
 			responsejson.put("result", false);
@@ -455,6 +590,81 @@ public class Datasource_connectinfoController {
 		}else{
 			responsejson.put("count",0);
 		}
+		return responsejson;
+	}
+	
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年5月8日
+	 * 作用:插入一条数据源记录
+	 * 参数：name、filename、filetype、desribe（可选）
+	 * 		filetype--enum(1,2,3,4)
+	 */
+	@RequestMapping(value = "/insertFileConnectinfoBySelf",method=RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="connectinfo",operationDesc="插入数据源")
+	public JSONObject insertFileConnectinfoBySelf(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map){
+		JSONObject responsejson = new JSONObject();
+		
+//		if(!GlobalMethodAndParams.checkLogin()){
+//			responsejson.put("result", false);
+//			responsejson.put("count",0);
+//			return responsejson;
+//		}
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
+		
+		//检查传参是否正确
+		if(!(map.containsKey("name")
+				&& map.containsKey("filename")
+				&& map.containsKey("filetype"))){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}	
+		
+		if(connectinfoService.getConnectinfoByName(map.get("name").toString()) != null){
+			responsejson.put("result", false);
+			responsejson.put("description", "数据源名称已经存在");
+			responsejson.put("count",0);
+			return responsejson;
+		}
+		
+		//插入数据源信息记录		
+		Connectinfo connectInfo = new Connectinfo();
+		connectInfo.setName(map.get("name").toString());
+		connectInfo.setType("file");
+		if(map.containsKey("describe")){
+			connectInfo.setDescription(map.get("describe").toString());
+		}
+		
+		//int metaModelId = Integer.parseInt(map.get("mountmetadataid").toString());
+		connectInfo.setMountMetaDataId(110);
+		//connectInfo.setNeedCheck(Integer.parseInt(map.get("checkstatus").toString()));
+		connectInfo.setNeedCheck(1);
+		if(!connectinfoService.insertConnectinfo(connectInfo)){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}
+		
+		//插入文件数据源连接信息记录
+		File_connectinfo file_connectinfo = new File_connectinfo();
+		file_connectinfo.setPath(GlobalMethodAndParams.PATH_NAME);
+		file_connectinfo.setFilename(map.get("filename").toString());
+		file_connectinfo.setFiletype(Integer.parseInt(map.get("filetype").toString()));
+		file_connectinfo.setSize(map.get("size").toString());
+		file_connectinfo.setParentid(connectInfo.getId());
+		
+		boolean result = file_connectinfoService.insertFile_connectinfo(file_connectinfo);
+		
+		responsejson.put("result", result);
+		if(result){
+			responsejson.put("count",1);
+		}else{
+			responsejson.put("count",0);
+		}
+		
 		return responsejson;
 	}
 	
@@ -529,6 +739,94 @@ public class Datasource_connectinfoController {
 			}
 			
 			boolean result = datasource_connectinfoService.insertDatasource_connectinfo(datasource_connectinfo);
+			responsejson.put("result", result);
+			if(result){
+				responsejson.put("count",1);
+			}else{
+				responsejson.put("count",0);
+			}
+		}catch(Exception e){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+		}
+		return responsejson;
+	}
+	
+	
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年5月8日
+	 * 作用:插入一条数据源记录
+	 * 参数：name、filename、filetype、desribe（可选）
+	 * 		filetype--enum(1,2,3,4)
+	 */
+	@RequestMapping(value = "/insertFileConnectinfoByMetadata",method=RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="connectinfo",operationDesc="插入数据源")
+	public JSONObject insertFileConnectinfoByMetadata(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map){
+		JSONObject responsejson = new JSONObject();
+		
+//		if(!GlobalMethodAndParams.checkLogin()){
+//			responsejson.put("result", false);
+//			responsejson.put("count",0);
+//			return responsejson;
+//		}
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
+		
+		//检查传参是否正确
+		if(!(map.containsKey("id"))){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}	
+		
+		String idstr = map.get("id").toString();
+		int id = 0;
+		id = Integer.parseInt(idstr);
+		
+		Metadata metadata = metaDataService.getMetadataById(id);
+
+		
+		if(connectinfoService.getConnectinfoByName(metadata.getNAME()) != null){
+			responsejson.put("result", false);
+			responsejson.put("description", "数据源名称已经存在");
+			responsejson.put("count",0);
+			return responsejson;
+		}
+		
+		try {
+			JSONObject json = JSONObject.fromObject(metadata.getATTRIBUTES());
+			//插入数据源信息记录		
+			Connectinfo connectInfo = new Connectinfo();
+			connectInfo.setName(metadata.getNAME());
+			connectInfo.setType("file");
+			if(json.containsKey("describe")){
+				connectInfo.setDescription(metadata.getDESCRIPTION());
+			}
+			
+			//int metaModelId = Integer.parseInt(map.get("mountmetadataid").toString());
+			connectInfo.setMountMetaDataId(110);
+			//connectInfo.setNeedCheck(Integer.parseInt(map.get("checkstatus").toString()));
+			connectInfo.setNeedCheck(1);
+			if(!connectinfoService.insertConnectinfo(connectInfo)){
+				responsejson.put("result", false);
+				responsejson.put("count",0);
+				return responsejson;
+			}
+			
+			//插入文件数据源连接信息记录
+			File_connectinfo file_connectinfo = new File_connectinfo();
+			file_connectinfo.setPath(GlobalMethodAndParams.PATH_NAME);
+			file_connectinfo.setFilename(json.get("filename").toString());
+			file_connectinfo.setFiletype(Integer.parseInt(json.get("filetype").toString()));
+			if(json.get("filelength") != null){
+				file_connectinfo.setSize(CalDataSize.getPrintSize(Long.parseLong(json.get("filelength").toString())));
+			}
+			file_connectinfo.setParentid(connectInfo.getId());
+			
+			boolean result = file_connectinfoService.insertFile_connectinfo(file_connectinfo);
+			
 			responsejson.put("result", result);
 			if(result){
 				responsejson.put("count",1);
