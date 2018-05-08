@@ -14,6 +14,7 @@ import com.x8.mt.dao.IDatasource_connectinfoDao;
 import com.x8.mt.entity.CollectJob;
 import com.x8.mt.entity.Datasource_connectinfo;
 import com.x8.mt.service.CollectJobService;
+import com.x8.mt.service.FileMetadataCollectService;
 import com.x8.mt.service.KettleMetadataCollectService;
 
 @RunWith(SpringJUnit4ClassRunner.class) 
@@ -26,6 +27,9 @@ import com.x8.mt.service.KettleMetadataCollectService;
 public class CollectKettleMetadataTest {
 	@Autowired
 	KettleMetadataCollectService kettleMetadataCollectService;
+	
+	@Autowired
+	FileMetadataCollectService fileMetadataCollectService;
 	
 	@Autowired
 	CollectJobService collectJobService;
@@ -55,9 +59,9 @@ public class CollectKettleMetadataTest {
 		}
 	}
 	
-	@Test
-	public void calString(){
-		int size = 0;
+//	@Test
+//	public void calString(){
+//		int size = 0;
 //		for(String str : tablenames){
 //			size = str.get
 //		    char[] chs = str.toCharArray();
@@ -65,11 +69,35 @@ public class CollectKettleMetadataTest {
 //		    	size += (chs[i] > 0xff) ? 2 : 1;
 //		    }
 //		}
-		String a = "ddddddd";
-
-		byte[] buf = a.getBytes();
-
-		System.out.println(buf.length+"Byte="+buf.length/1024+"KB" );
-	}	
+//		String a = "ddddddd";
+//
+//		byte[] buf = a.getBytes();
+//
+//		System.out.println(buf.length+"Byte="+buf.length/1024+"KB" );
+//	}	
+	
+	@Test
+	public void testExcel(){
+		fileMetadataCollectService.collectExcelMetaData("new1.xls");
+		System.out.println("Excel......................");
+	}
+	
+	@Test
+	public void testXml(){
+		fileMetadataCollectService.collectXmlMetadata("input_test.xml");
+		System.out.println("xml......................");
+	}
+	
+	@Test
+	public void testJSON(){
+		fileMetadataCollectService.collectJSONMetadata("json_test.js");
+		System.out.println("JSON......................");
+	}
+	
+	@Test
+	public void testText(){
+		fileMetadataCollectService.collectTXTMetadata("new.txt",";");
+		System.out.println("TEXT......................");
+	}
 
 }
