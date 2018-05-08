@@ -305,15 +305,16 @@ public class DatamapitemsController {
 			}
 			
 			JSONObject node = new JSONObject();
-			node.put("id", datamapitemsService.getDatamapitemsIDByMetadataId(tableMetadata.getID()).get(0).getId());
-			node.put("x", 400);
-			node.put("y", 110 * num);
+			Datamapitems itemNode = datamapitemsService.getDatamapitemsIDByMetadataId(tableMetadata.getID()).get(0);
+			node.put("id", itemNode.getId());
+			node.put("x", itemNode.getPosx());
+			node.put("y", itemNode.getPosy());
 			node.put("status", tableMetadata.getCHECKSTATUS());
 			node.put("name", tableMetadata.getNAME());
-			node.put("bgcolor", "rgba(48, 208, 198, 0.5)");
-			node.put("fontcolor", "#fff");
-			node.put("width", 100);
-			node.put("height", 100);
+			node.put("bgcolor", itemNode.getBackgroundcolor());
+			node.put("fontcolor", itemNode.getFontcolor());
+			node.put("width", itemNode.getWidth());
+			node.put("height", itemNode.getHeight());
 			node.put("flag", "db");
 			data.add(node);
 		}
@@ -327,8 +328,8 @@ public class DatamapitemsController {
 				Datamapitems datamapitems = new Datamapitems();
 				datamapitems.setMaplayerid(2);
 				datamapitems.setMetadataid(tableMetadata.getID());
-				datamapitems.setPosx(400);
-				datamapitems.setPosy(110 * num);
+				datamapitems.setPosx(800);
+				datamapitems.setPosy(110 * num++);
 				datamapitems.setWidth(100);
 				datamapitems.setHeight(100);
 				datamapitems.setBackgroundcolor("rgba(48, 208, 198, 0.5)");
@@ -337,41 +338,224 @@ public class DatamapitemsController {
 			}
 			
 			JSONObject node = new JSONObject();
-			node.put("id", datamapitemsService.getDatamapitemsIDByMetadataId(tableMetadata.getID()).get(0).getId());
-			node.put("x", 400);
-			node.put("y", 110 * num);
+			Datamapitems itemNode = datamapitemsService.getDatamapitemsIDByMetadataId(tableMetadata.getID()).get(0);
+			node.put("id", itemNode.getId());
+			node.put("x", itemNode.getPosx());
+			node.put("y", itemNode.getPosy());
 			node.put("status", tableMetadata.getCHECKSTATUS());
 			node.put("name", tableMetadata.getNAME());
-			node.put("bgcolor", "rgba(48, 208, 198, 0.5)");
-			node.put("fontcolor", "#fff");
-			node.put("width", 100);
-			node.put("height", 100);
+			node.put("bgcolor", itemNode.getBackgroundcolor());
+			node.put("fontcolor", itemNode.getFontcolor());
+			node.put("width", itemNode.getWidth());
+			node.put("height", itemNode.getHeight());
 			node.put("flag", "db");
 			data.add(node);
-			//找到所有的99对应的表映射元数据列表
-			List<Metadata> mappingList = metaDataService.getMetadataByMetaModelId(Integer.parseInt(GlobalMethodAndParams.MetaDataTableMappingModelId));
-			System.out.println(mappingList.size());
-			for (Metadata metadata : mappingList) {
-				String attributes = metadata.getATTRIBUTES();
-				JSONObject json1 = JSONObject.fromObject(attributes);
-				if(json1.containsKey("sourcetablid")){
-					Object sourcetablidObj = json1.get("sourcetablid");
-					int sourcetablid = Integer.parseInt(sourcetablidObj.toString());
-					
-					Object targettableidObj = json1.get("targettableid");
-					int targettableid = Integer.parseInt(targettableidObj.toString());
-					
-					
-					JSONObject link = new JSONObject();
-					link.put("sourceid", datamapitemsService.getDatamapitemsIDByMetadataId(sourcetablid));
-					link.put("targetid", datamapitemsService.getDatamapitemsIDByMetadataId(targettableid));
-					links.add(link);
-					
-				}
+		}
+		//找到所有的99对应的表映射元数据列表
+		List<Metadata> mappingList = metaDataService.getMetadataByMetaModelId(Integer.parseInt(GlobalMethodAndParams.MetaDataTableMappingModelId));
+		System.out.println(mappingList.size()+":Size");
+		for (Metadata metadata : mappingList) {
+			String attributes = metadata.getATTRIBUTES();
+			JSONObject json1 = JSONObject.fromObject(attributes);
+			if(json1.containsKey("sourcetableid")){
+				Object sourcetablidObj = json1.get("sourcetableid");
+				int sourcetablid = Integer.parseInt(sourcetablidObj.toString());
+				
+				Object targettableidObj = json1.get("targettableid");
+				int targettableid = Integer.parseInt(targettableidObj.toString());
+				
+				System.out.println(targettableid+"---"+sourcetablid);
+				
+				JSONObject link = new JSONObject();
+				link.put("sourceid", datamapitemsService.getDatamapitemsIDByMetadataId(sourcetablid));
+				link.put("targetid", datamapitemsService.getDatamapitemsIDByMetadataId(targettableid));
+				links.add(link);
+				
 			}
 		}
 		responsejson.put("nodes", data);
 		responsejson.put("links", links);
 		return responsejson;
 	}
+	
+	/**
+	 * 
+	 * 作者:itcoder 
+	 * 时间:2018年5月8日 
+	 * 作用:获取第三层数据地图
+	 * 参数：sourceid，targetid
+	 */
+	@RequestMapping(value = "/getThreeDatamap", method = RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType = "getThreeDatamap", operationDesc = "获取第三层数据地图")
+	public JSONObject getThreeDatamap(HttpServletRequest request,
+			HttpServletResponse response,@RequestBody Map<String,Object> map) {
+		JSONObject responsejson = new JSONObject();
+
+		// if(!GlobalMethodAndParams.checkLogin()){
+		// responsejson.put("result", false);
+		// responsejson.put("count",0);
+		// return responsejson;
+		// }
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
+
+		JSONArray data = new JSONArray();
+		JSONArray links = new JSONArray();
+		int count = 0;
+		if(!(map.containsKey("sourceid")&&map.containsKey("targetid"))){
+			responsejson.put("nodes", data);
+			responsejson.put("links", links);
+			return responsejson;
+		}
+		
+		String sourceidStr = map.get("sourceid").toString();
+		int sourceid = Integer.parseInt(sourceidStr);
+		String targetidStr = map.get("targetid").toString();
+		int targetid = Integer.parseInt(targetidStr);
+		//根据图元表的id，获得元数据id
+		int sourceMetadataid = datamapitemsService.getDatamapitemsMetadataidById(sourceid);
+		int targetMetadataid = datamapitemsService.getDatamapitemsMetadataidById(targetid);
+		//获取表下的字段id列表
+		List<String> sonMetadataList = metaDataRelationService.getMetadata_relationByMetadataid(sourceMetadataid);
+		List<String> sonTargetMetadataList = metaDataRelationService.getMetadata_relationByMetadataid(targetMetadataid);
+		int num = 0;
+		for (String string : sonTargetMetadataList) {
+			Metadata tableMetadata = metaDataService.getMetadataById(Integer.parseInt(string));
+			boolean isExist = datamapitemsService.isExist(tableMetadata.getID());
+			if(!isExist){
+				Datamapitems datamapitems = new Datamapitems();
+				datamapitems.setMaplayerid(3);
+				datamapitems.setMetadataid(tableMetadata.getID());
+				datamapitems.setPosx(400);
+				datamapitems.setPosy(110 * num++);
+				datamapitems.setWidth(100);
+				datamapitems.setHeight(100);
+				datamapitems.setBackgroundcolor("rgba(48, 208, 198, 0.5)");
+				datamapitems.setFontcolor("#fff");
+				datamapitemsService.insertDatamapitems(datamapitems);
+			}
+			
+			JSONObject node = new JSONObject();
+			Datamapitems itemNode = datamapitemsService.getDatamapitemsIDByMetadataId(tableMetadata.getID()).get(0);
+			node.put("id", itemNode.getId());
+			node.put("x", itemNode.getPosx());
+			node.put("y", itemNode.getPosy());
+			node.put("status", tableMetadata.getCHECKSTATUS());
+			node.put("name", tableMetadata.getNAME());
+			node.put("bgcolor", itemNode.getBackgroundcolor());
+			node.put("fontcolor", itemNode.getFontcolor());
+			node.put("width", itemNode.getWidth());
+			node.put("height", itemNode.getHeight());
+			node.put("flag", "db");
+			data.add(node);
+		}
+		
+		//遍历元数据字段查询该字段是否映射了其他数据库中的表的字段，如果有则获取其字段id，数据库id。
+		
+		for (String sourceTableid : sonMetadataList) {
+			Metadata tableMetadata = metaDataService.getMetadataById(Integer.parseInt(sourceTableid));
+			boolean isExist = datamapitemsService.isExist(tableMetadata.getID());
+			if(!isExist){
+				Datamapitems datamapitems = new Datamapitems();
+				datamapitems.setMaplayerid(3);
+				datamapitems.setMetadataid(tableMetadata.getID());
+				datamapitems.setPosx(800);
+				datamapitems.setPosy(110 * num++);
+				datamapitems.setWidth(100);
+				datamapitems.setHeight(100);
+				datamapitems.setBackgroundcolor("rgba(48, 208, 198, 0.5)");
+				datamapitems.setFontcolor("#fff");
+				datamapitemsService.insertDatamapitems(datamapitems);
+			}
+			
+			JSONObject node = new JSONObject();
+			Datamapitems itemNode = datamapitemsService.getDatamapitemsIDByMetadataId(tableMetadata.getID()).get(0);
+			node.put("id", itemNode.getId());
+			node.put("x", itemNode.getPosx());
+			node.put("y", itemNode.getPosy());
+			node.put("status", tableMetadata.getCHECKSTATUS());
+			node.put("name", tableMetadata.getNAME());
+			node.put("bgcolor", itemNode.getBackgroundcolor());
+			node.put("fontcolor", itemNode.getFontcolor());
+			node.put("width", itemNode.getWidth());
+			node.put("height", itemNode.getHeight());
+			node.put("flag", "db");
+			data.add(node);
+		}
+		//找到所有的100对应的字段映射元数据列表
+		List<Metadata> mappingList = metaDataService.getMetadataByMetaModelId(Integer.parseInt(GlobalMethodAndParams.MetaDataMappingModelId));
+		System.out.println(mappingList.size()+":Size");
+		for (Metadata metadata : mappingList) {
+			String attributes = metadata.getATTRIBUTES();
+			JSONObject json1 = JSONObject.fromObject(attributes);
+			if(json1.containsKey("sourcefieldid")){
+				Object sourcetablidObj = json1.get("sourcefieldid");
+				int sourcetablid = Integer.parseInt(sourcetablidObj.toString());
+				
+				Object targettableidObj = json1.get("targetfieldid");
+				int targettableid = Integer.parseInt(targettableidObj.toString());
+				
+				System.out.println(targettableid+"---"+sourcetablid);
+				
+				JSONObject link = new JSONObject();
+				link.put("sourceid", datamapitemsService.getDatamapitemsIDByMetadataId(sourcetablid));
+				link.put("targetid", datamapitemsService.getDatamapitemsIDByMetadataId(targettableid));
+				links.add(link);
+				
+			}
+		}
+		responsejson.put("nodes", data);
+		responsejson.put("links", links);
+		return responsejson;
+	}
+	
+	/**
+	 * 
+	 * 作者:itcoder 
+	 * 时间:2018年5月8日 
+	 * 作用:修改数据地图图元位置
+	 * 参数：JSONArray
+	 */
+	@RequestMapping(value = "/modifyDatamapPosition", method = RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType = "modifyDatamapPosition", operationDesc = "修改数据地图图元位置")
+	public JSONObject modifyDatamapPosition(HttpServletRequest request,
+			HttpServletResponse response,@RequestBody String jsonStr) {
+		JSONObject responsejson = new JSONObject();
+
+		// if(!GlobalMethodAndParams.checkLogin()){
+		// responsejson.put("result", false);
+		// responsejson.put("count",0);
+		// return responsejson;
+		// }
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
+		boolean result = false;
+		int count = 0;
+		
+		JSONArray paramArray = JSONArray.fromObject(jsonStr);
+		for (int i = 0; i < paramArray.size(); i++) {
+			JSONObject node = paramArray.getJSONObject(i);
+			int id = node.getInt("id");
+			int posx = node.getInt("posx");
+			int posy = node.getInt("posy");
+			Datamapitems datamapitems = new Datamapitems();
+			datamapitems.setPosx(posx);
+			datamapitems.setPosy(posy);
+			datamapitems.setId(id);
+			count += datamapitemsService.updateDatamapitems(datamapitems);
+		}
+		
+		if(count==paramArray.size()){
+			result = true;
+		}
+		if(result){
+			responsejson.put("result", result);
+			responsejson.put("count", 1);
+		}else{
+			responsejson.put("result", result);
+			responsejson.put("count", 0);
+		}
+		return responsejson;
+	}
+	
 }

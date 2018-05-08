@@ -201,6 +201,11 @@ public class GlobalMethodAndParams {
 	public static final String TRANS_NAME = "trans.ktr";
 	
 	/**
+	 * 所需采集元数据的文件存放路径
+	 */
+	public static final String PATH_NAME = "C:/Users/jason zhou/Desktop/spoonTest/";
+	
+	/**
 	 * 
 	 * 作者:allen
 	 * 时间:2017年11月29日

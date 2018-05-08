@@ -81,6 +81,7 @@ public class TransDataService {
 //			sourcefields=sourcefields+","+job.getFieldStream()[i];
 //		}
 		String sql = "SELECT "+job.getFieldSteram()+" FROM "+job.getSource_table() ;
+		System.out.println(job.getSource_table() );
 		TableInputMeta tableInputMeta = new TableInputMeta();
 		tableInputMeta.setDefault();
 		tableInputMeta.setDatabaseMeta(source);
@@ -98,6 +99,7 @@ public class TransDataService {
 		tableOutputMeta.setTruncateTable(true);
 		//String tableName = "test";
 		String tableName = job.getTarget_table();
+		System.out.println(tableName);
 		tableOutputMeta.setTableName(tableName);
 		//String[] fieldStream = {"id","name"};
 		

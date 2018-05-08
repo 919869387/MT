@@ -674,6 +674,7 @@ public class KettleMetadataCollectController {
 
 		List<CollectJob> collectJobs = collectJobService.getCollectJob(createDate, endDate);
 		if(collectJobs == null || collectJobs.isEmpty()){
+			System.out.println("出现问题");
 			responsejson.put("result",false);
 			responsejson.put("count",0);
 		}else{

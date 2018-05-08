@@ -59,7 +59,7 @@ public interface IETLJobDao {
 	 * 时间:2018年4月25日 
 	 * 作用:获取能够添加调度的作业
 	 */
-	List<ETLJob> getETLJobtoSchedule(int jobtype);
+	List<ETLJob> getETLJobtoSchedule(String type);
 	
 	
 	/**
@@ -68,7 +68,7 @@ public interface IETLJobDao {
 	 * 时间:2018年3月26日 
 	 * 作用:删除一条etl作业或者调度记录
 	 */
-	int deleteETLJob(int id,int type);
+	int deleteETLJob(@Param ("id")int id,@Param("type")int type);
 	
 	/**
 	 * 
@@ -76,7 +76,7 @@ public interface IETLJobDao {
 	 * 时间:2018年3月26日 
 	 * 作用:删除一组etl任务记录
 	 */
-	int deleteETLJobs(int[] id,int type);
+	int deleteETLJobs(@Param("id")int[] id,@Param("type")int type);
 	
 	/**
 	 * 

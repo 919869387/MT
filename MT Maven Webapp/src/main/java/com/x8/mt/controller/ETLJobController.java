@@ -26,8 +26,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.x8.mt.common.GlobalMethodAndParams;
 import com.x8.mt.common.Log;
 import com.x8.mt.common.PageParam;
+import com.x8.mt.entity.Dispatch;
 import com.x8.mt.entity.ETLJob;
 import com.x8.mt.entity.Metadata;
+import com.x8.mt.service.DispatchService;
 import com.x8.mt.service.ETLJobService;
 import com.x8.mt.service.MetaDataService;
 import com.x8.mt.service.MetadataManagementService;
@@ -47,6 +49,9 @@ public class ETLJobController {
 	MetaDataService metaDataService;
 	@Resource
 	SystemuserService systemuserService;
+	@Resource
+	DispatchService dispatchService;
+	
 
 	/**
 	 * 
@@ -109,51 +114,64 @@ public class ETLJobController {
 	 */
 	@RequestMapping(value = "/insertETLJobSchedule",method=RequestMethod.POST)
 	@ResponseBody
-	@Log(operationType="ETLJob",operationDesc="插入新的ETLJob任务")
+	@Log(operationType="ETLJob",operationDesc="插入新的ETLJob调度任务")
 	public JSONObject insertETLJobSchedule(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map) throws Exception{
 		JSONObject responsejson = new JSONObject();
 		GlobalMethodAndParams.setHttpServletResponse(request, response);
 		//检查传参是否正确
-		if(!(map.containsKey("id") 
-				&& map.containsKey("isRepeat") 
-				&& map.containsKey("SchedulerType"))){
+		if(!(map.containsKey("id")
+				&& map.containsKey("schedulerType"))){
 			responsejson.put("description", "参数不正确");
 			responsejson.put("result", false);
 			return responsejson;
 		}
 		
-		boolean isRepeat = false;
-		int SchedulerType = 0;
-		int intervalSeconds = 0;
-		int intervalMinutes = 0;
+		if(etlJobService.isRepeatByIdORName(Integer.parseInt(map.get("id").toString()))){
+			responsejson.put("description", "该作业已经存在调度");
+			responsejson.put("result", false);
+			return responsejson;
+		}
+		
+		int schedulerType = 0;
+		//int intervalSeconds = 0;
+		//int intervalMinutes = 0;
 		int hour = 0;
 		int minutes = 0;
-		int day = 0;
+		//int day = 0;
 		int week = 0;
 		
 		try{
 			ETLJob etlJob = etlJobService.getETLJobById(Integer.parseInt(map.get("id").toString()));
-			SchedulerType = Integer.parseInt(map.get("SchedulerType").toString());
-			isRepeat = Integer.parseInt(map.get("isRepeat").toString()) == 1 ? true :false;
-			intervalSeconds = Integer.parseInt(map.get("intervalSeconds").toString());
-			intervalMinutes = Integer.parseInt(map.get("intervalMinutes").toString());
-			hour = Integer.parseInt(map.get("hour").toString());
-			minutes = Integer.parseInt(map.get("minutes").toString());
-			day = Integer.parseInt(map.get("day").toString());
-			week = Integer.parseInt(map.get("week").toString());
+			schedulerType = Integer.parseInt(map.get("schedulerType").toString());
 			
 			Map dataMap = new HashedMap();
-			map.put("SchedulerType", SchedulerType);
-			map.put("isRepeat", isRepeat);
-			map.put("intervalSeconds", intervalSeconds);
-			map.put("intervalMinutes", intervalMinutes);
-			map.put("hour", hour);
-			map.put("minutes", minutes);
-			map.put("day", day);
-			map.put("week", week);
-			etlJobService.saveSchedule(metaDataService.getMetadataById(etlJob.getMappingid()).getNAME(), dataMap);
+			dataMap.put("schedulerType", schedulerType);
+			String date = map.get("daytime").toString();
+			date = date.replace("Z", " UTC");
+			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS Z");
+			Date d = format.parse(date);
+			String[] daytime = d.toString().split(" ");
+			String[] time = daytime[3].split(":");
+			hour = Integer.parseInt(time[0]);
+			minutes = Integer.parseInt(time[1]);
+			dataMap.put("hour", hour);
+			dataMap.put("minutes", minutes);
+			if(schedulerType == 3){
+				week = Integer.parseInt(map.get("week").toString());
+				map.put("week", week);
+			}
+			dataMap.put("description", map.get("description").toString());
+			//day = Integer.parseInt(map.get("day").toString());
+			//intervalSeconds = Integer.parseInt(map.get("intervalSeconds").toString());
+			//intervalMinutes = Integer.parseInt(map.get("intervalMinutes").toString());
+			//map.put("intervalSeconds", intervalSeconds);
+			//map.put("intervalMinutes", intervalMinutes);
+			//map.put("day", day);
+
+			responsejson.put("result", etlJobService.saveSchedule(metaDataService.getMetadataById(etlJob.getMappingid()).getNAME(), dataMap));
 			
 		}catch(Exception e){
+			e.printStackTrace();
 			responsejson.put("description", "运行出错");
 			responsejson.put("result", false);
 		}
@@ -161,6 +179,33 @@ public class ETLJobController {
 		return responsejson;
 	}
 	
+	/**
+	 * 作者:GodDispose
+	 * 时间:2018年4月25日
+	 * 作用:获取能够添加调度的作业
+	 */
+	@RequestMapping(value = "/getETLJobToSchedule",method=RequestMethod.GET)
+	@ResponseBody
+	@Log(operationType="ETLJob",operationDesc="获取能够添加调度的作业")
+	public JSONObject getETLJobToSchedule(HttpServletRequest request,HttpServletResponse response) {
+		JSONObject responsejson = new JSONObject();
+	
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
+		
+		List<ETLJob> etlJobs = etlJobService.getETLJobtoSchedule("LOCAL");
+		JSONArray data = new JSONArray();
+		for(ETLJob etlJob:etlJobs){
+			JSONObject node = new JSONObject();
+			node.put("value", etlJob.getId());	
+			node.put("label", metaDataService.getMetadataById(etlJob.getMappingid()).getNAME());	
+			data.add(node);
+		}
+		responsejson.put("result", true);
+		responsejson.put("data",data);
+		
+		return responsejson;
+	}
+
 	/**
 	 * 
 	 * 作者:Tomcroods
@@ -180,20 +225,38 @@ public class ETLJobController {
 			return responsejson;
 		}
 		
-		try{			
-			Metadata metadata = metaDataService.getMetadataById(Integer.parseInt((String)map.get("id")));
-			
-			ETLJob etlJob = new ETLJob();
-			etlJob.setMetadata_id(Integer.parseInt((String) map.get("id")));
-			if (map.containsKey("description")) {
-				etlJob.setDescription((String) map.get("description"));
-			}
-			etlJob.setCreate_date(new Date());
-			etlJob.setCreateuserid(systemuserService.selectUser("admin").getId());
-			etlJob.setType("EXTERNAL");
-			etlJob.setStatus("NewCreate");
-			etlJob.setJobtype(0);
-			responsejson.put("result", etlJobService.insertETLJob(etlJob));	
+		int id = 1;
+		
+		try{
+			id = Integer.parseInt((String) map.get("id"));
+			if((boolean)etlJobService.judgeJobOrSchedule(id).get("flag")){
+				String name = metaDataService.getMetadataById(id).getNAME();
+				Dispatch dispatch = new Dispatch();
+				dispatch.setName(name + " Schedule");
+				dispatch.setDescription(map.get("description").toString());
+				dispatch.setJobname(name);
+				dispatch.setStatus(1);
+				SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				dispatch.setCreatetime(sdf.parse(sdf.format(new Date())));			
+				dispatch.setRuninterval((int)map.get("schedulerType") == 2 ? "每周执行" : "每天执行");
+				dispatch.setType("EXTERNAL");
+				
+				dispatchService.addDispatch(dispatch);
+			}else{
+				
+				ETLJob etlJob = new ETLJob();
+				etlJob.setMetadata_id(id);
+				if (map.containsKey("description")) {
+					etlJob.setDescription((String) map.get("description"));
+				}
+				etlJob.setCreate_date(new Date());
+				etlJob.setCreateuserid(systemuserService.selectUser("admin").getId());
+				etlJob.setType("EXTERNAL");
+				etlJob.setStatus("NewCreate");
+				etlJob.setJobtype(0);
+				responsejson.put("result", etlJobService.insertETLJob(etlJob));		
+			}		
+
 		}catch(Exception e){
 			e.printStackTrace();
 			responsejson.put("result", false);
@@ -241,6 +304,40 @@ public class ETLJobController {
 		responsejson.put("result", result);
 		return responsejson;
 	}
+	
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年5月8日
+	 * 作用:执行ETL调度
+	 * 参数:id
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/executeETLSchedule",method=RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="ETLJob",operationDesc="执行ETL调度")
+	public JSONObject executeETLSchedule(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map) throws UnsupportedEncodingException, KettleException, IOException{
+		JSONObject responsejson = new JSONObject();
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
+		//检查传参是否正确
+		if(!(map.containsKey("id"))){
+			responsejson.put("result", false);
+			return responsejson;
+		}		
+		int id=Integer.parseInt((String)map.get("id"));
+		
+		Dispatch dispatch = dispatchService.queryByDispatchId(id);
+		boolean result = false;
+		try {
+			responsejson.put("result", etlJobService.excuteSchedule(dispatch));
+		} catch (Exception e) {
+			e.printStackTrace();
+			responsejson.put("result", false);
+		}
+		
+		return responsejson;
+	}
+	
 	
 	/**
 	 * 
@@ -353,34 +450,6 @@ public class ETLJobController {
 		return responsejson;
 		}
 	}
-	
-	/**
-	 * 作者:GodDispose
-	 * 时间:2018年4月25日
-	 * 作用:获取能够添加调度的作业
-	 */
-	@RequestMapping(value = "/getETLJobToSchedule",method=RequestMethod.GET)
-	@ResponseBody
-	@Log(operationType="ETLJob",operationDesc="根据id删除一个ETL任务")
-	public JSONObject getETLJobToSchedule(HttpServletRequest request,HttpServletResponse response) {
-		JSONObject responsejson = new JSONObject();
-
-		GlobalMethodAndParams.setHttpServletResponse(request, response);
-		
-		List<ETLJob> etlJobs = etlJobService.getETLJobtoSchedule(0);
-		JSONArray data = new JSONArray();
-		for(ETLJob etlJob:etlJobs){
-			JSONObject node = new JSONObject();
-			node.put("target_table_id", etlJob.getId());	
-			node.put("target_table", metaDataService.getMetadataById(etlJob.getMappingid()).getNAME());	
-			data.add(node);
-		}
-		responsejson.put("result", true);
-		responsejson.put("data",data);
-		
-		return responsejson;
-	}
-	
 	
 	/**
 	 * 作者:Tomcroods
@@ -500,6 +569,7 @@ public class ETLJobController {
 		}
 		
 	}
+	
 	/**
 	 * 作者:Tomcroods
 	 * 时间:2017年12月15日
@@ -511,15 +581,20 @@ public class ETLJobController {
 	@Log(operationType="ETLJob",operationDesc="停止作业执行")
 	public JSONObject stopETLJob(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map) {
 		JSONObject responsejson = new JSONObject();
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
+		
+		//检查传参是否正确
+		if(!(map.containsKey("target_table_id"))){
+			responsejson.put("result", false);
+			responsejson.put("message", "参数不正确");
+			return responsejson;
+		}
+		
 		try{			
 			int id = Integer.parseInt(map.get("target_table_id").toString());
 			ETLJob job = etlJobService.getETLJobById(id);
-			if(job.getType().equals("LOCAL")){
-				if(job.getJobtype() == 0){					
-					responsejson.put("result",etlJobService.stopETLJob(job.getMappingid()));
-				}else{
-					responsejson.put("result",etlJobService.stopETLSchedule(job.getMappingid() + "Schedule"));
-				}				
+			if(job.getType().equals("LOCAL")){				
+				responsejson.put("result",etlJobService.stopETLJob(job.getMappingid()));				
 			}else{
 				responsejson.put("result",etlJobService.stopETLJob(job.getMetadata_id()));
 			}
@@ -529,7 +604,214 @@ public class ETLJobController {
 			responsejson.put("result",false);
 		}
 		return responsejson;
-}
+	}
+	
+	/**
+	 * 作者:GodDispose
+	 * 时间:2018年5月4日
+	 * 作用:停止调度执行
+	 * 参数:id
+	 */
+	@RequestMapping(value = "/stopETLSchedule",method=RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="Dispatch",operationDesc="停止调度执行")
+	public JSONObject stopETLSchedule(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map) {
+		JSONObject responsejson = new JSONObject();
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
+		
+		//检查传参是否正确
+		if(!(map.containsKey("id"))){
+			responsejson.put("result", false);
+			responsejson.put("message", "参数不正确");
+			return responsejson;
+		}
+		
+		try{			
+			int id = Integer.parseInt(map.get("id").toString());			
+			responsejson.put("result",etlJobService.stopETLSchedule(id));				
+			
+		}catch(Exception e){
+			e.printStackTrace();
+			responsejson.put("result",false);
+		}
+		return responsejson;
+	}
+	
+	/**
+	 * 作者:GodDispose
+	 * 时间:2018年5月4日
+	 * 作用:根据id删除一个ETL调度
+	 * 参数:id
+	 */
+	@RequestMapping(value = "/deleteETLSchedule",method=RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="Dispatch",operationDesc="根据id删除一个ETL调度")
+	public JSONObject deleteETLSchedule(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map) {
+		JSONObject responsejson = new JSONObject();
+
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
+		
+		//检查传参是否正确
+		if(!map.containsKey("id")){
+			responsejson.put("result", false);
+			responsejson.put("message", "参数不正确");
+			return responsejson;
+		}
+		
+		int id = 1;
+		try{
+			id = Integer.parseInt(map.get("id").toString());
+		}catch(Exception e){
+			responsejson.put("result", false);
+			responsejson.put("message","转化不正确");
+			return responsejson;
+		}
+		
+		if(dispatchService.deleteDispatch(id)){
+			responsejson.put("result", true);
+			
+		}else{
+			responsejson.put("result", false);
+			responsejson.put("message", "删除失败");
+		}		
+	
+		return responsejson;
+	}
+	
+	/**
+	 * 作者:GodDispose
+	 * 时间:2018年5月4日
+	 * 作用:根据id字符串（逗号隔开）删除多条数据
+	 * 参数:ids(1,2,3这种)
+	 */
+	@RequestMapping(value = "/deleteETLSchedules",method=RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="Dispatch",operationDesc="根据id字符串（逗号隔开）删除多条数据")
+	public JSONObject deleteETLSchedules(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map) {
+		JSONObject responsejson = new JSONObject();
+
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
+		
+		//检查传参是否正确
+		if(!(map.containsKey("ids"))){
+			responsejson.put("result", false);
+			responsejson.put("message", "参数不正确");
+			return responsejson;
+		}
+		String[]ids= map.get("ids").toString().split(",");
+		int[] id = new int[ids.length];	
+		for(int i=0;i<ids.length;i++){
+			id[i]=Integer.parseInt(ids[i]);
+		}
+		if(dispatchService.deleteDispatchs(id)){
+			responsejson.put("result", true);
+			responsejson.put("message", "删除成功");
+		}else{
+			responsejson.put("result", false);
+			responsejson.put("message", "删除失败");
+		}		
+	
+		return responsejson;
+	}
+	
+	/**
+	 * 
+	 * 作者:Tomcroods
+	 * 时间:2018年5月7日
+	 * 作用:获取分页数据(数据按 createDate 倒叙排序，新添加的在最前面)
+	 * 参数:page(页码)、pageSize(每页多少行)
+	 */
+	@RequestMapping(value = "/getETLScheduleListByPage",method=RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="Dispatch",operationDesc="获取分页ETLJSchedule数据")
+	public JSONObject getETLScheduleListByPage(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map){
+		JSONObject responsejson = new JSONObject();
+
+//		if(!GlobalMethodAndParams.checkLogin()){
+//			responsejson.put("result", false);
+//			responsejson.put("count",0);
+//			return responsejson;
+//		}
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
+
+		//检查传参是否正确
+		if(!(map.containsKey("page")&&
+				map.containsKey("pageSize"))){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}
+
+		String currPageStr = map.get("page").toString();
+		String pageSizeStr = map.get("pageSize").toString();
+		int currPage = 1;
+		int pageSize = 1;
+		try {
+			currPage = Integer.parseInt(currPageStr);
+			pageSize = Integer.parseInt(pageSizeStr);
+		} catch (Exception e) {
+		}
+		//获取总记录数
+		int rowCount = dispatchService.getRowCount();
+		//构造分页数据
+		PageParam pageParam = new PageParam();
+		pageParam.setPageSize(pageSize);
+		pageParam.setRowCount(rowCount);
+		if(pageParam.getTotalPage()<currPage){
+			currPage = pageParam.getTotalPage();
+		}
+		pageParam.setCurrPage(currPage);
+		pageParam = dispatchService.getETLScheduleListByPage(pageParam);
+		if(pageParam.getData()==null|| pageParam.getData().isEmpty()){
+			responsejson.put("result", false);
+			responsejson.put("message", "没有查询到任务");
+			return responsejson;
+		}else{
+		JSONArray data = new JSONArray();
+		List<Dispatch> dispatchList=pageParam.getData();
+		for(Dispatch dispatch : dispatchList){
+			JSONObject dispatchJson = new JSONObject();
+			dispatchJson.put("dispatchid", dispatch.getDispatchid());
+			if(dispatch.getType().equals("LOCAL")){
+				dispatchJson.put("name", dispatch.getName());
+				dispatchJson.put("description", dispatch.getDescription());
+				dispatchJson.put("jobname", dispatch.getJobname());
+				if(dispatch.getStatus() == 1){
+					dispatchJson.put("status",  "新建");
+				}else if(dispatch.getStatus() == 2){
+					dispatchJson.put("status",  "运行中");
+				}else if(dispatch.getStatus() == 3){
+					dispatchJson.put("status",  "运行结束");
+				}
+				dispatchJson.put("runinterval","");
+				dispatchJson.put("createtime",new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(dispatch.getCreatetime()));	
+				dispatchJson.put("recenttime",dispatch.getRecenttime() == null ? "" :new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(dispatch.getRecenttime()));	
+				dispatchJson.put("endtime",dispatch.getEndtime() == null ? "" :new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(dispatch.getEndtime()));	
+				data.add(dispatchJson);
+			}else{
+				dispatchJson.put("name", dispatch.getName());
+				dispatchJson.put("description", dispatch.getDescription());
+				dispatchJson.put("jobname",metaDataService.getMetadataById(Integer.parseInt(dispatch.getJobname().toString())).getNAME());
+				if(dispatch.getStatus() == 1){
+					dispatchJson.put("status",  "新建");
+				}else if(dispatch.getStatus() == 2){
+					dispatchJson.put("status",  "运行中");
+				}else if(dispatch.getStatus() == 3){
+					dispatchJson.put("status",  "运行结束");
+				}
+				dispatchJson.put("runinterval","");
+				dispatchJson.put("createtime",new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(dispatch.getCreatetime()));	
+				dispatchJson.put("recenttime",dispatch.getRecenttime() == null ? "" :new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(dispatch.getRecenttime()));	
+				dispatchJson.put("endtime",dispatch.getEndtime() == null ? "" :new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(dispatch.getEndtime()));	
+				data.add(dispatchJson);
+			}
+		}
+		responsejson.put("result", true);
+		responsejson.put("data", data);
+		responsejson.put("count",dispatchList.size());
+		return responsejson;
+		}
+	}
 	
 }	
 

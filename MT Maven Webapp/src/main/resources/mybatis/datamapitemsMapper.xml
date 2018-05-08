@@ -35,4 +35,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		select metadataid from datamapitems where id = #{id}
 	</select>
 	
+	<update id="updateDatamapitems">
+		update datamapitems set posx = #{posx},posy = #{posy} where id = #{id}
+	</update>
+	
 </mapper>

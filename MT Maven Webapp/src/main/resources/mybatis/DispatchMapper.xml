@@ -10,31 +10,59 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</select>
 	
 	<select id="queryByDispatchId" resultType="com.x8.mt.entity.Dispatch">
-		select * from dispatch where dispatchId = #{id}
+		select * from dispatch where dispatchid = #{id}
 	</select>
 
 	<insert id="addDispatch" parameterType="com.x8.mt.entity.Dispatch"
 		useGeneratedKeys="true" keyProperty="id">
 		insert into
-		dispatch(taskname,time,user,status,	intervaltime,lasttime)
-		values(#{taskname}, #{time},#{user},#{status},#{intervaltime},#{lasttime})
+		dispatch(name,description,jobname,status,runinterval,createtime,recenttime,endtime,type)
+		values(#{name}, #{description},#{jobname},#{status},
+		#{runinterval},#{createtime},#{recenttime},#{endtime},#{type})
 	</insert>
 	
 	<delete id="deleteDispatch" parameterType="int">
 		delete from
-		dispatch where dispatchId=#{id}
+		dispatch where dispatchid=#{id}
 	</delete>
 	
 	<update id="updateDispatch" parameterType="com.x8.mt.entity.Dispatch">
 		update dispatch
 		<trim prefix="set" suffixOverrides=",">
-			<if test="taskname!=null">taskname=#{taskname},</if>
-			<if test="time!=null">time=#{time},</if>
-			<if test="user!=null">user=#{user},</if>
+			<if test="name!=null">name=#{name},</if>
+			<if test="description!=null">description=#{description},</if>
+			<if test="jobname!=null">jobname=#{jobname},</if>
 			<if test="status!=null">status=#{status},</if>
-			<if test="intervaltime!=null">intervaltime=#{intervaltime},</if>
-			<if test="lasttime!=null">lasttime=#{lasttime},</if>
+			<if test="runinterval!=null">runinterval=#{runinterval},</if>
+			<if test="createtime!=null">createtime=#{createtime},</if>
+			<if test="recenttime!=null">recenttime=#{recenttime},</if>
+			<if test="endtime!=null">endtime=#{endtime},</if>
+			<if test="type!=null">type=#{type},</if>
 		</trim>
-		where dispatchId=#{id}
+		where dispatchid=#{dispatchid}
 	</update>
+	
+	<delete id="deleteETLSchedules" parameterType="List">
+        delete from etljob where id in
+        <foreach item="ETLJobItem" collection="array" index="index" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete> 
+    
+    <select id="getRowCount" resultType="int">
+		select count(*) from dispatch
+	</select>
+	
+	<select id="selectByParams" resultType="com.x8.mt.entity.Dispatch"
+		parameterType="map">
+		select * from dispatch
+		order by createtime desc
+		limit ${offset},${size}
+	</select>
+	
+	<select id="isRepeatByJobName" resultType="com.x8.mt.entity.Dispatch"
+		parameterType="map">
+		select * from dispatch
+		where jobname = #{jobname}
+	</select>
 </mapper>

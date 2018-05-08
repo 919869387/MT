@@ -1,60 +1,78 @@
 package com.x8.mt.entity;
 
+import java.util.Date;
+
 public class Dispatch {
-	private String dispatchid;
-	private String taskname;
-	private String time;
-	private String user;
-	private String status;
-	private int intervaltime;
-	private String lasttime;
-	
-	public String getDispatchId() {
+	private int dispatchid;
+	private String name;
+	private String description;
+	private String jobname;
+	private int status;
+	private String runinterval;
+	private Date createtime;
+	private Date recenttime;
+	private Date endtime;
+	private String type;
+	public int getDispatchid() {
 		return dispatchid;
 	}
-	public String getTaskName() {
-		return taskname;
+	public void setDispatchid(int dispatchid) {
+		this.dispatchid = dispatchid;
 	}
-	public String getTime() {
-		return time;
+	public String getName() {
+		return name;
 	}
-	public String getUser() {
-		return user;
+	public void setName(String name) {
+		this.name = name;
 	}
-	public String getStatus() {
+	public String getDescription() {
+		return description;
+	}
+	public void setDescription(String description) {
+		this.description = description;
+	}
+	public String getJobname() {
+		return jobname;
+	}
+	public void setJobname(String jobname) {
+		this.jobname = jobname;
+	}
+	public int getStatus() {
 		return status;
 	}
-	public int getIntervalTime() {
-		return intervaltime;
-	}
-	public String getLastTime() {
-		return lasttime;
-	}
-	
-	public void setDispatchId(String dispatchId) {
-		this.dispatchid = dispatchId;
-	}
-	public void setTaskName(String taskName) {
-		this.taskname = taskName;
-	}
-	public void setTime(String time) {
-		this.time = time;
-	}
-	public void setUser(String user) {
-		this.user = user;
-	}
-	public void setStatus(String status) {
+	public void setStatus(int status) {
 		this.status = status;
 	}
-	public void setIntervalTime(int intervalTime) {
-		this.intervaltime = intervalTime;
+	public String getRuninterval() {
+		return runinterval;
 	}
-	public void setLastTime(String lastTime) {
-		this.lasttime = lastTime;
+	public void setRuninterval(String runinterval) {
+		this.runinterval = runinterval;
+	}
+	public Date getCreatetime() {
+		return createtime;
+	}
+	public void setCreatetime(Date createtime) {
+		this.createtime = createtime;
+	}
+	public Date getRecenttime() {
+		return recenttime;
+	}
+	public void setRecenttime(Date recenttime) {
+		this.recenttime = recenttime;
+	}
+	public Date getEndtime() {
+		return endtime;
+	}
+	public void setEndtime(Date endtime) {
+		this.endtime = endtime;
+	}
+	public void setType(String type){
+		this.type = type;
+	}
+	public String getType(){
+		return type;
 	}
 	
-	public Dispatch() {
-		
-	}
 	
 }

@@ -7,6 +7,7 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +28,7 @@ import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entries.special.JobEntrySpecial;
 import org.pentaho.di.job.entries.trans.JobEntryTrans;
 import org.pentaho.di.job.entry.JobEntryCopy;
+import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.di.repository.LongObjectId;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.RepositoryDirectoryInterface;
@@ -41,15 +43,24 @@ import org.springframework.stereotype.Service;
 
 
 
+
+
+
+
+
+
+
 import com.x8.mt.common.LogUtil;
 import com.x8.mt.common.PageParam;
 import com.x8.mt.common.TransformMetadata;
 import com.x8.mt.dao.ICollectJobDao;
+import com.x8.mt.dao.IDispatchDao;
 import com.x8.mt.dao.IETLJobDao;
 import com.x8.mt.dao.IConnectinfoDao;
 import com.x8.mt.dao.IDatasource_connectinfoDao;
 import com.x8.mt.dao.IMetaDataDao;
 import com.x8.mt.entity.Datasource_connectinfo;
+import com.x8.mt.entity.Dispatch;
 import com.x8.mt.entity.ETLJob;
 import com.x8.mt.entity.ETLJobParam;
 import com.x8.mt.entity.Metadata;
@@ -69,6 +80,8 @@ public class ETLJobService {
 	IConnectinfoDao iConnectinfoDao;
 	@Resource
 	IDatasource_connectinfoDao iDatasource_connectinfoDao;
+	@Resource
+	IDispatchDao iDispatchDao;
 	
 	@Resource
 	KettleMetadataCollectService kettleMetadataCollectService;
@@ -104,10 +117,16 @@ public class ETLJobService {
 	 * 时间:2018年4月25日 
 	 * 作用:停止执行调度
 	 */
-	public boolean stopETLSchedule(String index){
-		if(theJob.containsKey(index)){
-		((Job)theJob.get(index)).stopAll();
-		return true;
+	public boolean stopETLSchedule(int id){
+		if(theSchedule.containsKey(id + " Schedule")){
+			((Job)theSchedule.get(id + " Schedule")).stopAll();
+			
+			Dispatch dispatch = new Dispatch();
+			dispatch.setDispatchid(id);
+			dispatch.setStatus(3);
+			iDispatchDao.updateDispatch(dispatch);
+		
+			return true;
 		}		
 		else return false;		
 	}
@@ -163,43 +182,36 @@ public class ETLJobService {
 		String targetTableName = iMetaDataDao.getMetadataById(etlJob.getMappingid()).getNAME() + (etlJob.getJobtype() == 1 ? " Schedule" : "");
 		JobMeta jobMeta = new JobMeta(targetTableName+ ".kjb", null);
 		Job job = new Job(null,jobMeta);		
-		
-		if(etlJob.getJobtype() == 0){
-			theJob.put(etlJob.getMappingid(),job);
-			job.start();		
-			job.waitUntilFinished();
+
+		theJob.put(etlJob.getMappingid(),job);
+		job.start();		
+		job.waitUntilFinished();
 			
-			theJob.remove(etlJob.getMappingid());
-			etlJob.setStatus(job.getStatus());
-			etlJob.setRecently_run_date(new Date());
-	        LogUtil logUtil = new LogUtil(job,job.getJobMeta());
-	        String log=logUtil.getJobLog(job);
-	        if(etlJob.getStatus().equals("Finished")){
-	        	if(log.indexOf("完成处理")>-1){
-		        	log = log.substring(log.indexOf("完成处理"));
-		            log = log.substring(log.indexOf("W="));
-		            log = log.substring(2,log.indexOf(", U"));            
-		            log = "此次抽取了 "+log+" 条数据";
-		            etlJob.setLog(log);
-	        	}else{
-	        		etlJob.setLog("此次没有抽取到数据！");
-	        		 eTLJobDao.update(etlJob);
-	        	        return false;
-	        	}
-	        }else if(etlJob.getStatus().equals("Stopped")){
-	        	etlJob.setLog("作业已停止");
-	        	 eTLJobDao.update(etlJob);
-	             return false;
-	        }
-	        
-	        eTLJobDao.update(etlJob);
-		}else if(etlJob.getJobtype() == 1){
-			System.out.println(targetTableName+ ".kjb");
-			theSchedule.put(etlJob.getMappingid() + "Schedule",job);
-			job.start();
-			
-			job.waitUntilFinished();
-		}
+		theJob.remove(etlJob.getMappingid());
+		etlJob.setStatus(job.getStatus());
+		etlJob.setRecently_run_date(new Date());
+		System.out.println(job.getStatus());
+	    LogUtil logUtil = new LogUtil(job,job.getJobMeta());
+	    String log=logUtil.getJobLog(job);
+	    if(etlJob.getStatus().equals("Finished")){
+	    	if(log.indexOf("完成处理")>-1){
+	    		log = log.substring(log.indexOf("完成处理"));
+	    		log = log.substring(log.indexOf("W="));
+	    		log = log.substring(2,log.indexOf(", U"));            
+	    		log = "此次抽取了 "+log+" 条数据";
+	    		etlJob.setLog(log);
+	    	}else{
+	    		etlJob.setLog("此次没有抽取到数据！");
+	    		eTLJobDao.update(etlJob);
+	    		return false;
+	    	}
+	    }else if(etlJob.getStatus().equals("Stopped")){
+	    	etlJob.setLog("作业已停止");
+	    	eTLJobDao.update(etlJob);
+	    	return false;
+	    }
+
+	    eTLJobDao.update(etlJob);
 
        
         return true;
@@ -223,6 +235,7 @@ public class ETLJobService {
 		       RepositoryDirectoryInterface directory = kettleDatabaseRepository.findDirectory(objectId);
 
 			JobMeta jobMeta = kettleDatabaseRepository.loadJob(metadata.getNAME(),directory,null,null);
+			
 			Job job = new Job(kettleDatabaseRepository,jobMeta);
 			
 			theJob.put(etlJob.getMetadata_id(),job);
@@ -234,48 +247,6 @@ public class ETLJobService {
 			job.waitUntilFinished();
 			kettleDatabaseRepository.disconnect();
 			
-//			if(etlJob.getJobtype() == 0){
-//				theJob.put(etlJob.getMetadata_id(),job);
-//				
-//				job.start();
-//				
-//				job.waitUntilFinished();
-//				
-//				theJob.remove(etlJob.getMetadata_id());
-//				
-//				etlJob.setStatus(job.getStatus());
-//				etlJob.setRecently_run_date(new Date());
-//				LogUtil logUtil = new LogUtil(job,job.getJobMeta());
-//				String log=logUtil.getJobLog(job);
-//				if(etlJob.getStatus().equals("Finished")){
-//					if(log.indexOf("完成处理")>-1){
-//						log = log.substring(log.indexOf("完成处理"));
-//						log = log.substring(log.indexOf("W="));
-//						log = log.substring(2,log.indexOf(", U"));            
-//						log = "此次抽取了 "+log+" 条数据";
-//						etlJob.setLog(log);
-//					}else{
-//						etlJob.setLog("此次没有抽取到数据！");
-//						eTLJobDao.update(etlJob);
-//						return false;
-//					}
-//				}else if(etlJob.getStatus().equals("Stopped")){
-//					etlJob.setLog("作业已停止");
-//					eTLJobDao.update(etlJob);
-//					return false;
-//				}
-//				
-//				eTLJobDao.update(etlJob);
-//			}else if(etlJob.getJobtype() == 1){
-//				theSchedule.put(etlJob.getMetadata_id(),job);
-//				etlJob.setStatus("Excuting");
-//				etlJob.setRecently_run_date(new Date());
-//				eTLJobDao.update(etlJob);				
-//				
-//				job.start();
-//			}
-
-			
 			return true;
 		}catch(Exception e){
 			e.printStackTrace();
@@ -283,66 +254,53 @@ public class ETLJobService {
 		}
 	}
 	
-//	/**
-//	 * 
-//	 * 作者:GodDispose 
-//	 * 时间:2018年4月19日 
-//	 * 作用:执行外部job作业
-//	 */
-//	@SuppressWarnings("unchecked")
-//	public boolean excuteExternalJobSchedule(ETLJob etlJob){
-//		try{
-//			
-//			Metadata metadata = iMetaDataDao.getMetadataById(etlJob.getMetadata_id());
-//			Datasource_connectinfo res = datasource_connectinfoService.getDatasource_connectinfoListByparentid(
-//					collectJobService.getCollectJobById(metadata.getCOLLECTJOBID()).getConnectinfoId());
-//			
-//			
-//			KettleDatabaseRepository kettleDatabaseRepository = kettleMetadataCollectService.connectKettleDatabaseRepository(res);
-//			ObjectId objectId = new LongObjectId(new Long(0));
-//		       RepositoryDirectoryInterface directory = kettleDatabaseRepository.findDirectory(objectId);
-//
-//			JobMeta jobMeta = kettleDatabaseRepository.loadJob(metadata.getNAME(),directory,null,null);
-//			Job job = new Job(kettleDatabaseRepository,jobMeta);
-//			
-//			theJob.put(etlJob.getMetadata_id(),job);
-//			
-//			System.out.println(job.getName());
-//			System.out.println(etlJob.getMetadata_id());
-//			job.start();		
-//			job.waitUntilFinished();
-//			
-//			etlJob.setStatus(job.getStatus());
-//			etlJob.setRecently_run_date(new Date());
-//	        LogUtil logUtil = new LogUtil(job,job.getJobMeta());
-//	        String log=logUtil.getJobLog(job);
-//	        if(etlJob.getStatus().equals("Finished")){
-//	        	if(log.indexOf("完成处理")>-1){
-//	        	log = log.substring(log.indexOf("完成处理"));
-//	            log = log.substring(log.indexOf("W="));
-//	            log = log.substring(2,log.indexOf(", U"));            
-//	            log = "此次抽取了 "+log+" 条数据";
-//	            etlJob.setLog(log);
-//	        	}else{
-//	        		etlJob.setLog("此次没有抽取到数据！");
-//	        		 eTLJobDao.update(etlJob);
-//	        	        return false;
-//	        	}
-//	        }else if(etlJob.getStatus().equals("Stopped")){
-//	        	etlJob.setLog("作业已停止");
-//	        	 eTLJobDao.update(etlJob);
-//	             return false;
-//	        }
-//	        
-//	        eTLJobDao.update(etlJob);
-//			kettleDatabaseRepository.disconnect();
-//			
-//			return true;
-//		}catch(Exception e){
-//			e.printStackTrace();
-//			return false;
-//		}
-//	}
+	/**
+	 * 
+	 * 作者:GodDispose 
+	 * 时间:2018年5月4日 
+	 * 作用:执行本地调度
+	 */
+	public boolean excuteSchedule(Dispatch dispatch) throws Exception{
+		KettleEnvironment.init();
+		if(dispatch.getType().equals("LOCAL")){
+			JobMeta jobMeta = new JobMeta(dispatch.getName()+ ".kjb", null);
+			Job job = new Job(null,jobMeta);		
+			
+			theSchedule.put(dispatch.getDispatchid() + "Schedule",job);
+			job.start();				
+			job.waitUntilFinished();
+			
+			dispatch.setStatus(2);
+			SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			dispatch.setRecenttime(sdf.parse(sdf.format(new Date())));
+			iDispatchDao.updateDispatch(dispatch);
+		}else if(dispatch.getType().equals("EXTERNAL")){
+			Metadata metadata = iMetaDataDao.getMetadataById(Integer.parseInt(dispatch.getJobname()));
+			Datasource_connectinfo res = datasource_connectinfoService.getDatasource_connectinfoListByparentid(
+					collectJobService.getCollectJobById(metadata.getCOLLECTJOBID()).getConnectinfoId());			
+			
+			KettleDatabaseRepository kettleDatabaseRepository = kettleMetadataCollectService.connectKettleDatabaseRepository(res);
+			ObjectId objectId = new LongObjectId(new Long(0));
+		       RepositoryDirectoryInterface directory = kettleDatabaseRepository.findDirectory(objectId);
+
+			JobMeta jobMeta = kettleDatabaseRepository.loadJob(metadata.getNAME(),directory,null,null);
+			
+			Job job = new Job(kettleDatabaseRepository,jobMeta);
+			
+			theSchedule.put(dispatch.getDispatchid() + "Schedule",job);
+			job.start();
+			job.waitUntilFinished();
+			
+			dispatch.setStatus(2);
+			SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			dispatch.setRecenttime(sdf.parse(sdf.format(new Date())));
+			iDispatchDao.updateDispatch(dispatch);	
+		}
+
+       
+        return true;
+	}
+	
 	
 	/**
 	 * 
@@ -445,21 +403,6 @@ public class ETLJobService {
         return true;
 	}
 	
-	/**
-	 * 
-	 * 作者:GodDispose
-	 * 时间:2018年4月25日 
-	 * 作用:获取能够添加调度的作业
-	 */
-	public List<ETLJob> getETLJobtoSchedule(int jobtype){
-		try{
-			return eTLJobDao.getETLJobtoSchedule(jobtype);
-		}catch(Exception e){
-			e.printStackTrace();
-			return null;
-		}
-	}
-	
 	/*
 	 * 作者:GodDispose
 	 * 时间:2018年4月25日
@@ -473,18 +416,20 @@ public class ETLJobService {
 			int x=50,y =50;
 			
 			JobEntrySpecial jobEntrySpecial = new JobEntrySpecial( "START", true, false );
-			jobEntrySpecial.setRepeat((boolean)map.get("isRepeat"));
-			jobEntrySpecial.setSchedulerType((int)map.get("SchedulerType"));	//0 no,1 interval,2 day,3 week,4 month
+			jobEntrySpecial.setRepeat(true);
+			jobEntrySpecial.setSchedulerType((int)map.get("schedulerType"));	//0 no,1 interval,2 day,3 week,4 month
 			//以下两个方法只会在设置为INTERVAL的时候用
-			jobEntrySpecial.setIntervalSeconds((int)map.get("intervalSeconds"));
-			jobEntrySpecial.setIntervalMinutes((int)map.get("intervalMinutes"));
+			//jobEntrySpecial.setIntervalSeconds((int)map.get("intervalSeconds"));
+			//jobEntrySpecial.setIntervalMinutes((int)map.get("intervalMinutes"));
 			
 			//选用2或者以上会用到一下方法
 			jobEntrySpecial.setHour((int)map.get("hour"));
 			jobEntrySpecial.setMinutes((int)map.get("minutes"));
 			
-			jobEntrySpecial.setWeekDay((int)map.get("day"));
-			jobEntrySpecial.setDayOfMonth((int)map.get("week"));
+			if(Integer.parseInt(map.get("schedulerType").toString()) == 3){				
+				jobEntrySpecial.setWeekDay((int)map.get("week"));
+			}
+			//jobEntrySpecial.setDayOfMonth((int)map.get("week"));
 			
 		    JobEntryCopy jobEntry = new JobEntryCopy();
 		    jobEntry.setObjectId( null );
@@ -527,12 +472,104 @@ public class ETLJobService {
 			
 			KettleEnvironment.shutdown();
 			
+			Dispatch dispatch = new Dispatch();
+			dispatch.setName(name + " Schedule");
+			dispatch.setDescription(map.get("description").toString());
+			dispatch.setJobname(name);
+			dispatch.setStatus(1);
+			SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			dispatch.setCreatetime(sdf.parse(sdf.format(new Date())));			
+			dispatch.setRuninterval((int)map.get("schedulerType") == 2 ? "每周执行" : "每天执行");
+			dispatch.setType("LOCAL");
+			
+			iDispatchDao.addDispatch(dispatch);
+			
 			return true;
 		}catch(Exception e){
 			e.printStackTrace();
 			return  false;
 		}
 		
+	}
+
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年4月25日 
+	 * 作用:获取能够添加调度的作业
+	 */
+	public List<ETLJob> getETLJobtoSchedule(String type){
+		try{
+			return eTLJobDao.getETLJobtoSchedule(type);
+		}catch(Exception e){
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年5月7日 
+	 * 作用:判断外部创建是单次作业还是调度作业
+	 * 返回值类型Map
+	 * 如果是单次作业，只返回flag:false
+	 * 如果是调度作业，返回flag:true以及一些调度信息
+	 */
+	public Map<String, Object> judgeJobOrSchedule(int id){
+		try{
+			Map<String, Object> map = new HashMap<String, Object>();
+			
+			KettleEnvironment.init();
+			Metadata metadata = iMetaDataDao.getMetadataById(id);
+			Datasource_connectinfo res = datasource_connectinfoService.getDatasource_connectinfoListByparentid(
+					collectJobService.getCollectJobById(metadata.getCOLLECTJOBID()).getConnectinfoId());			
+			
+			KettleDatabaseRepository kettleDatabaseRepository = kettleMetadataCollectService.connectKettleDatabaseRepository(res);
+			ObjectId objectId = new LongObjectId(new Long(0));
+		       RepositoryDirectoryInterface directory = kettleDatabaseRepository.findDirectory(objectId);
+
+			JobMeta jobMeta = kettleDatabaseRepository.loadJob(metadata.getNAME(),directory,null,null);			
+				
+			JobEntryCopy startEntry = jobMeta.getStart();
+			JobEntrySpecial start = (JobEntrySpecial) startEntry.getEntry();
+			boolean flag = start.isRepeat();
+			map.put("flag", flag);
+			if(flag){
+				map.put("SchedulerType", start.getSchedulerType());
+				map.put("hour", start.getHour());
+				map.put("minutes", start.getMinutes());
+				map.put("week", start.getWeekDay());
+			}
+			
+			kettleDatabaseRepository.disconnect();
+			
+			return map;
+		}catch(Exception e){
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年4月25日 
+	 * 作用:获取能够添加调度的作业
+	 */
+	public boolean isRepeatByIdORName(int id){
+		try{
+			String jobname = iMetaDataDao.getMetadataById(eTLJobDao.getETLJobById(id).getMappingid()).getNAME();
+			List<Dispatch> dispatchs = iDispatchDao.isRepeatByJobName(jobname);
+			if(dispatchs.size() > 0){
+				return true;
+			}else{
+				return false;
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			return true;
+		}
 	}
 
 	

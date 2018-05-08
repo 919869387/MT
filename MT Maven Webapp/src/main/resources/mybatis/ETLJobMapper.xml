@@ -24,7 +24,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	
 	<select id="getRowCount" resultType="int">
 		select count(*) from etljob
-		where jobtype = {type}
+		where jobtype = #{type}
 	</select>
 	
 	<select id="selectByParams" resultType="com.x8.mt.entity.ETLJob"
@@ -38,27 +38,28 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<select id="getETLJobtoSchedule" resultType="com.x8.mt.entity.ETLJob"
 		parameterType="map">
 		select * from etljob
-		where jobtype = #{jobtype}
+		where type = #{type}
 		order by recently_run_date desc
 	</select>
 	
 	<delete id="deleteETLJob" parameterType="int">
 		delete from etljob
 		where id = #{id}
-		and jobtype = {type}
+		and jobtype = #{type}
 	</delete>
 	
 	<delete id="deleteETLJobs" parameterType="List">
-        delete from etljob where jobtype = {type}
+        delete from etljob where jobtype = #{type}
         and id in
         <foreach item="ETLJobItem" collection="array" index="index" open="(" separator="," close=")">
-            #{ETLJobItem}
+            #{id}
         </foreach>
     </delete> 
     <select id="queryTargetTableIdAndName" resultType="String">
 		select distinct json_extract(attributes,'$.targettableid') 
 		from metadata		
 		where json_extract(attributes,'$.targettableid') not in (SELECT mappingid from etljob)
+		and metamodelid = 100
 	</select>
 	
 	<select id="queryTargetTableId" resultType="String">
