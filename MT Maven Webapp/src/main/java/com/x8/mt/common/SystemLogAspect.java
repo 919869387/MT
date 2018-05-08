@@ -56,7 +56,13 @@ public class SystemLogAspect {
 		try {
 			Subject subject = SecurityUtils.getSubject();  
 			Session session = subject.getSession();
-			log.setSystemusername(session.getAttribute("username").toString());
+			String username = session.getAttribute("username").toString();
+			if (username != null) {
+				log.setSystemusername(username);
+			}else {
+				log.setSystemusername("visitors");
+			}
+			
 		} catch (Exception e) {
 		}
 	}    
