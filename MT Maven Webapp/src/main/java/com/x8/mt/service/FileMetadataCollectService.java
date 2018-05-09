@@ -68,13 +68,13 @@ public class FileMetadataCollectService {
 			metadataFile.setUPDATETIME(createDate);
 			metadataFile.setCHECKSTATUS("1");
 			metadataFile.setVERSION(1);
-			String databaseAttributes = "{\"filename\":\""+ filename
+			String fileAttributes = "{\"filename\":\""+ filename
 					+"\",\"filetype\":\"" + "1"
 					+"\",\"filelength\":\"" + CalDataSize.getPrintSize(file.length())
 					+"\",\"filepath\":\"" + GlobalMethodAndParams.PATH_NAME
 					+"\"}";	
 			
-			metadataFile.setATTRIBUTES(databaseAttributes);
+			metadataFile.setATTRIBUTES(fileAttributes);
 
 			if(!(iMetaDataDao.insertMetadata(metadataFile)>0 ? true:false)){//插入不成功
 				throw new RuntimeException("数据库元数据插入失败");
@@ -98,50 +98,93 @@ public class FileMetadataCollectService {
 			}
 			
 	        HSSFSheet sheet=null;
-//	        System.out.println("工作列表名称：" );
-//	        for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
-//	        	System.out.print(workbook.getSheetName(i)+"(共有"+ workbook.getSheetAt(i).getPhysicalNumberOfRows()+ "条记录)"+"\t");
-//	        }
-//	        for (int i = 0; i < workbook.getNumberOfSheets(); i++) {//获取每个Sheet表
-	        for (int i = 0; i < 1; i++) {//只获取第一个Sheet表
+
+	        for (int i = 0; i < workbook.getNumberOfSheets(); i++) {//获取每个Sheet表
 	             sheet=workbook.getSheetAt(i);
+	             System.out.println(workbook.getSheetName(i));
 	             if(sheet.getPhysicalNumberOfRows() == 0){	//只存在0行
 	            	 System.out.println("此文件不存在元数据！");
-	             }else if(sheet.getPhysicalNumberOfRows() > 0){  //存在数据
-	            	 HSSFRow row1=sheet.getRow(0);
-	            	 HSSFRow row2=sheet.getRow(1);
-	                 for (int k = 0; k < row1.getPhysicalNumberOfCells(); k++) {
-	                	 String fieldType = "String";
-	                     switch (row2.getCell(k).getCellType()) {
-		 	                case HSSFCell.CELL_TYPE_STRING:
-		 	                	fieldType = "String";
-		 	                	break;
-		 	                case HSSFCell.CELL_TYPE_NUMERIC:
-		 	                	fieldType = "Number";
-		 	                	break;
-		 	                case HSSFCell.CELL_TYPE_BOOLEAN:
-		 	                	fieldType = "Boolean";
-		 	                	break;
-		 	                default:
-		 	                	break;
-	                     }
+	             }else if(sheet.getPhysicalNumberOfRows() > 2){  //只存在2行
+	          	   String database = sheet.getRow(0).getCell(0).toString();
+//	          	   String databaseName = database.split("(")[0];
+//	          	   String databaseDescription = database.substring(database.indexOf("(")+1,database.indexOf(")"));
+	          	   String tableName = database.split("（")[0];
+	          	   String tableDescription = database.substring(database.indexOf("（")+1,database.indexOf("）"));
+	          	   
+		   			//3.将表数据存入元数据表	
+		   			Metadata metadataTable = new Metadata();
+		   			metadataTable.setNAME(tableName);
+		   			metadataTable.setCOLLECTJOBID(collectjobid);
+		   			metadataTable.setMETAMODELID(110);
+		   			metadataTable.setCREATETIME(createDate);
+		   			metadataTable.setUPDATETIME(createDate);
+		   			metadataTable.setCHECKSTATUS("1");
+		   			metadataTable.setVERSION(1);
+					String tableAttributes = "{\"tablename\":\""+ tableName +"\"}";
+		   			
+					metadataTable.setATTRIBUTES(tableAttributes);
+	
+		   			if(!(iMetaDataDao.insertMetadata(metadataTable)>0 ? true:false)){//插入不成功
+		   				throw new RuntimeException("数据库元数据插入失败");
+		   			}
+		   			
+		   			//4.将表元数据加入metadata_tank表
+		   			metadataTank.setCHECKSTATUS(metadataTable.getCHECKSTATUS());
+		   			metadataTank.setATTRIBUTES(metadataTable.getATTRIBUTES());
+		   			metadataTank.setCREATETIME(new Date());
+		   			metadataTank.setDESCRIPTION(metadataTable.getDESCRIPTION());
+		   			metadataTank.setKeyid(metadataTable.getID());
+		   			metadataTank.setMETAMODELID(metadataTable.getMETAMODELID());
+		   			metadataTank.setNAME(metadataTable.getNAME());
+		   			metadataTank.setUPDATETIME(new Date());
+		   			metadataTank.setVERSION(metadataTable.getVERSION());
+		   			metadataTank.setCOLLECTJOBID(collectjobid);
+	
+		   			if(!(iMetadataTankDao.insertMetaDataTank(metadataTank)>0)){
+		   				throw new RuntimeException("insertMetaDataTank Error");
+		   			}
+		   			
+     				metadataRelation.setMetaDataId(metadataFile.getID());
+     				metadataRelation.setRelateMetaDataId(metadataTable.getID());
+     				metadataRelation.setType("DEPENDENCY");
+     				
+     				if(!(metaDataRelationService.insertMetaDataRelation(metadataRelation))){//插入不成功
+     					throw new RuntimeException("元数据关系插入失败");
+     				} 
+	          	   
+	          	   for(int k = 2 ; k < sheet.getPhysicalNumberOfRows(); k++){
+	          		   HSSFRow row = sheet.getRow(k);
+	              	   String fieldTypeAndLength = row.getCell(2).toString();
+//	              	   String fieldType = database.split("(")[0];
+//	              	   String fieldLength = database.substring(database.indexOf("(")+1,database.indexOf(")")); 
+	              	   String fieldType = null;
+	              	   String fieldLength = null;
+	              	   if(fieldTypeAndLength.contains("（")){
+	              		   fieldType = fieldTypeAndLength.split("（")[0];
+	        	           fieldLength = fieldTypeAndLength.substring(fieldTypeAndLength.indexOf("（")+1,fieldTypeAndLength.indexOf("）"));
+	              	   }
+	              	   
+	              	   boolean allownull = true;
+	              	   if(row.getCell(3).toString().equals("N")){
+	              		   allownull = false;
+	              	   }
 	                     
-	                    //添加字段元数据 
+	                    //5.添加字段元数据 
 	                    Metadata metadataField = new Metadata();
-	     				metadataField.setNAME(row1.getCell(k).toString());
+	     				metadataField.setNAME(row.getCell(0).toString());
 	     				metadataField.setCOLLECTJOBID(collectjobid);
 	     				metadataField.setMETAMODELID(32);
 	     				metadataField.setCREATETIME(createDate);
 	     				metadataField.setUPDATETIME(createDate);
 	     				metadataField.setCHECKSTATUS("1");
 	     				metadataField.setVERSION(1);
-	     				String fieldAttributes = "{\"fieldname\":\""+ row1.getCell(k).toString()
+	     				String fieldAttributes = "{\"fieldname\":\""+ row.getCell(0).toString()
 	     					+ "\",\"fieldtype\":\"" + fieldType
-	     					+"\",\"length\":\"" + 0
+	     					+"\",\"length\":\"" + fieldLength
 	     					+"\",\"isprimarykey\":\"" + false
 	     					+"\",\"isforeignkey\":\"" + false
-	     					+"\",\"allownull\":\"" + false
-	     					+"\",\"defaultvalue\":\"" + 0
+	     					+"\",\"allownull\":\"" + allownull
+	     					+"\",\"defaultvalue\":\"" + row.getCell(4).toString()
 	     					+"\"}";	
 	     				
 	     				metadataField.setATTRIBUTES(fieldAttributes);
@@ -149,10 +192,11 @@ public class FileMetadataCollectService {
 	     					throw new RuntimeException("字段元数据插入失败");
 	     				}
 
-	     				metadataRelation.setMetaDataId(metadataFile.getID());
+	     				metadataRelation.setMetaDataId(metadataTable.getID());
 	     				metadataRelation.setRelateMetaDataId(metadataField.getID());
 	     				metadataRelation.setType("COMPOSITION");
 	     				
+	     				//6.添加字段元数据 到MetadataTank表
 	     				metadataTank.setCHECKSTATUS(metadataField.getCHECKSTATUS());
 	     				metadataTank.setATTRIBUTES(metadataField.getATTRIBUTES());
 	     				metadataTank.setCREATETIME(new Date());

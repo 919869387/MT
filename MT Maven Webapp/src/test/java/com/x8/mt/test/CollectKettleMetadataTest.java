@@ -88,7 +88,7 @@ public class CollectKettleMetadataTest {
 	@Test
 	public void testExcel() throws FileNotFoundException, IOException{
 		//fileMetadataCollectService.collectExcelMetaData("new1.xls");
-		File file = new File("C:/Users/jason zhou/Desktop/file1.xls"); 
+		File file = new File("C:/Users/jason zhou/Desktop/学习项目/文件类型说明/file.xls"); 
       HSSFWorkbook workbook=new HSSFWorkbook(new FileInputStream(file));
       
       //System.out.println("文件大小："+FormetFileSize(file.length()));
@@ -103,59 +103,29 @@ public class CollectKettleMetadataTest {
            System.out.println(workbook.getSheetName(i));
            if(sheet.getPhysicalNumberOfRows() == 0){	//只存在0行
           	 System.out.println("此文件不存在元数据！");
-           }else if(sheet.getPhysicalNumberOfRows() == 1){  //只存在1行
-          	 HSSFRow row=sheet.getRow(0);
-               for (int k = 0; k < row.getPhysicalNumberOfCells(); k++) {
-                   System.out.print(row.getCell(k)+"\t");
-               }
-           }else if(sheet.getPhysicalNumberOfRows() == 2){  //只存在2行
-          	 HSSFRow row1=sheet.getRow(0);
-          	 HSSFRow row2=sheet.getRow(1);
-               for (int k = 0; k < row1.getPhysicalNumberOfCells(); k++) {
-                   System.out.print(row1.getCell(i).toString());
-                   switch (row2.getCell(0).getCellType()) {
-	 	                case HSSFCell.CELL_TYPE_STRING:
-	 	                	System.out.print("("+"String" + ")"+ "\t");
-	 	                	break;
-	 	                case HSSFCell.CELL_TYPE_NUMERIC:
-	 	                	System.out.print("(" + "Number" +")"+ "\t");
-	 	                	break;
-	 	                case HSSFCell.CELL_TYPE_BOOLEAN:
-	 	                	System.out.print("(" + "Boolean" +")"+ "\t");
-	 	                	break;
-	 	                default:
-	 	                	break;
-                   }
-               }
            }else if(sheet.getPhysicalNumberOfRows() > 2){  //只存在2行
-          	 HSSFRow row1=sheet.getRow(0);
-          	 HSSFRow row2=sheet.getRow(1);
-          	 HSSFRow row3=sheet.getRow(2);
-          	 List<String> list = new ArrayList<String>();
-               for (int k = 0; k < row1.getPhysicalNumberOfCells(); k++) {
-                   System.out.print(row1.getCell(k).toString());
-                   switch (row2.getCell(0).getCellType()) {
-	 	                case HSSFCell.CELL_TYPE_STRING:
-	 	                 	System.out.print("("+"String" + ")" + "\t");
-	 	                	break;
-	 	                case HSSFCell.CELL_TYPE_NUMERIC:
-	 	                	if(row3.getCell(0).getCellType() == HSSFCell.CELL_TYPE_STRING){
-	 	                     	System.out.print("("+"String" + ")"+ "\t");
-	 	                	}else{	 	                		
-	 	                		System.out.print("(" + "Number" +")"+ "\t");
-	 	                	}
-	 	                	break;
-	 	                case HSSFCell.CELL_TYPE_BOOLEAN:
-	 	                	System.out.print("(" + "Boolean" +")"+ "\t");
-	 	                	break;
-	 	                default:
-	 	                	break;
-                   }
-               }
+        	   String database = sheet.getRow(0).getCell(0).toString();
+//        	   String databaseName = database.split("(")[0];
+//        	   String databaseDescription = database.substring(database.indexOf("(")+1,database.indexOf(")"));
+        	   String databaseName = database.split("（")[0];
+        	   String databaseDescription = database.substring(database.indexOf("（")+1,database.indexOf("）"));
+        	   for(int k = 2 ; k < sheet.getPhysicalNumberOfRows(); k++){
+        		   HSSFRow row = sheet.getRow(k);
+            	   String fieldTypeAndLength = row.getCell(2).toString();
+//            	   String fieldType = database.split("(")[0];
+//            	   String fieldLength = database.substring(database.indexOf("(")+1,database.indexOf(")")); 
+            	   String fieldType = database.split("（")[0];
+            	   String fieldLength = database.substring(database.indexOf("（")+1,database.indexOf("）"));
+            	   System.out.println("FieldName:" + row.getCell(0).toString() 
+        				   + "\t" + "FieldType:" + fieldType
+        				   + "\t" + "FieldTLength:" + fieldLength
+        				   + "\t" + "isNull:" + row.getCell(3).toString()
+        				   + "\t" + "Default:" + row.getCell(4).toString()
+        				   + "\t" + "Description:" + row.getCell(6).toString());
+        		   System.out.println();
+        	   }        	  
            }
-           System.out.println();
-	    }
-		System.out.println("Excel......................");
+      	}
 	}
 	
 	@Test
