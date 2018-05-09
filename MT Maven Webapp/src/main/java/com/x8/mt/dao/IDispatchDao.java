@@ -7,6 +7,7 @@ import java.util.Map;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
+import com.sun.org.glassfish.gmbal.ParameterNames;
 import com.x8.mt.entity.CollectJob;
 import com.x8.mt.entity.Dispatch;
 import com.x8.mt.entity.ETLJob;
@@ -70,6 +71,14 @@ public interface IDispatchDao {
 	 */
 	int getRowCount();
 	
+	
+	/**
+	 * 
+	 * 作者:GodDispose 
+	 * 时间:2018年5月9日 
+	 * 作用:根据描述筛选，并选取指定偏移量的一组etl调度
+	 */
+	List<Dispatch> selectByDescription(@Param("description")String description,@Param("offset") int offset,@Param("size") int size);
 	
 	/**
 	 * 

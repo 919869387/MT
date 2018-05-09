@@ -39,18 +39,26 @@ public interface IETLJobDao {
 	 * 
 	 * 作者:GodDispose
 	 * 时间:2018年4月25日 
-	 * 作用:获取不同类型的作业数量
+	 * 作用:获取作业数量
 	 */
-	int getRowCount(int type);
+	int getRowCount();
 	
 	
 	/**
 	 * 
 	 * 作者:谭凯旋 
 	 * 时间:2018年3月26日 
-	 * 作用:选取指定偏移量的一组etljob作业或者调度
+	 * 作用:选取指定偏移量的一组etljob作业
 	 */
 	List<ETLJob> selectByParams(Map<String, Object> params);
+	
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年5月9日 
+	 * 作用:根据描述筛选，并选取指定偏移量的一组etljob作业
+	 */
+	List<ETLJob> selectByDescription(@Param("description")String description,@Param("offset") int offset,@Param("size") int size);
 	
 	
 	/**

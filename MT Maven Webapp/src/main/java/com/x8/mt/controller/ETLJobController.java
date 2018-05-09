@@ -113,6 +113,58 @@ public class ETLJobController {
 	
 	/**
 	 * 
+	 * 作者:Tomcroods
+	 * 时间:2017年12月15日
+	 * 作用:通过ETL元数据建立ETL任务
+	 * 参数:id
+	 */
+	@RequestMapping(value = "/insertETLJobByMetaData",method=RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="ETLJob",operationDesc="通过ETL元数据建立ETL任务")
+	public JSONObject insertETLJobByMetaData(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map){
+		JSONObject responsejson = new JSONObject();
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
+		//检查传参是否正确
+		if(!(map.containsKey("id"))){
+			responsejson.put("result", false);
+			return responsejson;
+		}
+		
+		//获取当前的用户名
+		Subject subject = SecurityUtils.getSubject();  
+		Session session = subject.getSession();
+		String creater = session.getAttribute("username").toString();		
+		
+		int id = 1;
+		
+		try{
+			id = Integer.parseInt((String) map.get("id"));
+			ETLJob etlJob = new ETLJob();
+			etlJob.setMetadata_id(id);
+			if (map.containsKey("description")) {
+				etlJob.setDescription((String) map.get("description"));
+			}
+			etlJob.setCreate_date(new Date());
+			etlJob.setCreateuserid(systemuserService.selectUser(creater).getId());
+			etlJob.setType("EXTERNAL");
+			etlJob.setStatus("NewCreate");
+			
+			if((boolean)etlJobService.judgeJobOrSchedule(id).get("flag")){
+				etlJob.setJobtype(1);	
+			}else{	
+				etlJob.setJobtype(0);	
+			}	
+			responsejson.put("result", etlJobService.insertETLJob(etlJob));	
+	
+		}catch(Exception e){
+			e.printStackTrace();
+			responsejson.put("result", false);
+		}
+		return responsejson;
+	}
+
+	/**
+	 * 
 	 * 作者:GodDispose
 	 * 时间:2018年4月25日
 	 * 作用:插入新的ETLJob调度任务
@@ -165,7 +217,7 @@ public class ETLJobController {
 			dataMap.put("minutes", minutes);
 			if(schedulerType == 3){
 				week = Integer.parseInt(map.get("week").toString());
-				map.put("week", week);
+				dataMap.put("week", week);
 			}
 			dataMap.put("description", map.get("description").toString());
 			//day = Integer.parseInt(map.get("day").toString());
@@ -213,69 +265,6 @@ public class ETLJobController {
 		return responsejson;
 	}
 
-	/**
-	 * 
-	 * 作者:Tomcroods
-	 * 时间:2017年12月15日
-	 * 作用:通过ETL元数据建立ETL任务
-	 * 参数:id
-	 */
-	@RequestMapping(value = "/insertETLJobByMetaData",method=RequestMethod.POST)
-	@ResponseBody
-	@Log(operationType="ETLJob",operationDesc="通过ETL元数据建立ETL任务")
-	public JSONObject insertETLJobByMetaData(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map){
-		JSONObject responsejson = new JSONObject();
-		GlobalMethodAndParams.setHttpServletResponse(request, response);
-		//检查传参是否正确
-		if(!(map.containsKey("id"))){
-			responsejson.put("result", false);
-			return responsejson;
-		}
-		
-		//获取当前的用户名
-		Subject subject = SecurityUtils.getSubject();  
-		Session session = subject.getSession();
-		String creater = session.getAttribute("username").toString();		
-		
-		int id = 1;
-		
-		try{
-			id = Integer.parseInt((String) map.get("id"));
-			if((boolean)etlJobService.judgeJobOrSchedule(id).get("flag")){
-				String name = metaDataService.getMetadataById(id).getNAME();
-				Dispatch dispatch = new Dispatch();
-				dispatch.setName(name + " Schedule");
-				dispatch.setDescription(map.get("description").toString());
-				dispatch.setJobname(name);
-				dispatch.setStatus(1);
-				SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-				dispatch.setCreatetime(sdf.parse(sdf.format(new Date())));			
-				dispatch.setRuninterval((int)map.get("schedulerType") == 2 ? "每周执行" : "每天执行");
-				dispatch.setType("EXTERNAL");
-				
-				dispatchService.addDispatch(dispatch);
-			}else{
-				
-				ETLJob etlJob = new ETLJob();
-				etlJob.setMetadata_id(id);
-				if (map.containsKey("description")) {
-					etlJob.setDescription((String) map.get("description"));
-				}
-				etlJob.setCreate_date(new Date());
-				etlJob.setCreateuserid(systemuserService.selectUser(creater).getId());
-				etlJob.setType("EXTERNAL");
-				etlJob.setStatus("NewCreate");
-				etlJob.setJobtype(0);
-				responsejson.put("result", etlJobService.insertETLJob(etlJob));		
-			}		
-
-		}catch(Exception e){
-			e.printStackTrace();
-			responsejson.put("result", false);
-		}
-		return responsejson;
-	}
-	
 	/**
 	 * 
 	 * 作者:Tomcroods
@@ -350,118 +339,6 @@ public class ETLJobController {
 		return responsejson;
 	}
 	
-	
-	/**
-	 * 
-	 * 作者:Tomcroods
-	 * 时间:2017年12月15日
-	 * 作用:获取分页数据(数据按 createDate 倒叙排序，新添加的在最前面)
-	 * 参数:page(页码)、pageSize(每页多少行)
-	 */
-	@RequestMapping(value = "/getETLJobListByPage",method=RequestMethod.POST)
-	@ResponseBody
-	@Log(operationType="ETLJob",operationDesc="获取分页ETLJob数据")
-	public JSONObject getETLJobListByPage(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map){
-		JSONObject responsejson = new JSONObject();
-
-//		if(!GlobalMethodAndParams.checkLogin()){
-//			responsejson.put("result", false);
-//			responsejson.put("count",0);
-//			return responsejson;
-//		}
-		GlobalMethodAndParams.setHttpServletResponse(request, response);
-
-		//检查传参是否正确
-		if(!(map.containsKey("page")&&
-				map.containsKey("pageSize")&&
-					map.containsKey("type"))){
-			responsejson.put("result", false);
-			responsejson.put("count",0);
-			return responsejson;
-		}
-
-		String currPageStr = map.get("page").toString();
-		String pageSizeStr = map.get("pageSize").toString();
-		String typeStr = map.get("type").toString();
-		int currPage = 1;
-		int pageSize = 1;
-		int type = 0;
-		try {
-			currPage = Integer.parseInt(currPageStr);
-			pageSize = Integer.parseInt(pageSizeStr);
-			type = Integer.parseInt(typeStr);
-		} catch (Exception e) {
-		}
-		//获取总记录数
-		int rowCount = etlJobService.getRowCount(type);
-		//构造分页数据
-		PageParam pageParam = new PageParam();
-		pageParam.setPageSize(pageSize);
-		pageParam.setRowCount(rowCount);
-		if(pageParam.getTotalPage()<currPage){
-			currPage = pageParam.getTotalPage();
-		}
-		pageParam.setCurrPage(currPage);
-		pageParam = etlJobService.getETLJobListByPage(pageParam);
-		if(pageParam.getData()==null|| pageParam.getData().isEmpty()){
-			responsejson.put("result", false);
-			responsejson.put("message", "没有查询到任务");
-			return responsejson;
-		}else{
-		JSONArray data = new JSONArray();
-		@SuppressWarnings("unchecked")
-		List<ETLJob> ETLJobList=pageParam.getData();
-		for(ETLJob etlJob :ETLJobList){
-			JSONObject etljobJson = new JSONObject();
-			etljobJson.put("id", etlJob.getId());
-			if(etlJob.getType().equals("LOCAL")){				
-				if(etlJob.getStatus().equals("NewCreate")){
-					etljobJson.put("target_table_id", etlJob.getId());
-					etljobJson.put("target_table", metaDataService.getMetadataById(etlJob.getMappingid()).getNAME());
-					etljobJson.put("description", etlJob.getDescription());
-					etljobJson.put("create_date",  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(etlJob.getCreate_date()));
-					etljobJson.put("recently_run_date","");
-					etljobJson.put("status",etlJob.getStatus());
-					etljobJson.put("log","该任务刚刚新建");					
-					data.add(etljobJson);
-				}else{			
-					etljobJson.put("target_table_id", etlJob.getId());
-					etljobJson.put("target_table",  metaDataService.getMetadataById(etlJob.getMappingid()).getNAME());
-					etljobJson.put("description", etlJob.getDescription());
-					etljobJson.put("create_date",  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(etlJob.getCreate_date()));
-					etljobJson.put("recently_run_date", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(etlJob.getRecently_run_date()));
-					etljobJson.put("status", etlJob.getStatus());
-					etljobJson.put("log", etlJob.getLog());
-					data.add(etljobJson);
-				}
-			}else{
-				if(etlJob.getStatus().equals("NewCreate")){
-					etljobJson.put("target_table_id", etlJob.getId());
-					etljobJson.put("target_table",  metaDataService.getMetadataById(etlJob.getMetadata_id()).getNAME());
-					etljobJson.put("description", etlJob.getDescription());
-					etljobJson.put("create_date",  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(etlJob.getCreate_date()));
-					etljobJson.put("recently_run_date","");
-					etljobJson.put("status",etlJob.getStatus());
-					etljobJson.put("log","该任务刚刚新建");					
-					data.add(etljobJson);
-				}else{
-					etljobJson.put("target_table_id", etlJob.getId());
-					etljobJson.put("target_table",  metaDataService.getMetadataById(etlJob.getMetadata_id()).getNAME());
-					etljobJson.put("description", etlJob.getDescription());
-					etljobJson.put("create_date",  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(etlJob.getCreate_date()));
-					etljobJson.put("recently_run_date", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(etlJob.getRecently_run_date()));
-					etljobJson.put("status", etlJob.getStatus());
-					etljobJson.put("log", etlJob.getLog());
-					data.add(etljobJson);
-				}
-			}
-		}
-		responsejson.put("result", true);
-		responsejson.put("data", data);
-		responsejson.put("count",ETLJobList.size());
-		return responsejson;
-		}
-	}
 	
 	/**
 	 * 作者:Tomcroods
@@ -727,8 +604,123 @@ public class ETLJobController {
 	}
 	
 	/**
+		 * 
+		 * 作者:Tomcroods
+		 * 时间:2017年12月15日
+		 * 作用:获取分页数据(数据按 createDate 倒叙排序，新添加的在最前面)
+		 * 参数:page(页码)、pageSize(每页多少行)
+		 */
+		@RequestMapping(value = "/getETLJobListByPage",method=RequestMethod.POST)
+		@ResponseBody
+		@Log(operationType="ETLJob",operationDesc="获取分页ETLJob数据")
+		public JSONObject getETLJobListByPage(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map){
+			JSONObject responsejson = new JSONObject();
+	
+	//		if(!GlobalMethodAndParams.checkLogin()){
+	//			responsejson.put("result", false);
+	//			responsejson.put("count",0);
+	//			return responsejson;
+	//		}
+			GlobalMethodAndParams.setHttpServletResponse(request, response);
+	
+			//检查传参是否正确
+			if(!(map.containsKey("page")&&
+					map.containsKey("pageSize"))){
+				responsejson.put("result", false);
+				responsejson.put("count",0);
+				return responsejson;
+			}
+	
+			String currPageStr = map.get("page").toString();
+			String pageSizeStr = map.get("pageSize").toString();
+			String typeStr = map.get("type").toString();
+			int currPage = 1;
+			int pageSize = 1;
+			int type = 0;
+			try {
+				currPage = Integer.parseInt(currPageStr);
+				pageSize = Integer.parseInt(pageSizeStr);
+				type = Integer.parseInt(typeStr);
+			} catch (Exception e) {
+			}
+			//获取总记录数
+			int rowCount = etlJobService.getRowCount();
+			//构造分页数据
+			PageParam pageParam = new PageParam();
+			pageParam.setPageSize(pageSize);
+			pageParam.setRowCount(rowCount);
+			if(pageParam.getTotalPage()<currPage){
+				currPage = pageParam.getTotalPage();
+			}
+			pageParam.setCurrPage(currPage);
+			pageParam = etlJobService.getETLJobListByPage(pageParam);
+			if(pageParam.getData()==null|| pageParam.getData().isEmpty()){
+				responsejson.put("result", false);
+				responsejson.put("message", "没有查询到任务");
+				return responsejson;
+			}else{
+			JSONArray data = new JSONArray();
+			@SuppressWarnings("unchecked")
+			List<ETLJob> ETLJobList=pageParam.getData();
+			for(ETLJob etlJob :ETLJobList){
+				JSONObject etljobJson = new JSONObject();
+				etljobJson.put("id", etlJob.getId());
+				if(etlJob.getType().equals("LOCAL")){				
+					if(etlJob.getStatus().equals("NewCreate")){
+						etljobJson.put("target_table", metaDataService.getMetadataById(etlJob.getMappingid()).getNAME());
+						etljobJson.put("description", etlJob.getDescription());
+						etljobJson.put("create_date",  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(etlJob.getCreate_date()));
+						etljobJson.put("recently_run_date","");
+						etljobJson.put("status",etlJob.getStatus());
+						etljobJson.put("type", "内部");
+						etljobJson.put("jobtype", "否");
+						etljobJson.put("log","该任务刚刚新建");					
+						data.add(etljobJson);
+					}else{			
+						etljobJson.put("target_table",  metaDataService.getMetadataById(etlJob.getMappingid()).getNAME());
+						etljobJson.put("description", etlJob.getDescription());
+						etljobJson.put("create_date",  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(etlJob.getCreate_date()));
+						etljobJson.put("recently_run_date", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(etlJob.getRecently_run_date()));
+						etljobJson.put("status", etlJob.getStatus());
+						etljobJson.put("type", "内部");
+						etljobJson.put("jobtype", "否");
+						etljobJson.put("log", etlJob.getLog());
+						data.add(etljobJson);
+					}
+				}else{
+					if(etlJob.getStatus().equals("NewCreate")){
+						etljobJson.put("target_table",  metaDataService.getMetadataById(etlJob.getMetadata_id()).getNAME());
+						etljobJson.put("description", etlJob.getDescription());
+						etljobJson.put("create_date",  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(etlJob.getCreate_date()));
+						etljobJson.put("recently_run_date","");
+						etljobJson.put("status",etlJob.getStatus());
+						etljobJson.put("type","外部");
+						etljobJson.put("jobtype", etlJob.getJobtype() == 0 ? "否":"是");
+						etljobJson.put("log","该任务刚刚新建");					
+						data.add(etljobJson);
+					}else{
+						etljobJson.put("target_table",  metaDataService.getMetadataById(etlJob.getMetadata_id()).getNAME());
+						etljobJson.put("description", etlJob.getDescription());
+						etljobJson.put("create_date",  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(etlJob.getCreate_date()));
+						etljobJson.put("recently_run_date", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(etlJob.getRecently_run_date()));
+						etljobJson.put("type","外部");
+						etljobJson.put("jobtype", etlJob.getJobtype() == 0 ? "否":"是");
+						etljobJson.put("status", etlJob.getStatus());
+						etljobJson.put("log", etlJob.getLog());
+						data.add(etljobJson);
+					}
+				}
+			}
+			responsejson.put("result", true);
+			responsejson.put("data", data);
+			responsejson.put("count",ETLJobList.size());
+			return responsejson;
+			}
+		}
+
+	/**
 	 * 
-	 * 作者:Tomcroods
+	 * 作者:GodDispose
 	 * 时间:2018年5月7日
 	 * 作用:获取分页数据(数据按 createDate 倒叙排序，新添加的在最前面)
 	 * 参数:page(页码)、pageSize(每页多少行)
@@ -784,7 +776,6 @@ public class ETLJobController {
 		for(Dispatch dispatch : dispatchList){
 			JSONObject dispatchJson = new JSONObject();
 			dispatchJson.put("dispatchid", dispatch.getDispatchid());
-			if(dispatch.getType().equals("LOCAL")){
 				dispatchJson.put("name", dispatch.getName());
 				dispatchJson.put("description", dispatch.getDescription());
 				dispatchJson.put("jobname", dispatch.getJobname());
@@ -795,28 +786,11 @@ public class ETLJobController {
 				}else if(dispatch.getStatus() == 3){
 					dispatchJson.put("status",  "运行结束");
 				}
-				dispatchJson.put("runinterval","");
+				dispatchJson.put("runinterval",dispatch.getRuninterval());
 				dispatchJson.put("createtime",new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(dispatch.getCreatetime()));	
 				dispatchJson.put("recenttime",dispatch.getRecenttime() == null ? "" :new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(dispatch.getRecenttime()));	
 				dispatchJson.put("endtime",dispatch.getEndtime() == null ? "" :new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(dispatch.getEndtime()));	
 				data.add(dispatchJson);
-			}else{
-				dispatchJson.put("name", dispatch.getName());
-				dispatchJson.put("description", dispatch.getDescription());
-				dispatchJson.put("jobname",metaDataService.getMetadataById(Integer.parseInt(dispatch.getJobname().toString())).getNAME());
-				if(dispatch.getStatus() == 1){
-					dispatchJson.put("status",  "新建");
-				}else if(dispatch.getStatus() == 2){
-					dispatchJson.put("status",  "运行中");
-				}else if(dispatch.getStatus() == 3){
-					dispatchJson.put("status",  "运行结束");
-				}
-				dispatchJson.put("runinterval","");
-				dispatchJson.put("createtime",new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(dispatch.getCreatetime()));	
-				dispatchJson.put("recenttime",dispatch.getRecenttime() == null ? "" :new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(dispatch.getRecenttime()));	
-				dispatchJson.put("endtime",dispatch.getEndtime() == null ? "" :new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(dispatch.getEndtime()));	
-				data.add(dispatchJson);
-			}
 		}
 		responsejson.put("result", true);
 		responsejson.put("data", data);
@@ -824,6 +798,205 @@ public class ETLJobController {
 		return responsejson;
 		}
 	}
+	
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年5月7日
+	 * 作用:根据描述筛选，并获取分页ETLJSchedule数据(数据按 createDate 倒叙排序，新添加的在最前面)
+	 * 参数:page(页码)、pageSize(每页多少行)、description(描述)
+	 */
+	@RequestMapping(value = "/getETLScheduleListByDescription",method=RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="Dispatch",operationDesc="根据描述筛选，并获取分页ETLJSchedule数据")
+	public JSONObject getETLScheduleListByDescription(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map){
+		JSONObject responsejson = new JSONObject();
+
+//		if(!GlobalMethodAndParams.checkLogin()){
+//			responsejson.put("result", false);
+//			responsejson.put("count",0);
+//			return responsejson;
+//		}
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
+		
+		//检查传参是否正确
+		if(!(map.containsKey("page")&&
+				map.containsKey("pageSize"))){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}
+
+		String currPageStr = map.get("page").toString();
+		String pageSizeStr = map.get("pageSize").toString();
+		String description = map.get("description").toString();
+		int currPage = 1;
+		int pageSize = 1;
+		try {
+			currPage = Integer.parseInt(currPageStr);
+			pageSize = Integer.parseInt(pageSizeStr);
+		} catch (Exception e) {
+		}
+		//获取总记录数
+		int rowCount = dispatchService.getRowCount();
+		//构造分页数据
+		PageParam pageParam = new PageParam();
+		pageParam.setPageSize(pageSize);
+		pageParam.setRowCount(rowCount);
+		if(pageParam.getTotalPage()<currPage){
+			currPage = pageParam.getTotalPage();
+		}
+		pageParam.setCurrPage(currPage);
+		pageParam = dispatchService.getETLScheduleListByDescription(pageParam,description);
+		if(pageParam.getData()==null|| pageParam.getData().isEmpty()){
+			responsejson.put("result", false);
+			responsejson.put("message", "没有查询到任务");
+			return responsejson;
+		}else{
+		JSONArray data = new JSONArray();
+		List<Dispatch> dispatchList=pageParam.getData();
+		for(Dispatch dispatch : dispatchList){
+			JSONObject dispatchJson = new JSONObject();
+			dispatchJson.put("dispatchid", dispatch.getDispatchid());
+				dispatchJson.put("name", dispatch.getName());
+				dispatchJson.put("description", dispatch.getDescription());
+				dispatchJson.put("jobname", dispatch.getJobname());
+				if(dispatch.getStatus() == 1){
+					dispatchJson.put("status",  "新建");
+				}else if(dispatch.getStatus() == 2){
+					dispatchJson.put("status",  "运行中");
+				}else if(dispatch.getStatus() == 3){
+					dispatchJson.put("status",  "运行结束");
+				}
+				dispatchJson.put("runinterval",dispatch.getRuninterval());
+				dispatchJson.put("createtime",new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(dispatch.getCreatetime()));	
+				dispatchJson.put("recenttime",dispatch.getRecenttime() == null ? "" :new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(dispatch.getRecenttime()));	
+				dispatchJson.put("endtime",dispatch.getEndtime() == null ? "" :new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(dispatch.getEndtime()));	
+				data.add(dispatchJson);
+		}
+		responsejson.put("result", true);
+		responsejson.put("data", data);
+		responsejson.put("count",dispatchList.size());
+		return responsejson;
+		}
+	}
+	
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年5月7日
+	 * 作用:根据描述筛选，并获取分页ETLJob数据(数据按 createDate 倒叙排序，新添加的在最前面)
+	 * 参数:page(页码)、pageSize(每页多少行)、description(描述)
+	 */
+	@RequestMapping(value = "/getETLJobListByDescription",method=RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="ETLJob",operationDesc="根据描述筛选，并获取分页ETLJob数据(数据按 createDate 倒叙排序，新添加的在最前面)")
+	public JSONObject getETLJobListByDescription(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map){
+		JSONObject responsejson = new JSONObject();
+
+//		if(!GlobalMethodAndParams.checkLogin()){
+//			responsejson.put("result", false);
+//			responsejson.put("count",0);
+//			return responsejson;
+//		}
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
+
+		//检查传参是否正确
+		if(!(map.containsKey("page")&&
+				map.containsKey("pageSize"))){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}
+
+		String currPageStr = map.get("page").toString();
+		String pageSizeStr = map.get("pageSize").toString();
+		String typeStr = map.get("type").toString();
+		String description = map.get("description").toString();
+		int currPage = 1;
+		int pageSize = 1;
+		int type = 0;
+		try {
+			currPage = Integer.parseInt(currPageStr);
+			pageSize = Integer.parseInt(pageSizeStr);
+			type = Integer.parseInt(typeStr);
+		} catch (Exception e) {
+		}
+		//获取总记录数
+		int rowCount = etlJobService.getRowCount();
+		//构造分页数据
+		PageParam pageParam = new PageParam();
+		pageParam.setPageSize(pageSize);
+		pageParam.setRowCount(rowCount);
+		if(pageParam.getTotalPage()<currPage){
+			currPage = pageParam.getTotalPage();
+		}
+		pageParam.setCurrPage(currPage);
+		pageParam = etlJobService.getETLJobListByDescrption(pageParam,description);
+		if(pageParam.getData()==null|| pageParam.getData().isEmpty()){
+			responsejson.put("result", false);
+			responsejson.put("message", "没有查询到任务");
+			return responsejson;
+		}else{
+		JSONArray data = new JSONArray();
+		@SuppressWarnings("unchecked")
+		List<ETLJob> ETLJobList=pageParam.getData();
+		for(ETLJob etlJob :ETLJobList){
+			JSONObject etljobJson = new JSONObject();
+			etljobJson.put("id", etlJob.getId());
+			if(etlJob.getType().equals("LOCAL")){				
+				if(etlJob.getStatus().equals("NewCreate")){
+					etljobJson.put("target_table", metaDataService.getMetadataById(etlJob.getMappingid()).getNAME());
+					etljobJson.put("description", etlJob.getDescription());
+					etljobJson.put("create_date",  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(etlJob.getCreate_date()));
+					etljobJson.put("recently_run_date","");
+					etljobJson.put("status",etlJob.getStatus());
+					etljobJson.put("type", "内部");
+					etljobJson.put("jobtype", "否");
+					etljobJson.put("log","该任务刚刚新建");					
+					data.add(etljobJson);
+				}else{			
+					etljobJson.put("target_table",  metaDataService.getMetadataById(etlJob.getMappingid()).getNAME());
+					etljobJson.put("description", etlJob.getDescription());
+					etljobJson.put("create_date",  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(etlJob.getCreate_date()));
+					etljobJson.put("recently_run_date", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(etlJob.getRecently_run_date()));
+					etljobJson.put("status", etlJob.getStatus());
+					etljobJson.put("type", "内部");
+					etljobJson.put("jobtype", "否");
+					etljobJson.put("log", etlJob.getLog());
+					data.add(etljobJson);
+				}
+			}else{
+				if(etlJob.getStatus().equals("NewCreate")){
+					etljobJson.put("target_table",  metaDataService.getMetadataById(etlJob.getMetadata_id()).getNAME());
+					etljobJson.put("description", etlJob.getDescription());
+					etljobJson.put("create_date",  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(etlJob.getCreate_date()));
+					etljobJson.put("recently_run_date","");
+					etljobJson.put("status",etlJob.getStatus());
+					etljobJson.put("type","外部");
+					etljobJson.put("jobtype", etlJob.getJobtype() == 0 ? "否":"是");
+					etljobJson.put("log","该任务刚刚新建");					
+					data.add(etljobJson);
+				}else{
+					etljobJson.put("target_table",  metaDataService.getMetadataById(etlJob.getMetadata_id()).getNAME());
+					etljobJson.put("description", etlJob.getDescription());
+					etljobJson.put("create_date",  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(etlJob.getCreate_date()));
+					etljobJson.put("recently_run_date", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(etlJob.getRecently_run_date()));
+					etljobJson.put("type","外部");
+					etljobJson.put("jobtype", etlJob.getJobtype() == 0 ? "否":"是");
+					etljobJson.put("status", etlJob.getStatus());
+					etljobJson.put("log", etlJob.getLog());
+					data.add(etljobJson);
+				}
+			}
+		}
+		responsejson.put("result", true);
+		responsejson.put("data", data);
+		responsejson.put("count",ETLJobList.size());
+		return responsejson;
+		}
+	}
+	
 	
 }	
 

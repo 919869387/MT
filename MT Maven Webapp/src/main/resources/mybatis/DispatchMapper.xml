@@ -60,6 +60,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		limit ${offset},${size}
 	</select>
 	
+	<select id="selectByDescription" resultType="com.x8.mt.entity.Dispatch"
+		parameterType="map">
+		select * from dispatch
+		where binary description like "%"#{description}"%"
+		order by createtime desc
+		limit #{offset},#{size}
+	</select>
+	
 	<select id="isRepeatByJobName" resultType="com.x8.mt.entity.Dispatch"
 		parameterType="map">
 		select * from dispatch

@@ -24,7 +24,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	
 	<select id="getRowCount" resultType="int">
 		select count(*) from etljob
-		where jobtype = #{type}
 	</select>
 	
 	<select id="selectByParams" resultType="com.x8.mt.entity.ETLJob"
@@ -69,6 +68,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	
 	<select id="getETLJobById" resultType="com.x8.mt.entity.ETLJob">
 		select * from etljob where id = #{id}
+	</select>
+	
+	<select id="selectByDescription" resultType="com.x8.mt.entity.ETLJob"
+		parameterType="map">
+		select * from etljob
+		where binary description like "%"#{description}"%"
+		order by create_date desc
+		limit #{offset},#{size}
 	</select>
 	
 

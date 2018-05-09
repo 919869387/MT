@@ -7,6 +7,7 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -34,6 +35,7 @@ import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.RepositoryDirectoryInterface;
 import org.pentaho.di.repository.kdr.KettleDatabaseRepository;
 import org.springframework.stereotype.Service;
+
 
 
 
@@ -116,14 +118,16 @@ public class ETLJobService {
 	 * 作者:GodDispose 
 	 * 时间:2018年4月25日 
 	 * 作用:停止执行调度
+	 * @throws ParseException 
 	 */
-	public boolean stopETLSchedule(int id){
+	public boolean stopETLSchedule(int id) throws Exception{
 		if(theSchedule.containsKey(id + " Schedule")){
 			((Job)theSchedule.get(id + " Schedule")).stopAll();
-			System.out.println("停止");
 			Dispatch dispatch = new Dispatch();
 			dispatch.setDispatchid(id);
 			dispatch.setStatus(3);
+			SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			dispatch.setEndtime(sdf.parse(sdf.format(new Date())));
 			iDispatchDao.updateDispatch(dispatch);
 		
 			return true;
@@ -131,8 +135,8 @@ public class ETLJobService {
 		return false;		
 	}
 	
-	public int getRowCount(int type){
-		return eTLJobDao.getRowCount(type);
+	public int getRowCount(){
+		return eTLJobDao.getRowCount();
 	}
 	
 	public PageParam getETLJobListByPage(PageParam pageParam) {
@@ -146,7 +150,6 @@ public class ETLJobService {
 		params.put("size", size);
 
 		List<ETLJob> ETLJobList = eTLJobDao.selectByParams(params);
-		System.out.println(ETLJobList.size());
 		pageParam.setDate(ETLJobList);
 
 		return pageParam;
@@ -190,7 +193,6 @@ public class ETLJobService {
 		theJob.remove(etlJob.getMappingid());
 		etlJob.setStatus(job.getStatus());
 		etlJob.setRecently_run_date(new Date());
-		System.out.println(job.getStatus());
 	    LogUtil logUtil = new LogUtil(job,job.getJobMeta());
 	    String log=logUtil.getJobLog(job);
 	    if(etlJob.getStatus().equals("Finished")){
@@ -262,7 +264,7 @@ public class ETLJobService {
 	 */
 	public boolean excuteSchedule(Dispatch dispatch) throws Exception{
 		KettleEnvironment.init();
-		if(dispatch.getType().equals("LOCAL")){
+//		if(dispatch.getType().equals("LOCAL")){
 			JobMeta jobMeta = new JobMeta(dispatch.getName()+ ".kjb", null);
 			Job job = new Job(null,jobMeta);		
 			
@@ -276,28 +278,28 @@ public class ETLJobService {
 			job.waitUntilFinished();
 			
 
-		}else if(dispatch.getType().equals("EXTERNAL")){
-			Metadata metadata = iMetaDataDao.getMetadataById(Integer.parseInt(dispatch.getJobname()));
-			Datasource_connectinfo res = datasource_connectinfoService.getDatasource_connectinfoListByparentid(
-					collectJobService.getCollectJobById(metadata.getCOLLECTJOBID()).getConnectinfoId());			
-			
-			KettleDatabaseRepository kettleDatabaseRepository = kettleMetadataCollectService.connectKettleDatabaseRepository(res);
-			ObjectId objectId = new LongObjectId(new Long(0));
-		       RepositoryDirectoryInterface directory = kettleDatabaseRepository.findDirectory(objectId);
-
-			JobMeta jobMeta = kettleDatabaseRepository.loadJob(metadata.getNAME(),directory,null,null);
-			
-			Job job = new Job(kettleDatabaseRepository,jobMeta);
-			
-			theSchedule.put(dispatch.getDispatchid() + " Schedule",job);
-			job.start();
-			job.waitUntilFinished();
-			
-			dispatch.setStatus(2);
-			SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			dispatch.setRecenttime(sdf.parse(sdf.format(new Date())));
-			iDispatchDao.updateDispatch(dispatch);	
-		}
+//		}else if(dispatch.getType().equals("EXTERNAL")){
+//			Metadata metadata = iMetaDataDao.getMetadataById(Integer.parseInt(dispatch.getJobname()));
+//			Datasource_connectinfo res = datasource_connectinfoService.getDatasource_connectinfoListByparentid(
+//					collectJobService.getCollectJobById(metadata.getCOLLECTJOBID()).getConnectinfoId());			
+//			
+//			KettleDatabaseRepository kettleDatabaseRepository = kettleMetadataCollectService.connectKettleDatabaseRepository(res);
+//			ObjectId objectId = new LongObjectId(new Long(0));
+//		       RepositoryDirectoryInterface directory = kettleDatabaseRepository.findDirectory(objectId);
+//
+//			JobMeta jobMeta = kettleDatabaseRepository.loadJob(metadata.getNAME(),directory,null,null);
+//			
+//			Job job = new Job(kettleDatabaseRepository,jobMeta);
+//			
+//			theSchedule.put(dispatch.getDispatchid() + " Schedule",job);
+//			job.start();
+//			job.waitUntilFinished();
+//			
+//			dispatch.setStatus(2);
+//			SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//			dispatch.setRecenttime(sdf.parse(sdf.format(new Date())));
+//			iDispatchDao.updateDispatch(dispatch);	
+//		}
 
        
         return true;
@@ -425,11 +427,11 @@ public class ETLJobService {
 			//jobEntrySpecial.setIntervalMinutes((int)map.get("intervalMinutes"));
 			
 			//选用2或者以上会用到一下方法
-			jobEntrySpecial.setHour((int)map.get("hour"));
-			jobEntrySpecial.setMinutes((int)map.get("minutes"));
+			jobEntrySpecial.setHour(Integer.parseInt(map.get("hour").toString()));
+			jobEntrySpecial.setMinutes(Integer.parseInt(map.get("minutes").toString()));
 			
-			if(Integer.parseInt(map.get("schedulerType").toString()) == 3){				
-				jobEntrySpecial.setWeekDay((int)map.get("week"));
+			if(Integer.parseInt(map.get("schedulerType").toString()) == 3){	
+				jobEntrySpecial.setWeekDay(Integer.parseInt(map.get("week").toString()));
 			}
 			//jobEntrySpecial.setDayOfMonth((int)map.get("week"));
 			
@@ -463,7 +465,6 @@ public class ETLJobService {
 			
 			String jobName = name + " Schedule"+".kjb";
 			File file = new File(jobName);
-			System.out.println(jobName);
 			if (file.exists() && file.isFile()) {
 				if (file.delete()) {}
 			}
@@ -482,7 +483,7 @@ public class ETLJobService {
 			dispatch.setStatus(1);
 			SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			dispatch.setCreatetime(sdf.parse(sdf.format(new Date())));			
-			dispatch.setRuninterval((int)map.get("schedulerType") == 2 ? "每周执行" : "每天执行");
+			dispatch.setRuninterval((int)map.get("schedulerType") == 2 ? "每天执行" : "每周执行");
 			dispatch.setType("LOCAL");
 			
 			iDispatchDao.addDispatch(dispatch);
@@ -575,5 +576,19 @@ public class ETLJobService {
 		}
 	}
 
+	public PageParam getETLJobListByDescrption(PageParam pageParam,String description) {
+		int currPage = pageParam.getCurrPage();
+		if(currPage>0){
+		int offset = (currPage-1)*pageParam.getPageSize();//计算出偏移量，起始位置
+		int size = pageParam.getPageSize();//一页的数量
+
+		List<ETLJob> ETLJobList = eTLJobDao.selectByDescription(description,offset,size);
+		pageParam.setDate(ETLJobList);
+
+		return pageParam;
+		}else{
+			return pageParam;
+		}
+	}
 	
 }

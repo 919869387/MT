@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Service;
 
 import com.x8.mt.common.PageParam;
@@ -110,6 +111,27 @@ public class DispatchService {
 		params.put("size", size);
 
 		List<Dispatch> scheduleList = dispatchDAO.selectByParams(params);
+		pageParam.setDate(scheduleList);
+
+		return pageParam;
+		}else{
+			return pageParam;
+		}
+	}
+	
+	/**
+	 * 
+	 * 作者:GodDispose 
+	 * 时间:2018年5月7日 
+	 * 作用:获取etl调度数量
+	 */
+	public PageParam getETLScheduleListByDescription(PageParam pageParam,String description) {
+		int currPage = pageParam.getCurrPage();
+		if(currPage>0){
+		int offset = (currPage-1)*pageParam.getPageSize();//计算出偏移量，起始位置
+		int size = pageParam.getPageSize();//一页的数量
+
+		List<Dispatch> scheduleList = dispatchDAO.selectByDescription(description,offset,size);
 		pageParam.setDate(scheduleList);
 
 		return pageParam;
