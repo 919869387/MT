@@ -256,7 +256,7 @@ public class MetadataManagementService {
 	 *  	3.加入metadata_tank表
 	 */
 	@Transactional
-	public boolean addMetadata(Map<String,Object> map){
+	public int addMetadata(Map<String,Object> map){
 
 		String parentMetadataIdStr = map.get("parentMetadataId").toString();
 		String metamodelIdStr = map.get("metamodelId").toString();
@@ -315,7 +315,7 @@ public class MetadataManagementService {
 			throw new RuntimeException("insertMetaDataTank Error");
 		}
 
-		return true;
+		return metadataId;
 	}
 
 	/**
@@ -655,7 +655,7 @@ public class MetadataManagementService {
 	@Transactional
 	public boolean addTableFieldMappingMetadata(List<Map<String, Object>> list) {
 		for(Map<String, Object> map:list){
-			if(!addMetadata(map)){
+			if(addMetadata(map)<=0){
 				throw new RuntimeException("addTableFieldMappingMetadata Error");
 			}
 		}
