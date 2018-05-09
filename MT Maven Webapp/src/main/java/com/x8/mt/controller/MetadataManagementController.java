@@ -680,9 +680,11 @@ public class MetadataManagementController {
 			responsejson.put("count",0);
 			return responsejson;
 		}
-
-		if(metadataManagementService.addMetadata(map)){
+		
+		int metadataId = metadataManagementService.addMetadata(map);
+		if(metadataId>0){
 			responsejson.put("result", true);
+			responsejson.put("metadataId", metadataId);
 			responsejson.put("count", 1);
 		}else{
 			responsejson.put("result", false);
