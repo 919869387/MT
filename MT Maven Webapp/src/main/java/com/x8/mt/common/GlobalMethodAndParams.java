@@ -201,7 +201,7 @@ public class GlobalMethodAndParams {
 	/**
 	 * 所需采集元数据的文件存放路径
 	 */
-	public static final String PATH_NAME = "C:/Users/jason zhou/Desktop/spoonTest/";
+	public static final String PATH_NAME = "C:/data/";
 	
 	/**
 	 * 
