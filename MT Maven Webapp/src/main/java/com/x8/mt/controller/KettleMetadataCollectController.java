@@ -357,9 +357,9 @@ public class KettleMetadataCollectController {
 			createDate = sdf.parse(sdf.format(new Date()));
 		}catch(Exception e){}
 		//获取当前的用户名
-		//Subject subject = SecurityUtils.getSubject();  
-		//Session session = subject.getSession();
-		//String creater = session.getAttribute("username").toString();
+		Subject subject = SecurityUtils.getSubject();  
+		Session session = subject.getSession();
+		String creater = session.getAttribute("username").toString();
 		//获取数据源的详细连接信息
 	
 		Connectinfo connectinfo = connectinfoService.getConnectinfoByid(id);
@@ -370,7 +370,7 @@ public class KettleMetadataCollectController {
 			metaDataService.deleteMetadataByCollectJobId(oldCollectJob.getId());		
 		}
 		
-		CollectJob newCollectJob = new CollectJob(name,connectinfoid,mode,checkResult,createDate,"admin");			
+		CollectJob newCollectJob = new CollectJob(name,connectinfoid,mode,checkResult,createDate,creater);			
 		collectJobService.insertCollectJob(newCollectJob);				
 	
 		try {

@@ -110,7 +110,7 @@ public class MetaDataService {
 	 * 
 	 * 作者:GodDipose
 	 * 时间:2018年3月14日
-	 * 作用:根据id查找元数据
+	 * 作用:插入元数据
 	 */
 	public boolean insertMetadata(Metadata metadata){
 		try{
@@ -124,7 +124,7 @@ public class MetaDataService {
 	 * 
 	 * 作者:GodDipose
 	 * 时间:2018年3月22日
-	 * 作用:根据id查找元数据
+	 * 作用:手动添加元数据
 	 */
 	public boolean insertMetadataWithNoCollectJob(Metadata metadata){
 		try{
@@ -153,6 +153,23 @@ public class MetaDataService {
 			return null;
 		}
 	}
+	
+	
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年5月10日
+	 * 作用:根据metaModelId查找元数据
+	 */
+	public List<Metadata> getMetadataByMetaModelIdAndNoNull(int id) {
+		try{			
+			return iMetadataDao.getMetadataByMetaModelIdAndNoNull(id);
+		}catch(Exception e){
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
 	
 	
 }

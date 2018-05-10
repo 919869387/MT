@@ -102,7 +102,7 @@ public class ETLJobController {
 			etlJob.setCreateuserid(systemuserService.selectUser(creater).getId());
 			etlJob.setType("LOCAL");
 			etlJob.setStatus("NewCreate");	
-			etlJob.setJobtype(Integer.parseInt((String)map.get("type")));
+			etlJob.setJobtype(0);
 			responsejson.put("result", etlJobService.saveJob(etlJob) && etlJobService.insertETLJob(etlJob));
 		}else{
 			responsejson.put("result", false);
@@ -633,14 +633,12 @@ public class ETLJobController {
 	
 			String currPageStr = map.get("page").toString();
 			String pageSizeStr = map.get("pageSize").toString();
-			String typeStr = map.get("type").toString();
 			int currPage = 1;
 			int pageSize = 1;
 			int type = 0;
 			try {
 				currPage = Integer.parseInt(currPageStr);
 				pageSize = Integer.parseInt(pageSizeStr);
-				type = Integer.parseInt(typeStr);
 			} catch (Exception e) {
 			}
 			//获取总记录数
@@ -829,7 +827,10 @@ public class ETLJobController {
 
 		String currPageStr = map.get("page").toString();
 		String pageSizeStr = map.get("pageSize").toString();
-		String description = map.get("description").toString();
+		String description = null;
+		if(map.containsKey("description")){
+			description = map.get("description").toString();			
+		}
 		int currPage = 1;
 		int pageSize = 1;
 		try {
@@ -911,15 +912,15 @@ public class ETLJobController {
 
 		String currPageStr = map.get("page").toString();
 		String pageSizeStr = map.get("pageSize").toString();
-		String typeStr = map.get("type").toString();
-		String description = map.get("description").toString();
+		String description = null;
+		if(map.containsKey("description")){
+			description = map.get("description").toString();			
+		}
 		int currPage = 1;
 		int pageSize = 1;
-		int type = 0;
 		try {
 			currPage = Integer.parseInt(currPageStr);
 			pageSize = Integer.parseInt(pageSizeStr);
-			type = Integer.parseInt(typeStr);
 		} catch (Exception e) {
 		}
 		//获取总记录数
@@ -995,6 +996,41 @@ public class ETLJobController {
 		responsejson.put("count",ETLJobList.size());
 		return responsejson;
 		}
+	}
+	
+	/**
+	 * 作者:GodDispose
+	 * 时间:2018年5月10日
+	 * 作用:获取已经采集的ETL作业元数据
+	 * 参数:无
+	 */
+	@RequestMapping(value = "/queryJobIdAndName",method=RequestMethod.GET)
+	@ResponseBody
+	@Log(operationType="Metadata",operationDesc="获取已经采集的ETL作业元数据")
+	public JSONObject queryJobIdAndName(HttpServletRequest request,HttpServletResponse response) {
+		JSONObject responsejson = new JSONObject();
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
+		
+		List<Metadata> target_table_ids= metaDataService.getMetadataByMetaModelIdAndNoNull(203);
+		if(target_table_ids==null || target_table_ids.isEmpty() || target_table_ids.get(0) == null){
+			responsejson.put("result",false);
+			responsejson.put("message","没有查询到任何字段映射元数据");
+			
+			return responsejson;
+		}else{
+		
+		JSONArray data = new JSONArray();
+		for(Metadata metadata:target_table_ids){
+			JSONObject node = new JSONObject();
+			node.put("id", metadata.getID());	
+			node.put("name", metadata.getNAME());	
+			data.add(node);
+		}
+		responsejson.put("result", true);
+		responsejson.put("data",data);
+		return responsejson;
+		}
+		
 	}
 	
 	

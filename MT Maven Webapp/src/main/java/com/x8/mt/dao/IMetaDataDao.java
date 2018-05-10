@@ -83,5 +83,15 @@ public interface IMetaDataDao {
 	 */
 	List<Metadata> getMetadataByMetaModelIdNoNull(int id);
 	
+	
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年5月10日
+	 * 作用:根据元模型id获取一组Metadata记录
+	 */
+	List<Metadata> getMetadataByMetaModelIdAndNoNull(int id);
+	
+	
 
 }
