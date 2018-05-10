@@ -1,12 +1,16 @@
 package com.x8.mt.test;
 
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -88,8 +92,11 @@ public class CollectKettleMetadataTest {
 	@Test
 	public void testExcel() throws FileNotFoundException, IOException{
 		//fileMetadataCollectService.collectExcelMetaData("new1.xls");
-		File file = new File("C:/Users/jason zhou/Desktop/学习项目/文件类型说明/file.xls"); 
+		File file = new File("C:/Users/jason zhou/Desktop/file.xls"); 
       HSSFWorkbook workbook=new HSSFWorkbook(new FileInputStream(file));
+      
+		//存储表格列名，name,type,default,isNull
+		Map<String,Integer> map = new HashMap<String, Integer>();
       
       //System.out.println("文件大小："+FormetFileSize(file.length()));
       HSSFSheet sheet=null;
@@ -109,19 +116,29 @@ public class CollectKettleMetadataTest {
 //        	   String databaseDescription = database.substring(database.indexOf("(")+1,database.indexOf(")"));
         	   String databaseName = database.split("（")[0];
         	   String databaseDescription = database.substring(database.indexOf("（")+1,database.indexOf("）"));
+				HSSFRow tempRow = sheet.getRow(1);
+				for(int j = 0 ; j < tempRow.getPhysicalNumberOfCells(); j++){
+					map.put(tempRow.getCell(j).toString(), j);
+					System.out.println(tempRow.getCell(j).toString());
+				}
+        	   
         	   for(int k = 2 ; k < sheet.getPhysicalNumberOfRows(); k++){
         		   HSSFRow row = sheet.getRow(k);
-            	   String fieldTypeAndLength = row.getCell(2).toString();
+            	   String fieldTypeAndLength = row.getCell(map.get("type")).toString();
 //            	   String fieldType = database.split("(")[0];
 //            	   String fieldLength = database.substring(database.indexOf("(")+1,database.indexOf(")")); 
-            	   String fieldType = database.split("（")[0];
-            	   String fieldLength = database.substring(database.indexOf("（")+1,database.indexOf("）"));
-            	   System.out.println("FieldName:" + row.getCell(0).toString() 
+              	   String fieldType = fieldTypeAndLength;
+              	   String fieldLength = null;
+              	   if(fieldTypeAndLength.contains("（")){
+              		   fieldType = fieldTypeAndLength.split("（")[0];
+        	           fieldLength = fieldTypeAndLength.substring(fieldTypeAndLength.indexOf("（")+1,fieldTypeAndLength.indexOf("）"));
+              	   }           	   
+              	   System.out.println("FieldName:" + row.getCell(map.get("name")).toString() 
         				   + "\t" + "FieldType:" + fieldType
-        				   + "\t" + "FieldTLength:" + fieldLength
-        				   + "\t" + "isNull:" + row.getCell(3).toString()
-        				   + "\t" + "Default:" + row.getCell(4).toString()
-        				   + "\t" + "Description:" + row.getCell(6).toString());
+        				   + "\t" + "FieldLength:" + fieldLength
+        				   + "\t" + "isNull:" + row.getCell(map.get("isNull")).toString()
+        				   + "\t" + "Default:" + row.getCell(map.get("default")).toString()
+        				   + "\t" + "Description:" + row.getCell(map.get("description")).toString());
         		   System.out.println();
         	   }        	  
            }
@@ -141,9 +158,56 @@ public class CollectKettleMetadataTest {
 	}
 	
 	@Test
-	public void testText(){
+	public void testText() throws Exception{
 		//fileMetadataCollectService.collectTXTMetadata("new.txt",";");
-		System.out.println("TEXT......................");
+		//System.out.println("TEXT......................");
+		//存储表格列名，name,type,default,isNull,description
+		Map<String,Integer> map = new HashMap<String, Integer>();
+		
+		File file = new File("C:/Users/jason zhou/Desktop/file.txt");
+		InputStreamReader insr = new InputStreamReader(new FileInputStream(file));
+		BufferedReader br = new BufferedReader(insr);
+		String start = br.readLine();
+		if(start.equals("Start")){
+			String tableStart = br.readLine();
+			while(tableStart.equals("Table Start")){
+				String table = br.readLine();
+				String tableName = table;
+				String tableDescription = null;
+				if(table.contains("（")){					
+					tableName = table.split("（")[0];
+					tableDescription = table.substring(table.indexOf("（")+1,table.indexOf("）"));
+				}
+				System.out.println(tableName + "..." + tableDescription);
+				String[] columns = br.readLine().split("\t");
+				for(int i = 0 ; i < columns.length; i++){
+					map.put(columns[i], i);
+				}
+				String temp = br.readLine().toString();
+				while(!temp.equals("Table End")){
+					String[] data = temp.split("\t");
+					String fieldTypeAndLength = data[Integer.parseInt((map.get("type")).toString())];
+	              	String fieldType = fieldTypeAndLength;
+	              	String fieldLength = null;
+	              	if(fieldTypeAndLength.contains("（")){
+	              		fieldType = fieldTypeAndLength.split("（")[0];
+	        	        fieldLength = fieldTypeAndLength.substring(fieldTypeAndLength.indexOf("（")+1,fieldTypeAndLength.indexOf("）"));
+	              	 }   
+	              	System.out.println("FieldName:" + data[Integer.parseInt((map.get("name")).toString())] 
+	        				   + "\t" + "FieldType:" + fieldType
+	        				   + "\t" + "FieldLength:" + fieldLength
+	        				   + "\t" + "isNull:" + data[Integer.parseInt((map.get("isNull")).toString())]
+	        				   + "\t" + "Default:" + data[Integer.parseInt((map.get("default")).toString())]
+	        				   + "\t" + "Description:" + data[Integer.parseInt((map.get("description")).toString())]);
+	              	temp = br.readLine().toString();
+				}
+				tableStart = br.readLine();
+			}
+		}
+		br.close();
+		insr.close();
+		
+		
 	}
 
 }
