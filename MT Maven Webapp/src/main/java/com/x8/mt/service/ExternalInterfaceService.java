@@ -1,9 +1,20 @@
 package com.x8.mt.service;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import org.springframework.stereotype.Service;
+
+import com.x8.mt.common.GlobalMethodAndParams;
+import com.x8.mt.dao.IExternalInterfaceDao;
+import com.x8.mt.dao.IMetadataAnalysisDao;
+import com.x8.mt.entity.Metadata;
 /**
  * 
  * 作者:allen
@@ -11,60 +22,71 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class ExternalInterfaceService {
+	@Resource
+	IExternalInterfaceDao iExternalInterfaceDao;
+	@Resource
+	IMetadataAnalysisDao iMetadataAnalysisDao;
 
 	/**
 	 * 
 	 * 作者:allen
 	 * 时间:2018年5月9日
-	 * 作用:获取通信报文元数据
+	 * 获取通信报文元数据
 	 */
-	public JSONArray getCommunicationMessageMetadata() {
+	public JSONArray getProtocolMetadata(String protocolType) {
+		JSONArray protocols = new JSONArray();
 		
-		JSONObject protocolSegment1 = new JSONObject();
-		protocolSegment1.put("startIndex", 0);
-		protocolSegment1.put("endIndex", 7);
-		protocolSegment1.put("name", "Start_BC");
-		protocolSegment1.put("meaning", "发电机备车");
+		Map<String,String> paramMap = new HashMap<String, String>();
+		paramMap.put("key", GlobalMethodAndParams.JSONKey_protocolid);
+		paramMap.put("value", protocolType);
 		
-		JSONObject protocolSegment2 = new JSONObject();
-		protocolSegment2.put("startIndex", 8);
-		protocolSegment2.put("endIndex", 15);
-		protocolSegment2.put("name", "GeneratorState");
-		protocolSegment2.put("meaning", "发电机起停指令");
+		List<Metadata> protocolMetadatas= iMetadataAnalysisDao.getMetadataByJson(paramMap);
 		
-		JSONArray protocolContent1 = new JSONArray();
-		protocolContent1.add(protocolSegment1);
-		protocolContent1.add(protocolSegment2);
+		JSONObject protocol = null;
+		for(Metadata metadata : protocolMetadatas){
+			protocol = new JSONObject();
+			protocol.put("protocolName", metadata.getNAME());
+			protocol.put("protocolDescription", metadata.getDESCRIPTION());
+			protocol.put("protocolId", JSONObject.fromObject(metadata.getATTRIBUTES()).get("protocolid"));
+			protocol.put("protocolType", JSONObject.fromObject(metadata.getATTRIBUTES()).get("protocoltype"));
+			protocol.put("protocolParams", getProtocolParamMetadata(metadata.getID()+""));
+			
+			protocols.add(protocol);
+		}
+		return protocols;
+	}
+	
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年5月9日
+	 * 获取通信报文元数据的参数元数据
+	 */
+	public JSONArray getProtocolParamMetadata(String metadataid){
+		JSONArray paramArray = new JSONArray();
 		
-		JSONObject protocolSegment3 = new JSONObject();
-		protocolSegment3.put("startIndex", 1330);
-		protocolSegment3.put("endIndex", 1336);
-		protocolSegment3.put("name", "");
-		protocolSegment3.put("meaning", "主锅炉");
+		List<Metadata> protocolParams = iExternalInterfaceDao.getCompositionRelatedmetadata(metadataid);
 		
-		JSONObject protocolSegment4 = new JSONObject();
-		protocolSegment4.put("startIndex", 1337);
-		protocolSegment4.put("endIndex", 1349);
-		protocolSegment4.put("name", "");
-		protocolSegment4.put("meaning", "主锅炉操作器");
+		JSONObject param = null;
+		for(Metadata metadata : protocolParams){
+			param = new JSONObject();
+			param.put("paramName", metadata.getNAME());
+			param.put("paramDescription", metadata.getDESCRIPTION());
+			JSONObject attributes = JSONObject.fromObject(metadata.getATTRIBUTES());
+			param.put("paramTag", attributes.get("tag"));
+			param.put("paramPosition", attributes.get("position"));
+			param.put("paramLength", attributes.get("length"));
+			param.put("paramLengthmetric", attributes.get("lengthmetric"));
+			param.put("paramType",attributes.get("type"));
+			param.put("paramMeaning", attributes.get("meaning"));
+			param.put("paramRemark", attributes.get("remark"));
+			param.put("paramSignificance", attributes.get("significance"));
+			param.put("paramIotype", attributes.get("iotype"));
+			
+			paramArray.add(param);
+		}
 		
-		JSONArray protocolContent2 = new JSONArray();
-		protocolContent2.add(protocolSegment3);
-		protocolContent2.add(protocolSegment4);
-		
-		JSONObject messageMetadata1 = new JSONObject();
-		messageMetadata1.put("protocolName", "Modbus数据协议（电力系统区配、专配电压电流）");
-		messageMetadata1.put("protocolContent", protocolContent1);
-		
-		JSONObject messageMetadata2 = new JSONObject();
-		messageMetadata2.put("protocolName", "Modbus数据协议（动力系统输入量以及状态反馈）");
-		messageMetadata2.put("protocolContent", protocolContent2);
-		
-		JSONArray communicationMessageMetadatas = new JSONArray();
-		communicationMessageMetadatas.add(messageMetadata1);
-		communicationMessageMetadatas.add(messageMetadata2);
-		
-		return communicationMessageMetadatas;
+		return paramArray;
 	}
 
 }

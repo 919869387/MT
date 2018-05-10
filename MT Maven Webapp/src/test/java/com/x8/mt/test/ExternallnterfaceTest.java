@@ -1,5 +1,8 @@
 package com.x8.mt.test;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -23,10 +26,14 @@ public class ExternallnterfaceTest {
 	ExternalInterfaceController externalInterfaceController;
 	
 	@Test
-	public void getCommunicationMessageMetadata(){
+	public void getProtocolMetadata(){
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
-		System.out.println(externalInterfaceController.getCommunicationMessageMetadata(request, response));
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("protocolType", "modbus");
+		//map.put("protocolType", "opc");
+		
+		System.out.println(externalInterfaceController.getProtocolMetadata(request, response,map));
 	}
 	
 }

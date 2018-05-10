@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.x8.mt.dao.IExternalInterfaceDao">
+	<select id="getCompositionRelatedmetadata" resultType="com.x8.mt.entity.Metadata">
+		select * from
+		metadata where id in (select relatedmetadataid from metadata_relation where
+		metadataid=#{metadataid} and type='COMPOSITION');
+	</select>
+</mapper>

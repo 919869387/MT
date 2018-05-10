@@ -33,27 +33,39 @@ import com.x8.mt.service.MetadataManagementService;
 public class ExternalInterfaceController {
 	@Resource
 	ExternalInterfaceService externalInterfaceService;
-	
+
 	/**
 	 * 
 	 * 作者:allen
 	 * 时间:2018年5月9日
 	 * 作用:外部接口-获取通信报文元数据
+	 * 
+	 * 参数：protocolType--opc、dds、modbus、udp
 	 */
-	@RequestMapping(value = "/getCommunicationMessageMetadata", method = RequestMethod.GET)
+	@RequestMapping(value = "/getProtocolMetadata", method = RequestMethod.POST)
 	@ResponseBody
 	@Log(operationType="metadata",operationDesc="外部接口-获取通信报文元数据")
-	public JSONObject getCommunicationMessageMetadata(HttpServletRequest request,
-			HttpServletResponse response){
+	public JSONObject getProtocolMetadata(HttpServletRequest request,
+			HttpServletResponse response,@RequestBody Map<String,String> map){
 		JSONObject responsejson = new JSONObject();
 
 		//GlobalMethodAndParams.setHttpServletResponse(request, response);
 
-		JSONArray communicationMessageMetadata = externalInterfaceService.getCommunicationMessageMetadata();
+		//检测参数是否正确
+		if(!map.containsKey("protocolType")){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}
+
+		String protocolType = map.get("protocolType");
+
+		JSONArray protocolMetadata = externalInterfaceService.getProtocolMetadata(protocolType);
 
 		responsejson.put("result", true);
-		responsejson.put("data", communicationMessageMetadata);
-		responsejson.put("count", communicationMessageMetadata.size());
+		responsejson.put("data", protocolMetadata);
+		responsejson.put("count", protocolMetadata.size());
+
 		return responsejson;
 	}
 

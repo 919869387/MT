@@ -1,8 +1,5 @@
 package com.x8.mt.common;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -10,12 +7,13 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 
 public class GlobalMethodAndParams {
-	
+
 	/**
 	 * 字段编号,字段名
 	 */
 	public static final String JSONKey_sourcefieldid= "$.sourcefieldid";
 	public static final String JSONKey_targetfieldid= "$.targetfieldid";
+	public static final String JSONKey_protocolid= "$.protocolid";
 	
 	/**
 	 * 组合关系名
