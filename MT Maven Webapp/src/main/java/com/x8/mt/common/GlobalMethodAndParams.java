@@ -13,7 +13,7 @@ public class GlobalMethodAndParams {
 	 */
 	public static final String JSONKey_sourcefieldid= "$.sourcefieldid";
 	public static final String JSONKey_targetfieldid= "$.targetfieldid";
-	public static final String JSONKey_protocolid= "$.protocolid";
+	public static final String JSONKey_protocolid= "$.protocoltype";
 	
 	/**
 	 * 组合关系名
