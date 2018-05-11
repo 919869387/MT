@@ -746,8 +746,7 @@ public class MetadataManagementController {
 
 		//GlobalMethodAndParams.setHttpServletResponse(request, response);
 
-		//增加第一层元数据的逻辑
-		if(map.containsKey("id")){
+		if(map.containsKey("id")){//增加第一层元数据的逻辑
 			String idStr = map.get("id").toString();
 
 			List<MetadataViewNode> metadataViewNodes= metadataViewNodeService.getMetadataViewNode(idStr);
@@ -770,27 +769,30 @@ public class MetadataManagementController {
 			responsejson.put("includeMetaModel", includeMetaModel);
 			responsejson.put("includeCount", includeMetaModel.size());
 			responsejson.put("count", includeMetaModel.size());
-			return responsejson;
+		}else{//增加第一层之外的元数据逻辑
+			//检查传参是否正确
+			if(!map.containsKey("metamodelId")){
+				responsejson.put("result", false);
+				responsejson.put("count",0);
+				return responsejson;
+			}
+
+			String metamodelIdStr = map.get("metamodelId").toString();
+			String metamodelname = metamodel_hierarchyService.getMetamodel_hierarchy(Integer.parseInt(metamodelIdStr)).getName();
+
+			List<JSONObject> includeMetaModel = metadataManagementService.getCOMPOSITIONMetamodel(metamodelIdStr);
+			
+			if(includeMetaModel==null){
+				responsejson.put("result", false);
+				responsejson.put("count",0);
+			}else{
+				responsejson.put("result", true);
+				responsejson.put("metamodelname", metamodelname);
+				responsejson.put("includeMetaModel", includeMetaModel);
+				responsejson.put("includeCount", includeMetaModel.size());
+				responsejson.put("count", includeMetaModel.size());
+			}
 		}
-
-
-		//检查传参是否正确
-		if(!map.containsKey("metamodelId")){
-			responsejson.put("result", false);
-			responsejson.put("count",0);
-			return responsejson;
-		}
-
-		String metamodelIdStr = map.get("metamodelId").toString();
-		String metamodelname = metamodel_hierarchyService.getMetamodel_hierarchy(Integer.parseInt(metamodelIdStr)).getName();
-
-		List<JSONObject> includeMetaModel = metadataManagementService.getCOMPOSITIONMetamodel(metamodelIdStr);
-
-		responsejson.put("result", true);
-		responsejson.put("metamodelname", metamodelname);
-		responsejson.put("includeMetaModel", includeMetaModel);
-		responsejson.put("includeCount", includeMetaModel.size());
-		responsejson.put("count", includeMetaModel.size());
 		return responsejson;
 	}
 
