@@ -111,4 +111,10 @@ public class DispatchTest {
 		
 		eTLJobService.saveSchedule(metaDataService.getMetadataById(83250).getNAME(),dataMap);
 	}
+	
+	@Test
+	public void testNull(){
+		String description = null;
+		System.out.println(eTLJobService.getRowCount(description));;
+	}
 }

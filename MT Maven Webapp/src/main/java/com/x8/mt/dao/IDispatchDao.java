@@ -29,7 +29,7 @@ public interface IDispatchDao {
 	 * 时间:2018年5月4日 
 	 * 作用:删除一条调度记录
 	 */
-	boolean deleteDispatch(int dispatchId);
+	boolean deleteETLSchedule(int dispatchId);
 	
 	/**
 	 * 
@@ -37,7 +37,7 @@ public interface IDispatchDao {
 	 * 时间:2018年5月4日 
 	 * 作用:删除一组调度记录
 	 */
-	int deleteDispatchs(int[] id);
+	int deleteETLSchedules(int[] id);
 	
 	/**
 	 * 
@@ -69,7 +69,7 @@ public interface IDispatchDao {
 	 * 时间:2018年5月7日 
 	 * 作用:获取调度数量
 	 */
-	int getRowCount();
+	int getRowCount(@Param("description")String description);
 	
 	
 	/**

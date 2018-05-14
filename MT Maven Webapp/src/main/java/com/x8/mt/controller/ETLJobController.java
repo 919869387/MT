@@ -399,8 +399,7 @@ public class ETLJobController {
 		GlobalMethodAndParams.setHttpServletResponse(request, response);
 		
 		//检查传参是否正确
-		if(!(map.containsKey("ids")
-				&& map.containsKey("type"))){
+		if(!(map.containsKey("ids"))){
 			responsejson.put("result", false);
 			responsejson.put("message", "参数不正确");
 			return responsejson;
@@ -410,9 +409,7 @@ public class ETLJobController {
 		for(int i=0;i<ids.length;i++){
 			id[i]=Integer.parseInt(ids[i]);
 		}
-		String typeStr = map.get("type").toString();
-		int type = Integer.parseInt(typeStr);
-		if(etlJobService.deleteETLJobs(id,type)){
+		if(etlJobService.deleteETLJobs(id)){
 			responsejson.put("result", true);
 			responsejson.put("message", "删除成功");
 		}else{
@@ -556,7 +553,7 @@ public class ETLJobController {
 			return responsejson;
 		}
 		
-		if(dispatchService.deleteDispatch(id)){
+		if(dispatchService.deleteETLSchedule(id)){
 			responsejson.put("result", true);
 			
 		}else{
@@ -592,7 +589,7 @@ public class ETLJobController {
 		for(int i=0;i<ids.length;i++){
 			id[i]=Integer.parseInt(ids[i]);
 		}
-		if(dispatchService.deleteDispatchs(id)){
+		if(dispatchService.deleteETLSchedules(id)){
 			responsejson.put("result", true);
 			responsejson.put("message", "删除成功");
 		}else{
@@ -642,7 +639,7 @@ public class ETLJobController {
 			} catch (Exception e) {
 			}
 			//获取总记录数
-			int rowCount = etlJobService.getRowCount();
+			int rowCount = etlJobService.getRowCount("");
 			//构造分页数据
 			PageParam pageParam = new PageParam();
 			pageParam.setPageSize(pageSize);
@@ -711,6 +708,7 @@ public class ETLJobController {
 			}
 			responsejson.put("result", true);
 			responsejson.put("data", data);
+			responsejson.put("total", etlJobService.getRowCount(""));
 			responsejson.put("count",ETLJobList.size());
 			return responsejson;
 			}
@@ -754,7 +752,7 @@ public class ETLJobController {
 		} catch (Exception e) {
 		}
 		//获取总记录数
-		int rowCount = dispatchService.getRowCount();
+		int rowCount = dispatchService.getRowCount("");
 		//构造分页数据
 		PageParam pageParam = new PageParam();
 		pageParam.setPageSize(pageSize);
@@ -792,6 +790,7 @@ public class ETLJobController {
 		}
 		responsejson.put("result", true);
 		responsejson.put("data", data);
+		responsejson.put("total", dispatchService.getRowCount(""));
 		responsejson.put("count",dispatchList.size());
 		return responsejson;
 		}
@@ -829,7 +828,10 @@ public class ETLJobController {
 		String pageSizeStr = map.get("pageSize").toString();
 		String description = null;
 		if(map.containsKey("description")){
-			description = map.get("description").toString();			
+			description = map.get("description").toString();
+			if(description.isEmpty()){
+				description = null;
+			}
 		}
 		int currPage = 1;
 		int pageSize = 1;
@@ -839,7 +841,7 @@ public class ETLJobController {
 		} catch (Exception e) {
 		}
 		//获取总记录数
-		int rowCount = dispatchService.getRowCount();
+		int rowCount = dispatchService.getRowCount(description);
 		//构造分页数据
 		PageParam pageParam = new PageParam();
 		pageParam.setPageSize(pageSize);
@@ -877,6 +879,7 @@ public class ETLJobController {
 		}
 		responsejson.put("result", true);
 		responsejson.put("data", data);
+		responsejson.put("total", dispatchService.getRowCount(description));
 		responsejson.put("count",dispatchList.size());
 		return responsejson;
 		}
@@ -914,7 +917,10 @@ public class ETLJobController {
 		String pageSizeStr = map.get("pageSize").toString();
 		String description = null;
 		if(map.containsKey("description")){
-			description = map.get("description").toString();			
+			description = map.get("description").toString();
+			if(description.isEmpty()){
+				description = null;
+			}
 		}
 		int currPage = 1;
 		int pageSize = 1;
@@ -924,7 +930,7 @@ public class ETLJobController {
 		} catch (Exception e) {
 		}
 		//获取总记录数
-		int rowCount = etlJobService.getRowCount();
+		int rowCount = etlJobService.getRowCount(description);
 		//构造分页数据
 		PageParam pageParam = new PageParam();
 		pageParam.setPageSize(pageSize);
@@ -993,6 +999,7 @@ public class ETLJobController {
 		}
 		responsejson.put("result", true);
 		responsejson.put("data", data);
+		responsejson.put("total", etlJobService.getRowCount(description));
 		responsejson.put("count",ETLJobList.size());
 		return responsejson;
 		}

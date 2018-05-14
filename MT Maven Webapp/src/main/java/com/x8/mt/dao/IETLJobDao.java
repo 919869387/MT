@@ -41,7 +41,7 @@ public interface IETLJobDao {
 	 * 时间:2018年4月25日 
 	 * 作用:获取作业数量
 	 */
-	int getRowCount();
+	int getRowCount(@Param("description")String description);
 	
 	
 	/**
@@ -84,7 +84,7 @@ public interface IETLJobDao {
 	 * 时间:2018年3月26日 
 	 * 作用:删除一组etl任务记录
 	 */
-	int deleteETLJobs(@Param("id")int[] id,@Param("type")int type);
+	int deleteETLJobs(int[] id);
 	
 	/**
 	 * 

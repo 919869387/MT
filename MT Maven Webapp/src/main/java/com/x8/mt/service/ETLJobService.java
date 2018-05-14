@@ -52,6 +52,8 @@ import org.springframework.stereotype.Service;
 
 
 
+
+
 import com.x8.mt.common.LogUtil;
 import com.x8.mt.common.PageParam;
 import com.x8.mt.common.TransformMetadata;
@@ -135,8 +137,8 @@ public class ETLJobService {
 		return false;		
 	}
 	
-	public int getRowCount(){
-		return eTLJobDao.getRowCount();
+	public int getRowCount(String description){
+		return eTLJobDao.getRowCount(description);
 	}
 	
 	public PageParam getETLJobListByPage(PageParam pageParam) {
@@ -145,7 +147,6 @@ public class ETLJobService {
 		int offset = (currPage-1)*pageParam.getPageSize();//计算出偏移量，起始位置
 		int size = pageParam.getPageSize();//一页的数量
 		Map<String,Object> params = new HashMap<String,Object>();
-		params.put("jobtype", 0);
 		params.put("offset", offset);
 		params.put("size", size);
 
@@ -326,10 +327,11 @@ public class ETLJobService {
 	 * 时间:2018年3月26日 
 	 * 作用:删除一组etl任务记录
 	 */
-	public boolean deleteETLJobs(int[] id,int type){
+	public boolean deleteETLJobs(int[] id){
 		try{
-			return eTLJobDao.deleteETLJobs(id,type)>0?true:false;
+			return eTLJobDao.deleteETLJobs(id)>0?true:false;
 		}catch(Exception e){
+			e.printStackTrace();
 			return false;
 		}
 	}

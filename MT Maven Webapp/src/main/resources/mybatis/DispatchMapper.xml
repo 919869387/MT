@@ -21,7 +21,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		#{runinterval},#{createtime},#{recenttime},#{endtime},#{type})
 	</insert>
 	
-	<delete id="deleteDispatch" parameterType="int">
+	<delete id="deleteETLSchedule" parameterType="int">
 		delete from
 		dispatch where dispatchid=#{id}
 	</delete>
@@ -43,14 +43,19 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</update>
 	
 	<delete id="deleteETLSchedules" parameterType="List">
-        delete from etljob where id in
+        delete from dispatch where dispatchid in
         <foreach item="ETLJobItem" collection="array" index="index" open="(" separator="," close=")">
-            #{id}
+            #{ETLJobItem}
         </foreach>
     </delete> 
     
     <select id="getRowCount" resultType="int">
-		select count(*) from dispatch
+		select count(*) from dispatch 
+		<where>
+            <if test="description != null">
+                binary description like "%"#{description}"%"
+            </if>
+        </where>
 	</select>
 	
 	<select id="selectByParams" resultType="com.x8.mt.entity.Dispatch"
@@ -63,7 +68,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<select id="selectByDescription" resultType="com.x8.mt.entity.Dispatch"
 		parameterType="map">
 		select * from dispatch
-		where binary description like "%"#{description}"%"
+        <where>
+            <if test="description != null">
+                binary description like "%"#{description}"%"
+            </if>
+        </where>
 		order by createtime desc
 		limit #{offset},#{size}
 	</select>

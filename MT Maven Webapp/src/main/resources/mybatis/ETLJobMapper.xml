@@ -23,13 +23,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</update>
 	
 	<select id="getRowCount" resultType="int">
-		select count(*) from etljob
+		select count(*) from etljob 
+		<where>
+            <if test="description != null">
+                binary description like "%"#{description}"%"
+            </if>
+        </where>
 	</select>
 	
 	<select id="selectByParams" resultType="com.x8.mt.entity.ETLJob"
 		parameterType="map">
 		select * from etljob
-		where jobtype = #{jobtype}
 		order by create_date desc
 		limit ${offset},${size}
 	</select>
@@ -48,10 +52,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</delete>
 	
 	<delete id="deleteETLJobs" parameterType="List">
-        delete from etljob where jobtype = #{type}
-        and id in
+        delete from etljob where
+        id in
         <foreach item="ETLJobItem" collection="array" index="index" open="(" separator="," close=")">
-            #{id}
+            #{ETLJobItem}
         </foreach>
     </delete> 
     <select id="queryTargetTableIdAndName" resultType="String">
@@ -73,7 +77,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<select id="selectByDescription" resultType="com.x8.mt.entity.ETLJob"
 		parameterType="map">
 		select * from etljob
-		where binary description like "%"#{description}"%"
+        <where>
+            <if test="description != null">
+                binary description like "%"#{description}"%"
+            </if>
+        </where>
 		order by create_date desc
 		limit #{offset},#{size}
 	</select>

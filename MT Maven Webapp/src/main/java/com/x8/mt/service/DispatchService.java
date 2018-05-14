@@ -65,8 +65,8 @@ public class DispatchService {
 	 * 时间:2018年5月4日 
 	 * 作用:删除一个etl调度
 	 */
-	public boolean deleteDispatch(int i) {
-		return dispatchDAO.deleteDispatch(i);
+	public boolean deleteETLSchedule(int i) {
+		return dispatchDAO.deleteETLSchedule(i);
 	}
 	
 	/**
@@ -75,10 +75,11 @@ public class DispatchService {
 	 * 时间:2018年5月4日 
 	 * 作用:删除一组etl调度
 	 */
-	public boolean deleteDispatchs(int[] id){
+	public boolean deleteETLSchedules(int[] id){
 		try{
-			return dispatchDAO.deleteDispatchs(id) > 0?true:false;
+			return dispatchDAO.deleteETLSchedules(id) > 0?true:false;
 		}catch(Exception e){
+			e.printStackTrace();
 			return false;
 		}
 	}
@@ -89,8 +90,8 @@ public class DispatchService {
 	 * 时间:2018年5月7日 
 	 * 作用:获取etl调度数量
 	 */
-	public int getRowCount(){
-		return dispatchDAO.getRowCount();
+	public int getRowCount(String description){
+		return dispatchDAO.getRowCount(description);
 	}
 	
 	
