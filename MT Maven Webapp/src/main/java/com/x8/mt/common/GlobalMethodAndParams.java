@@ -10,7 +10,7 @@ public class GlobalMethodAndParams {
 	
 	public static final int protocolParamArrayMetamodelID= 1002;
 
-	public static final String JSONKey_protocolid= "$.protocolType";
+	public static final String JSONKey_protocolType= "$.protocolType";
 	
 	/**
 	 * 字段编号,字段名

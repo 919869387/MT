@@ -37,7 +37,7 @@ public class ExternalInterfaceService {
 		JSONArray protocols = new JSONArray();
 		
 		Map<String,String> paramMap = new HashMap<String, String>();
-		paramMap.put("key", GlobalMethodAndParams.JSONKey_protocolid);
+		paramMap.put("key", GlobalMethodAndParams.JSONKey_protocolType);
 		paramMap.put("value", protocolType);
 		
 		List<Metadata> protocolMetadatas= iMetadataAnalysisDao.getMetadataByJson(paramMap);
@@ -45,8 +45,6 @@ public class ExternalInterfaceService {
 		JSONObject protocol = null;
 		for(Metadata metadata : protocolMetadatas){
 			protocol = new JSONObject();
-			protocol.put("protocolName", metadata.getNAME());
-			protocol.put("protocolDescription", metadata.getDESCRIPTION());
 			protocol.putAll((Map)JSONObject.fromObject(metadata.getATTRIBUTES()));//添加私有属性
 			protocol.put("protocolParams", getProtocolParamArrayMetadataOrParamMetadata(metadata.getID()+""));
 			
@@ -69,15 +67,12 @@ public class ExternalInterfaceService {
 		JSONObject param = null;//可能是参数组元数据或参数元数据
 		for(Metadata metadata : protocolParams){
 			param = new JSONObject();
-			if(metadata.getMETAMODELID()==GlobalMethodAndParams.protocolParamArrayMetamodelID){//通信协议参数组元数据
-				param.put("paramArrayName", metadata.getNAME());
-				param.put("paramArrayDescription", metadata.getDESCRIPTION());
-				param.put("paramArrayParams", getProtocolParamArrayMetadataOrParamMetadata(metadata.getID()+""));//递归添加参数元数据
-			}else{//通信协议参数元数据
-				param.put("paramName", metadata.getNAME());
-				param.put("paramDescription", metadata.getDESCRIPTION());
-			}
 			param.putAll((Map)JSONObject.fromObject(metadata.getATTRIBUTES()));//添加私有属性
+			
+			if(metadata.getMETAMODELID()==GlobalMethodAndParams.protocolParamArrayMetamodelID){//通信协议参数组元数据
+				param.put("paramArrayParams", getProtocolParamArrayMetadataOrParamMetadata(metadata.getID()+""));//递归添加参数元数据
+			}
+			
 			paramArray.add(param);
 		}
 		return paramArray;
