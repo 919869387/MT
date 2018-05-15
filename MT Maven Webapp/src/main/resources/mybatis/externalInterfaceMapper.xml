@@ -4,8 +4,19 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.x8.mt.dao.IExternalInterfaceDao">
 	<select id="getCompositionRelatedmetadata" resultType="com.x8.mt.entity.Metadata">
-		select * from
-		metadata where id in (select relatedmetadataid from metadata_relation where
-		metadataid=#{metadataid} and type='COMPOSITION');
+		select *
+		from
+		metadata where id in (select relatedmetadataid from
+		metadata_relation where
+		metadataid=#{metadataid} and
+		type='COMPOSITION') ORDER BY CAST(JSON_EXTRACT(attributes,
+		'$.index')
+		AS UNSIGNED);
+	</select>
+
+	<select id="getProtocolType" resultType="java.lang.String">
+		SELECT
+		DISTINCT JSON_UNQUOTE(JSON_EXTRACT(attributes, '$.protocolType')) from metadata
+		where metamodelid=1001;
 	</select>
 </mapper>

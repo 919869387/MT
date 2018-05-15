@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.x8.mt.common.GlobalMethodAndParams;
 import com.x8.mt.common.Log;
 import com.x8.mt.service.ExternalInterfaceService;
-import com.x8.mt.service.MetadataManagementService;
 
 /**
  * 作者： allen
@@ -33,7 +32,31 @@ import com.x8.mt.service.MetadataManagementService;
 public class ExternalInterfaceController {
 	@Resource
 	ExternalInterfaceService externalInterfaceService;
+	
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年5月15日
+	 * 作用:外部接口-获取通信报文元数据种类
+	 */
+	@RequestMapping(value = "/getProtocolType", method = RequestMethod.GET)
+	@ResponseBody
+	@Log(operationType="metadata",operationDesc="外部接口-获取通信报文元数据种类")
+	public JSONObject getProtocolType(HttpServletRequest request,
+			HttpServletResponse response){
+		JSONObject responsejson = new JSONObject();
 
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
+
+		List<String> protocolType = externalInterfaceService.getProtocolType();
+
+		responsejson.put("result", true);
+		responsejson.put("data", protocolType);
+		responsejson.put("count", protocolType.size());
+
+		return responsejson;
+	}
+	
 	/**
 	 * 
 	 * 作者:allen
@@ -49,7 +72,7 @@ public class ExternalInterfaceController {
 			HttpServletResponse response,@RequestBody Map<String,String> map){
 		JSONObject responsejson = new JSONObject();
 
-		//GlobalMethodAndParams.setHttpServletResponse(request, response);
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
 
 		//检测参数是否正确
 		if(!map.containsKey("protocolType")){

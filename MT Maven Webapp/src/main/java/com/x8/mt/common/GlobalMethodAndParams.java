@@ -7,13 +7,16 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 
 public class GlobalMethodAndParams {
+	
+	public static final int protocolParamArrayMetamodelID= 1002;
 
+	public static final String JSONKey_protocolid= "$.protocolType";
+	
 	/**
 	 * 字段编号,字段名
 	 */
 	public static final String JSONKey_sourcefieldid= "$.sourcefieldid";
 	public static final String JSONKey_targetfieldid= "$.targetfieldid";
-	public static final String JSONKey_protocolid= "$.protocoltype";
 	
 	/**
 	 * 组合关系名

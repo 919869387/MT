@@ -26,6 +26,14 @@ public class ExternallnterfaceTest {
 	ExternalInterfaceController externalInterfaceController;
 	
 	@Test
+	public void getProtocolType(){
+		HttpServletRequest request = null;
+		HttpServletResponse response = null;
+		
+		System.out.println(externalInterfaceController.getProtocolType(request, response));
+	}
+	
+	@Test
 	public void getProtocolMetadata(){
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;

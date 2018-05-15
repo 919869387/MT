@@ -47,9 +47,8 @@ public class ExternalInterfaceService {
 			protocol = new JSONObject();
 			protocol.put("protocolName", metadata.getNAME());
 			protocol.put("protocolDescription", metadata.getDESCRIPTION());
-			protocol.put("protocolId", JSONObject.fromObject(metadata.getATTRIBUTES()).get("protocolid"));
-			protocol.put("protocolType", JSONObject.fromObject(metadata.getATTRIBUTES()).get("protocoltype"));
-			protocol.put("protocolParams", getProtocolParamMetadata(metadata.getID()+""));
+			protocol.putAll((Map)JSONObject.fromObject(metadata.getATTRIBUTES()));//添加私有属性
+			protocol.put("protocolParams", getProtocolParamArrayMetadataOrParamMetadata(metadata.getID()+""));
 			
 			protocols.add(protocol);
 		}
@@ -60,33 +59,39 @@ public class ExternalInterfaceService {
 	 * 
 	 * 作者:allen
 	 * 时间:2018年5月9日
-	 * 获取通信报文元数据的参数元数据
+	 * 获取通信报文元数据的参数组元数据或参数元数据
 	 */
-	public JSONArray getProtocolParamMetadata(String metadataid){
+	public JSONArray getProtocolParamArrayMetadataOrParamMetadata(String metadataid){
 		JSONArray paramArray = new JSONArray();
 		
 		List<Metadata> protocolParams = iExternalInterfaceDao.getCompositionRelatedmetadata(metadataid);
 		
-		JSONObject param = null;
+		JSONObject param = null;//可能是参数组元数据或参数元数据
 		for(Metadata metadata : protocolParams){
 			param = new JSONObject();
-			param.put("paramName", metadata.getNAME());
-			param.put("paramDescription", metadata.getDESCRIPTION());
-			JSONObject attributes = JSONObject.fromObject(metadata.getATTRIBUTES());
-			param.put("paramTag", attributes.get("tag"));
-			param.put("paramPosition", attributes.get("position"));
-			param.put("paramLength", attributes.get("length"));
-			param.put("paramLengthmetric", attributes.get("lengthmetric"));
-			param.put("paramType",attributes.get("type"));
-			param.put("paramMeaning", attributes.get("meaning"));
-			param.put("paramRemark", attributes.get("remark"));
-			param.put("paramSignificance", attributes.get("significance"));
-			param.put("paramIotype", attributes.get("iotype"));
-			
+			if(metadata.getMETAMODELID()==GlobalMethodAndParams.protocolParamArrayMetamodelID){//通信协议参数组元数据
+				param.put("paramArrayName", metadata.getNAME());
+				param.put("paramArrayDescription", metadata.getDESCRIPTION());
+				param.put("paramArrayParams", getProtocolParamArrayMetadataOrParamMetadata(metadata.getID()+""));//递归添加参数元数据
+			}else{//通信协议参数元数据
+				param.put("paramName", metadata.getNAME());
+				param.put("paramDescription", metadata.getDESCRIPTION());
+			}
+			param.putAll((Map)JSONObject.fromObject(metadata.getATTRIBUTES()));//添加私有属性
 			paramArray.add(param);
 		}
-		
 		return paramArray;
+	}
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年5月15日
+	 * 作用:获取通信报文元数据种类
+	 */
+	public List<String> getProtocolType() {
+		List<String> protocolType = iExternalInterfaceDao.getProtocolType();
+		return protocolType;
 	}
 
 }
