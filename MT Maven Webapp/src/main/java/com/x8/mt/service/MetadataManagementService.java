@@ -662,4 +662,34 @@ public class MetadataManagementService {
 		return true;
 	}
 
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年5月15日
+	 * 作用:请求第一层试图节点
+	 */
+	public List<Map<String, String>> getViewNode(String viewid) {
+		return imetadataManagementDao.getViewNode(viewid);
+	}
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年5月15日
+	 * 作用:请求元数据的第一层节点
+	 */
+	public List<Map<String, String>> getMetadataFirstNode(String id) {
+		return imetadataManagementDao.getMetadataFirstNode(id);
+	}
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年5月15日
+	 * 作用:请求元数据的其他层次节点
+	 */
+	public List<Map<String, String>> getMetadataOtherNode(String metadataid) {
+		return imetadataManagementDao.getMetadataOtherNode(metadataid);
+	}
+
 }

@@ -911,7 +911,7 @@ public class MetadataManagementController {
 	/**
 	 * 
 	 * 作者:allen
-	 * 时间:2017年3月17日
+	 * 时间:2018年3月17日
 	 * 作用:查询得到元数据视图树(不包括字段元数据)
 	 * 
 	 * 参数：viewid [系统默认视图的viewid=1]
@@ -944,6 +944,46 @@ public class MetadataManagementController {
 		responsejson.put("result", true);
 		responsejson.put("data", metadataViewTree);
 		responsejson.put("count", 1);
+		return responsejson;
+	}
+	
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年5月15日
+	 * 作用:查询得到元数据视图树第一层节点
+	 * 
+	 * 参数：viewid [系统默认视图的viewid=1]
+	 */
+	@RequestMapping(value = "/getMetadataViewTreeNode", method = RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="metadata",operationDesc="查找元数据视图树第一层节点")
+	public JSONObject getMetadataViewTreeNode(HttpServletRequest request,
+			HttpServletResponse response,@RequestBody Map<String, Object> map){
+		JSONObject responsejson = new JSONObject();
+		
+		List<Map<String, String>> treeNode = null;
+		if(map.containsKey("viewid")){//第一层试图节点
+			String viewidStr = map.get("viewid").toString();
+			
+			treeNode = metadataManagementService.getViewNode(viewidStr);
+		}else if(map.containsKey("id")){//元数据的第一层节点
+			String id = map.get("id").toString();
+			
+			treeNode = metadataManagementService.getMetadataFirstNode(id);
+		}else if(map.containsKey("metadataid")){//元数据的其他层次节点
+			String metadataid = map.get("metadataid").toString();
+			
+			treeNode = metadataManagementService.getMetadataOtherNode(metadataid);
+		}else{
+			responsejson.put("result", false);
+			responsejson.put("count", 0);
+			return responsejson;
+		}
+		
+		responsejson.put("result", true);
+		responsejson.put("data", treeNode);
+		responsejson.put("count", treeNode.size());
 		return responsejson;
 	}
 }

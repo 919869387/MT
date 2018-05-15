@@ -168,4 +168,28 @@ public interface IMetadataManagementDao {
 	 * 作用:得到元模型私有属性
 	 */
 	List<Metamodel_datatype> getMetamodelPrivateInfo(String metamodelidStr);
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年5月15日
+	 * 作用:请求第一层试图节点
+	 */
+	List<Map<String, String>> getViewNode(String viewid);
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年5月15日
+	 * 作用:请求元数据的第一层节点
+	 */
+	List<Map<String, String>> getMetadataFirstNode(String id);
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年5月15日
+	 * 作用:请求元数据的其他层次节点
+	 */
+	List<Map<String, String>> getMetadataOtherNode(String metadataid);
 }

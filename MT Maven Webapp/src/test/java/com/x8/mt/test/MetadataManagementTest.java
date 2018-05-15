@@ -288,26 +288,15 @@ public class MetadataManagementTest {
 	}
 
 	@Test
-	public void getMetadataViewTree(){
-
-		Date a = new Date();
-		
+	public void getMetadataViewTreeNode(){
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("viewid", 1);
+		//map.put("viewid", 1);
+		//map.put("id", 2);
+		map.put("metadataid", 83236);
+		
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
-		System.out.println(metadataManagementController.getMetadataViewTree(request,response,map));
+		System.out.println(metadataManagementController.getMetadataViewTreeNode(request,response,map));
 		
-		Date b = new Date();
-
-		long interval = b.getTime() - a.getTime();
-
-		System.out.println("两个时间相差"+interval+"秒");//会打印出相差3秒
-	}
-	
-	@Test
-	public void test(){
-		System.out.println("\"92016\"");
-		System.out.println("\"92016\"".replace("\"",""));
 	}
 }

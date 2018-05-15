@@ -4,16 +4,54 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.x8.mt.dao.IMetadataManagementDao">
 
+	<select id="getViewNode" resultType="java.util.Map">
+		select id,name as
+		lable,IF((SELECT count(*) FROM metadata WHERE
+		metamodelid=childmetamodelid)>0,'true','false') AS leaf from
+		metadata_view_node where viewid=#{viewid};
+	</select>
+
+	<select id="getMetadataFirstNode" resultType="java.util.Map">
+		select metadata.id
+		as metadataid,name as lable,IF((SELECT count(*) FROM metadata_relation
+		WHERE
+		metadataid=metadata.id and type='COMPOSITION')>0,'true','false')
+		AS leaf
+		from metadata where metamodelid in (select childmetamodelid
+		from
+		metadata_view_node where id=#{id}) and id not in
+		(select
+		relatedmetadataid from
+		metadata_relation where
+		type='COMPOSITION');
+	</select>
+
+	<select id="getMetadataOtherNode" resultType="java.util.Map">
+		select metadata.id
+		as metadataid,name as lable,IF((SELECT count(*) FROM metadata_relation
+		WHERE
+		metadataid=metadata.id and type='COMPOSITION')>0,'true','false')
+		AS leaf
+		from metadata where id in
+		(select
+		relatedmetadataid from
+		metadata_relation
+		where metadataid=#{metadataid} and type='COMPOSITION');
+	</select>
+
 	<select id="getMetamodelPrivateInfo" resultType="com.x8.mt.entity.Metamodel_datatype">
-		select * from metamodel_datatype where metamodelid=#{metamodelidStr}
+		select * from
+		metamodel_datatype where metamodelid=#{metamodelidStr}
 	</select>
 
 	<select id="getHistoryMetadataPrivateInfo" resultType="java.lang.String">
-		select attributes from metadata_tank where id=#{tankidStr}
+		select
+		attributes from metadata_tank where id=#{tankidStr}
 	</select>
 
 	<select id="getHistoryMetadataCommonInfo" resultType="com.x8.mt.entity.MetadataTank">
-		select * from metadata_tank where keyid=#{metadataidStr}
+		select *
+		from metadata_tank where keyid=#{metadataidStr}
 	</select>
 
 	<delete id="deleteMetadataDepend">
@@ -101,9 +139,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<update id="updataMetadataCheckstatus" parameterType="com.x8.mt.entity.Metadata">
 		update
 		metadata set checkstatus = #{CHECKSTATUS} where id in (
-			select id from (
-				select id from metadata where collectjobid = #{ID}
-			) as temp
+		select id from
+		(
+		select id from metadata where collectjobid = #{ID}
+		) as temp
 		)
 	</update>
 
