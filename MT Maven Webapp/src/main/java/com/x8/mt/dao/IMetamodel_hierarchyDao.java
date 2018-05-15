@@ -94,5 +94,5 @@ public interface IMetamodel_hierarchyDao {
 	 */
 	List<Metamodel_hierarchy> getMetamodel_packageByType();
 
-	List<Metamodel_hierarchy> getAvailableMetamodel();
+	List<Metamodel_hierarchy> getAvailableMetamodel(int metamodelid);
 }
