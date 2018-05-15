@@ -5,7 +5,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 <mapper namespace="com.x8.mt.dao.IMetamodel_relationDao">
 
 	<select id="getDependencyRelationByMetamodelid" resultType="com.x8.mt.entity.Metamodel_relation" parameterType="Integer">
-		select * from  metamodel_relation where metamodelid = #{id} and type = "DEPENDENCY"
+		select * from  metamodel_relation where metamodelid = #{id} and type = #{type}
 	</select>
 
 	<insert id="insertMetamodel_relation" parameterType="com.x8.mt.entity.Metamodel_relation">

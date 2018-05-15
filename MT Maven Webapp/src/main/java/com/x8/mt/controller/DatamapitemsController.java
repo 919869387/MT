@@ -96,8 +96,7 @@ public class DatamapitemsController {
 						.getMetamodel_hierarchy(GlobalMethodAndParams.SystemMedamodelId_InDatabase);
 				//获得系统元模型下的元模型关系
 				List<Metamodel_relation> dbRelatedMetamodelList = metamodel_relationService
-						.getDependencyRelationByMetamodelid(sysMetamodel
-								.getId());
+						.getDependencyRelationByMetamodelid(sysMetamodel.getId(),GlobalMethodAndParams.metamodel_relation_dependency);
 				for (Metamodel_relation metamodel_relation : dbRelatedMetamodelList) {
 					System.out.println(metamodel_relation.getRelatedmetamodelid()+"-----------------------");
 					List<Metadata> dbMetadataList = metaDataService
@@ -287,7 +286,7 @@ public class DatamapitemsController {
 		//获取数据库下的表id列表
 		List<String> sonMetadataList = metaDataRelationService.getMetadata_relationByMetadataid(sourceMetadataid);
 		List<String> sonTargetMetadataList = metaDataRelationService.getMetadata_relationByMetadataid(targetMetadataid);
-		int num = 0;
+		int num = 1;
 		for (String string : sonTargetMetadataList) {
 			Metadata tableMetadata = metaDataService.getMetadataById(Integer.parseInt(string));
 			boolean isExist = datamapitemsService.isExist(tableMetadata.getID());
@@ -320,7 +319,7 @@ public class DatamapitemsController {
 		}
 		
 		//遍历元数据表查询该表是否映射了其他数据库中的表，如果有则获取其表id，数据库id。
-		
+		num = 1;
 		for (String sourceTableid : sonMetadataList) {
 			Metadata tableMetadata = metaDataService.getMetadataById(Integer.parseInt(sourceTableid));
 			boolean isExist = datamapitemsService.isExist(tableMetadata.getID());
@@ -418,7 +417,7 @@ public class DatamapitemsController {
 		//获取表下的字段id列表
 		List<String> sonMetadataList = metaDataRelationService.getMetadata_relationByMetadataid(sourceMetadataid);
 		List<String> sonTargetMetadataList = metaDataRelationService.getMetadata_relationByMetadataid(targetMetadataid);
-		int num = 0;
+		int num = 1;
 		for (String string : sonTargetMetadataList) {
 			Metadata tableMetadata = metaDataService.getMetadataById(Integer.parseInt(string));
 			boolean isExist = datamapitemsService.isExist(tableMetadata.getID());
@@ -451,7 +450,7 @@ public class DatamapitemsController {
 		}
 		
 		//遍历元数据字段查询该字段是否映射了其他数据库中的表的字段，如果有则获取其字段id，数据库id。
-		
+		num = 1;
 		for (String sourceTableid : sonMetadataList) {
 			Metadata tableMetadata = metaDataService.getMetadataById(Integer.parseInt(sourceTableid));
 			boolean isExist = datamapitemsService.isExist(tableMetadata.getID());
