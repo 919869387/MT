@@ -19,9 +19,10 @@ public class Metamodel_relationService {
 	 * 作者:itcoder 
 	 * 时间:2018年4月10日 
 	 * 作用:获得所有的依赖关系
+	 * @param type 
 	 */
-	public List<Metamodel_relation> getDependencyRelationByMetamodelid(int metamodelid) {
-		return iMetamodel_relationDao.getDependencyRelationByMetamodelid(metamodelid);
+	public List<Metamodel_relation> getDependencyRelationByMetamodelid(int metamodelid, String type) {
+		return iMetamodel_relationDao.getDependencyRelationByMetamodelid(metamodelid,type);
 	}
 
 	public boolean insertMetamodel_relation(Metamodel_relation metamodel_relation) {

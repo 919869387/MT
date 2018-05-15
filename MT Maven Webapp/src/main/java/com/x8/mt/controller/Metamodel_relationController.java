@@ -39,13 +39,14 @@ public class Metamodel_relationController {
 	 * 
 	 * 作者:itcoder 
 	 * 时间:2018年5月2日 
-	 * 作用:获得所有的可以添加依赖关系的自定义元模型
+	 * 作用:根据元模型id获取所有的除自身外的可添加的自定义元模型
+	 * 参数：modelid
 	 */
-	@RequestMapping(value = "/getAvailableMetamodel", method = RequestMethod.GET)
+	@RequestMapping(value = "/getAvailableMetamodel", method = RequestMethod.POST)
 	@ResponseBody
 	@Log(operationType = "getAvailableMetamodel", operationDesc = "获得所有的可以添加依赖关系的自定义元模型")
 	public JSONObject getAvailableMetamodel(
-			HttpServletRequest request, HttpServletResponse response) {
+			HttpServletRequest request, HttpServletResponse response,@RequestBody Map<String,Object> map) {
 		JSONObject responsejson = new JSONObject();
 
 		// if(!GlobalMethodAndParams.checkLogin()){
@@ -54,10 +55,19 @@ public class Metamodel_relationController {
 		// return responsejson;
 		// }
 		GlobalMethodAndParams.setHttpServletResponse(request, response);
+		
+		if (!map.containsKey("metamodelid")
+				|| map.get("metamodelid").toString().trim().equals("")) {
+			responsejson.put("result", false);
+			responsejson.put("count", 0);
+			return responsejson;
+		}
 
 		JSONArray data = new JSONArray();
+		String metamodelidStr = map.get("metamodelid").toString();
+		int metamodelid = Integer.parseInt(metamodelidStr);
 		
-		List<Metamodel_hierarchy> metamodelList = metamodel_hierarchyService.getAvailableMetamodel();
+		List<Metamodel_hierarchy> metamodelList = metamodel_hierarchyService.getAvailableMetamodel(metamodelid);
 		for (Metamodel_hierarchy metamodel_hierarchy : metamodelList) {
 			JSONObject node = new JSONObject();
 			node.put("metamodelid",metamodel_hierarchy.getId());
@@ -75,8 +85,8 @@ public class Metamodel_relationController {
 	 * 
 	 * 作者:itcoder 
 	 * 时间:2018年4月10日 
-	 * 作用:获得所有的依赖关系 
-	 * 参数：元模型id 即metamodelid
+	 * 作用:获得所有的依赖关系 ，包含关系
+	 * 参数：元模型id 即metamodelid，type
 	 */
 	@RequestMapping(value = "/getMetamodel_relationDEPENDENCY", method = RequestMethod.POST)
 	@ResponseBody
@@ -93,8 +103,9 @@ public class Metamodel_relationController {
 		// }
 		GlobalMethodAndParams.setHttpServletResponse(request, response);
 
-		if (!map.containsKey("metamodelid")
-				|| map.get("metamodelid").toString().trim().equals("")) {
+		if (!(map.containsKey("metamodelid")&&map.containsKey("type"))
+				|| map.get("metamodelid").toString().trim().equals("")
+				|| map.get("type").toString().trim().equals("")) {
 			responsejson.put("result", false);
 			responsejson.put("count", 0);
 			return responsejson;
@@ -103,10 +114,12 @@ public class Metamodel_relationController {
 		JSONArray data = new JSONArray();
 		int metamodelid = 0;
 		String metamodelidStr = map.get("metamodelid").toString().trim();
+		String type = map.get("type").toString().trim();
+		
 		try {
 			metamodelid = Integer.parseInt(metamodelidStr);
 			List<Metamodel_relation> dependencyRelationList = metamodel_relationService
-					.getDependencyRelationByMetamodelid(metamodelid);
+					.getDependencyRelationByMetamodelid(metamodelid,type);
 
 			for (Metamodel_relation metamodel_relation : dependencyRelationList) {
 				JSONObject json = new JSONObject();
@@ -136,7 +149,7 @@ public class Metamodel_relationController {
 	 * 作者:itcoder 
 	 * 时间:2018年4月10日 
 	 * 作用:增加元模型关系
-	 * 参数：sourcemetamodelid，targetmetamodelid都不能为空
+	 * 参数：sourcemetamodelid，targetmetamodelid都不能为空,type
 	 */
 	@RequestMapping(value = "/insertMetamodel_relation", method = RequestMethod.POST)
 	@ResponseBody
@@ -153,14 +166,16 @@ public class Metamodel_relationController {
 		GlobalMethodAndParams.setHttpServletResponse(request, response);
 
 		if (!(map.containsKey("sourcemetamodelid")
-				&& map.containsKey("targetmetamodelid"))) {
+				&& map.containsKey("targetmetamodelid")
+				&& map.containsKey("type"))) {
 			responsejson.put("result", false);
 			responsejson.put("count", 0);
 			return responsejson;
 		}
 
 		if (map.get("sourcemetamodelid").toString().trim().equals("")
-				|| map.get("targetmetamodelid").toString().trim().equals("")) {
+				|| map.get("targetmetamodelid").toString().trim().equals("")
+				|| map.get("type").toString().trim().equals("")) {
 			responsejson.put("result", false);
 			responsejson.put("count", 0);
 			return responsejson;
@@ -172,7 +187,7 @@ public class Metamodel_relationController {
 		metamodel_relation.setRelatedmetamodelid(Integer.parseInt(map.get(
 				"targetmetamodelid").toString()));
 		metamodel_relation
-				.setType(GlobalMethodAndParams.metamodel_relation_dependency);
+				.setType(map.get("type").toString());
 
 		boolean flag = metamodel_relationService
 				.insertMetamodel_relation(metamodel_relation);
