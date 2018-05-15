@@ -175,7 +175,7 @@ public interface IMetadataManagementDao {
 	 * 时间:2018年5月15日
 	 * 作用:请求第一层试图节点
 	 */
-	List<Map<String, String>> getViewNode(String viewid);
+	List<Map<String, Object>> getViewNode(String viewid);
 
 	/**
 	 * 
@@ -183,7 +183,7 @@ public interface IMetadataManagementDao {
 	 * 时间:2018年5月15日
 	 * 作用:请求元数据的第一层节点
 	 */
-	List<Map<String, String>> getMetadataFirstNode(String id);
+	List<Map<String, Object>> getMetadataFirstNode(String id);
 
 	/**
 	 * 
@@ -191,5 +191,5 @@ public interface IMetadataManagementDao {
 	 * 时间:2018年5月15日
 	 * 作用:请求元数据的其他层次节点
 	 */
-	List<Map<String, String>> getMetadataOtherNode(String metadataid);
+	List<Map<String, Object>> getMetadataOtherNode(String metadataid);
 }

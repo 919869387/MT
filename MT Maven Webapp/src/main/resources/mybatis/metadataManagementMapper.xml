@@ -6,14 +6,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 	<select id="getViewNode" resultType="java.util.Map">
 		select id,name as
-		lable,IF((SELECT count(*) FROM metadata WHERE
+		label,IF((SELECT count(*) FROM metadata WHERE
 		metamodelid=childmetamodelid)>0,'true','false') AS leaf from
 		metadata_view_node where viewid=#{viewid};
 	</select>
 
 	<select id="getMetadataFirstNode" resultType="java.util.Map">
 		select metadata.id
-		as metadataid,name as lable,IF((SELECT count(*) FROM metadata_relation
+		as id,name as label,metamodelid,IF((SELECT count(*) FROM metadata_relation
 		WHERE
 		metadataid=metadata.id and type='COMPOSITION')>0,'true','false')
 		AS leaf
@@ -28,7 +28,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 	<select id="getMetadataOtherNode" resultType="java.util.Map">
 		select metadata.id
-		as metadataid,name as lable,IF((SELECT count(*) FROM metadata_relation
+		as id,name as label,metamodelid,IF((SELECT count(*) FROM metadata_relation
 		WHERE
 		metadataid=metadata.id and type='COMPOSITION')>0,'true','false')
 		AS leaf

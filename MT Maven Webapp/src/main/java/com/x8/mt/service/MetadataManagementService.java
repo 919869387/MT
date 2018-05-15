@@ -668,8 +668,8 @@ public class MetadataManagementService {
 	 * 时间:2018年5月15日
 	 * 作用:请求第一层试图节点
 	 */
-	public List<Map<String, String>> getViewNode(String viewid) {
-		return imetadataManagementDao.getViewNode(viewid);
+	public List<Map<String, Object>> getViewNode(String viewid) {
+		return TraverseBoolean(imetadataManagementDao.getViewNode(viewid));
 	}
 
 	/**
@@ -678,8 +678,8 @@ public class MetadataManagementService {
 	 * 时间:2018年5月15日
 	 * 作用:请求元数据的第一层节点
 	 */
-	public List<Map<String, String>> getMetadataFirstNode(String id) {
-		return imetadataManagementDao.getMetadataFirstNode(id);
+	public List<Map<String, Object>> getMetadataFirstNode(String id) {
+		return TraverseBoolean(imetadataManagementDao.getMetadataFirstNode(id));
 	}
 
 	/**
@@ -688,8 +688,22 @@ public class MetadataManagementService {
 	 * 时间:2018年5月15日
 	 * 作用:请求元数据的其他层次节点
 	 */
-	public List<Map<String, String>> getMetadataOtherNode(String metadataid) {
-		return imetadataManagementDao.getMetadataOtherNode(metadataid);
+	public List<Map<String, Object>> getMetadataOtherNode(String metadataid) {
+		return TraverseBoolean(imetadataManagementDao.getMetadataOtherNode(metadataid));
+	}
+	
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年5月15日
+	 * 作用:将字符串的boolean转换
+	 */
+	private List<Map<String, Object>> TraverseBoolean(List<Map<String, Object>> list){
+		for(Map<String, Object> map : list){
+			boolean temp = map.get("leaf").equals("true")?true:false;
+			map.put("leaf", temp);
+		}
+		return list;
 	}
 
 }

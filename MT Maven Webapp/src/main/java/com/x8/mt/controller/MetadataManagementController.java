@@ -962,7 +962,7 @@ public class MetadataManagementController {
 			HttpServletResponse response,@RequestBody Map<String, Object> map){
 		JSONObject responsejson = new JSONObject();
 		
-		List<Map<String, String>> treeNode = null;
+		List<Map<String, Object>> treeNode = null;
 		if(map.containsKey("viewid")){//第一层试图节点
 			String viewidStr = map.get("viewid").toString();
 			
