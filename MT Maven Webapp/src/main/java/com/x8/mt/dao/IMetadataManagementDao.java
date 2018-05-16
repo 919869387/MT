@@ -22,22 +22,6 @@ public interface IMetadataManagementDao {
 	 * 作用:查找元数据
 	 */
 	List<Metadata> searchMetadata(String key);
-	
-    /**
-	 * 
-	 * 作者:allen 
-	 * 时间:2017年3月16日 
-	 * 作用:查询元数据视图第一层
-	 */
-    List<Map<Object, Object>> getMetadataViewFirstLevel(int viewID);
-    
-    /**
-	 * 
-	 * 作者:allen 
-	 * 时间:2017年3月16日 
-	 * 作用:查询儿子元数据
-	 */
-    List<Map<Object, Object>> getSonMetadata(String metadata_id);
     
     /**
 	 * 

@@ -276,11 +276,6 @@ public class MetadataManagementTest {
 		map.put("tableMetadataId", 1322);
 		System.out.println(metadataManagementController.getFieldMetadata(request,response,map));
 	}
-	
-	@Test
-	public void getMetadataViewFirstLevel(){
-		System.out.println(metadataManagementService.getMetadataViewFirstLevel(1));
-	}
 
 	@Test
 	public void getMetadataViewTreeChild(){

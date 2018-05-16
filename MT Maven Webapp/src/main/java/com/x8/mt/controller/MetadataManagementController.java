@@ -907,45 +907,6 @@ public class MetadataManagementController {
 		responsejson.put("count", fieldMetadatas.size());
 		return responsejson;
 	}
-
-	/**
-	 * 
-	 * 作者:allen
-	 * 时间:2018年3月17日
-	 * 作用:查询得到元数据视图树(不包括字段元数据)
-	 * 
-	 * 参数：viewid [系统默认视图的viewid=1]
-	 */
-	@RequestMapping(value = "/getMetadataViewTree", method = RequestMethod.POST)
-	@ResponseBody
-	@Log(operationType="metadata",operationDesc="查找元数据视图树")
-	public JSONObject getMetadataViewTree(HttpServletRequest request,
-			HttpServletResponse response,@RequestBody Map<String, Object> map){
-		JSONObject responsejson = new JSONObject();
-
-		//GlobalMethodAndParams.setHttpServletResponse(request, response);
-
-		//检查传参是否正确
-		if(!map.containsKey("viewid")){
-			responsejson.put("result", false);
-			responsejson.put("count",0);
-			return responsejson;
-		}
-
-		String viewidStr = map.get("viewid").toString();
-		int viewid = 0;
-		try {
-			viewid = Integer.parseInt(viewidStr);
-		} catch (Exception e) {
-		}
-
-		JSONArray metadataViewTree= metadataManagementService.getMetadataViewTree(viewid);
-
-		responsejson.put("result", true);
-		responsejson.put("data", metadataViewTree);
-		responsejson.put("count", 1);
-		return responsejson;
-	}
 	
 	/**
 	 * 
