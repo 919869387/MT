@@ -94,9 +94,12 @@ public class DatamapitemsController {
 
 				Metamodel_hierarchy sysMetamodel = metamodel_hierarchyService
 						.getMetamodel_hierarchy(GlobalMethodAndParams.SystemMedamodelId_InDatabase);
+				Metamodel_hierarchy metamodel_hierarchy = new Metamodel_hierarchy();
+				metamodel_hierarchy.setId(sysMetamodel.getId());
+				metamodel_hierarchy.setType(GlobalMethodAndParams.metamodel_relation_dependency);
 				//获得系统元模型下的元模型关系
 				List<Metamodel_relation> dbRelatedMetamodelList = metamodel_relationService
-						.getDependencyRelationByMetamodelid(sysMetamodel.getId(),GlobalMethodAndParams.metamodel_relation_dependency);
+						.getDependencyRelationByMetamodelid(metamodel_hierarchy);
 				for (Metamodel_relation metamodel_relation : dbRelatedMetamodelList) {
 					System.out.println(metamodel_relation.getRelatedmetamodelid()+"-----------------------");
 					List<Metadata> dbMetadataList = metaDataService

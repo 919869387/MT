@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.x8.mt.dao.IMetamodel_relationDao;
+import com.x8.mt.entity.Metamodel_hierarchy;
 import com.x8.mt.entity.Metamodel_relation;
 
 @Service
@@ -21,8 +22,8 @@ public class Metamodel_relationService {
 	 * 作用:获得所有的依赖关系
 	 * @param type 
 	 */
-	public List<Metamodel_relation> getDependencyRelationByMetamodelid(int metamodelid, String type) {
-		return iMetamodel_relationDao.getDependencyRelationByMetamodelid(metamodelid,type);
+	public List<Metamodel_relation> getDependencyRelationByMetamodelid(Metamodel_hierarchy metamodel_hierarchy) {
+		return iMetamodel_relationDao.getDependencyRelationByMetamodelid(metamodel_hierarchy);
 	}
 
 	public boolean insertMetamodel_relation(Metamodel_relation metamodel_relation) {

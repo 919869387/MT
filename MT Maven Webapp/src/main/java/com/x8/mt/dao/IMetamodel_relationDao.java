@@ -16,7 +16,7 @@ public interface IMetamodel_relationDao {
 	 * 作用:得到依赖关系列表
 	 * @param type 
 	 */
-	List<Metamodel_relation> getDependencyRelationByMetamodelid(int metamodelid, String type);
+	List<Metamodel_relation> getDependencyRelationByMetamodelid(Metamodel_hierarchy metamodel_hierarchy);
 	
 	/**
 	 * 

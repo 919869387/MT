@@ -118,8 +118,11 @@ public class Metamodel_relationController {
 		
 		try {
 			metamodelid = Integer.parseInt(metamodelidStr);
+			Metamodel_hierarchy metamodel_hierarchy = new Metamodel_hierarchy();
+			metamodel_hierarchy.setId(metamodelid);
+			metamodel_hierarchy.setType(type);
 			List<Metamodel_relation> dependencyRelationList = metamodel_relationService
-					.getDependencyRelationByMetamodelid(metamodelid,type);
+					.getDependencyRelationByMetamodelid(metamodel_hierarchy);
 
 			for (Metamodel_relation metamodel_relation : dependencyRelationList) {
 				JSONObject json = new JSONObject();
