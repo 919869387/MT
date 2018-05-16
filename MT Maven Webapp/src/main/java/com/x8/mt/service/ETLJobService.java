@@ -415,7 +415,7 @@ public class ETLJobService {
 	 * 作用:生成调度
 	 */
 	public boolean saveSchedule(String name,Map map) throws Exception{
-		try{			
+		try{	
 			KettleEnvironment.init();
 			JobMeta jobMeta = new JobMeta();
 			jobMeta.setName("jobMeta");
@@ -431,9 +431,14 @@ public class ETLJobService {
 			//选用2或者以上会用到一下方法
 			jobEntrySpecial.setHour(Integer.parseInt(map.get("hour").toString()));
 			jobEntrySpecial.setMinutes(Integer.parseInt(map.get("minutes").toString()));
+			String runinterval = "每天"+Integer.parseInt(map.get("hour").toString())+"时"
+								+Integer.parseInt(map.get("minutes").toString())+"分执行";
 			
 			if(Integer.parseInt(map.get("schedulerType").toString()) == 3){	
 				jobEntrySpecial.setWeekDay(Integer.parseInt(map.get("week").toString()));
+				runinterval = "每周"+getWeek(Integer.parseInt(map.get("week").toString()))
+						+Integer.parseInt(map.get("hour").toString())+"时"
+						+Integer.parseInt(map.get("minutes").toString())+"分执行";
 			}
 			//jobEntrySpecial.setDayOfMonth((int)map.get("week"));
 			
@@ -485,7 +490,7 @@ public class ETLJobService {
 			dispatch.setStatus(1);
 			SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			dispatch.setCreatetime(sdf.parse(sdf.format(new Date())));			
-			dispatch.setRuninterval((int)map.get("schedulerType") == 2 ? "每天执行" : "每周执行");
+			dispatch.setRuninterval(runinterval);
 			dispatch.setType("LOCAL");
 			
 			iDispatchDao.addDispatch(dispatch);
@@ -591,6 +596,19 @@ public class ETLJobService {
 		}else{
 			return pageParam;
 		}
+	}
+	
+	public String getWeek(int day){
+		switch(day){
+			case 0:return "日";
+			case 1:return "一";
+			case 2:return "二";
+			case 3:return "三";
+			case 4:return "四";
+			case 5:return "五";
+			case 6:return "六";
+		}
+		return "一";
 	}
 	
 }
