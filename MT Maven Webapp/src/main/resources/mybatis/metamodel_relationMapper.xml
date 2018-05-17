@@ -9,7 +9,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</select>
 
 	<insert id="insertMetamodel_relation" parameterType="com.x8.mt.entity.Metamodel_relation">
-		insert into metamodel_relation(metamodelid,relatedmetamodelid,type) values(#{metamodelid},#{relatedmetamodelid},"DEPENDENCY")
+		insert into metamodel_relation(metamodelid,relatedmetamodelid,type) values(#{metamodelid},#{relatedmetamodelid},#{type})
 	</insert>
 
 	<delete id="deleteMetamodel_relation" parameterType="Integer">
