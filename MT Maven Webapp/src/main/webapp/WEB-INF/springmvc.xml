@@ -35,7 +35,7 @@
 	<!-- 让controller层支持aop;service层不用监控日志就不用配，监控controller只需要在controller层配		 -->
 	<aop:aspectj-autoproxy proxy-target-class="true" />
 
-	<!-- 模型解析，在请求时为模型视图名称添加前后缀 比如在controller类中需要请求/WEB-INF/page/index.jsp文件，直接写index就可以了 -->
+	<!-- 模型解析，在请求时为模型视图名称添加前后缀 比如在controller类中需要请求/WEB-INF/page/index.jsp文件，直接写index就可以了--> 
 	<bean
 		class="org.springframework.web.servlet.view.InternalResourceViewResolver"
 		p:prefix="/WEB-INF/page/" p:suffix=".jsp" />

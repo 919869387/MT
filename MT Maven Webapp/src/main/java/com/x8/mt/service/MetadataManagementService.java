@@ -14,10 +14,19 @@ import javax.annotation.Resource;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.x8.mt.common.GlobalMethodAndParams;
+import com.x8.mt.common.PageParam;
 import com.x8.mt.common.TransformMetadata;
 import com.x8.mt.dao.IMetaDataDao;
 import com.x8.mt.dao.IMetaDataRelationDao;
@@ -52,28 +61,162 @@ public class MetadataManagementService {
 	/**
 	 * 
 	 * 作者:allen
+	 * 时间:2018年5月16日
+	 * 作用:导出元数据到excel
+	 */
+	public HSSFWorkbook exportMetadataToExcel(String metadataid) {
+		Metadata metadata = imetadataManagementDao.getMetadata(metadataid);
+		HSSFWorkbook wb = new HSSFWorkbook();
+		if(metadata!=null){
+			wb = new HSSFWorkbook(); 
+			Metamodel_hierarchy Metamodel_hierarchy = imetadataManagementDao.getMetamodelByMetadataid(metadataid);
+			Sheet sheet = wb.createSheet(Metamodel_hierarchy.getName());
+			setExcelCellColor(wb,sheet);//设置sheet表头
+
+			Row row = sheet.createRow(1);
+			setExcelCellContent(row,null,metadata);
+
+			exportSonMetadataToExcel(wb,metadata);
+		}
+		return wb;  
+	}
+
+	private void setExcelCellColor(HSSFWorkbook wb,Sheet sheet){
+		Row row = null;
+		Cell cell = null;
+
+		row = sheet.createRow(0); 
+		cell= row.createCell(0);
+		cell.setCellValue("元数据id");
+		cell = row.createCell(1);  
+		cell.setCellValue("元数据名称");
+		cell = row.createCell(2);  
+		cell.setCellValue("元数据业务说明");
+		cell = row.createCell(3);  
+		cell.setCellValue("元数据入库时间");
+		cell = row.createCell(4);  
+		cell.setCellValue("元数据修改时间");
+		cell = row.createCell(5);  
+		cell.setCellValue("元数据的版本号");
+		cell = row.createCell(6);  
+		cell.setCellValue("采集元数据的任务编号");
+		cell = row.createCell(7);  
+		cell.setCellValue("审核状态");
+		cell = row.createCell(8);  
+		cell.setCellValue("所属的元模型id");
+		cell = row.createCell(9);  
+		cell.setCellValue("元数据的私有属性信息");
+		cell = row.createCell(10);  
+		cell.setCellValue("父元数据名称");
+	}
+
+	private void setExcelCellContent(Row row,Metadata fatherMetadata,Metadata metadata){
+		Cell cell = null;
+		cell= row.createCell(0);
+		cell.setCellValue(metadata.getID());
+		cell = row.createCell(1);  
+		cell.setCellValue(metadata.getNAME());
+		cell = row.createCell(2);  
+		cell.setCellValue(metadata.getDESCRIPTION());
+		cell = row.createCell(3);  
+		cell.setCellValue(metadata.getCREATETIME());
+		cell = row.createCell(4);  
+		cell.setCellValue(metadata.getUPDATETIME());
+		cell = row.createCell(5);  
+		cell.setCellValue(metadata.getVERSION());
+		cell = row.createCell(6);  
+		cell.setCellValue(metadata.getCOLLECTJOBID());
+		cell = row.createCell(7);  
+		cell.setCellValue(metadata.getCHECKSTATUS());
+		cell = row.createCell(8);  
+		cell.setCellValue(metadata.getMETAMODELID());
+		cell = row.createCell(9);  
+		cell.setCellValue(metadata.getATTRIBUTES());
+
+		if(fatherMetadata!=null){
+			cell = row.createCell(10);  
+			cell.setCellValue(fatherMetadata.getNAME());
+		}
+	}
+
+	private void exportSonMetadataToExcel(HSSFWorkbook wb,Metadata fatherMetadata){
+		List<Metadata> metadataList = imetadataManagementDao.getSonMetadata(fatherMetadata.getID()+"");
+		if(metadataList.size()==0){
+			return;
+		}else{
+			Metamodel_hierarchy Metamodel_hierarchy = imetadataManagementDao.getMetamodelByMetadataid(metadataList.get(0).getID()+"");
+			Sheet sheet = null;
+			Row row = null;
+			if(wb.getSheet(Metamodel_hierarchy.getName())==null){//此类型sheet不存在
+				sheet = wb.createSheet(Metamodel_hierarchy.getName());
+				setExcelCellColor(wb,sheet);//设置sheet表头
+
+				for(int i=0;i<metadataList.size();i++){
+					row = sheet.createRow(i+1);
+					setExcelCellContent(row,fatherMetadata,metadataList.get(i));//设置单元格内容
+
+					exportSonMetadataToExcel(wb,metadataList.get(i));
+				}
+			}else{//此类型sheet存在
+				sheet = wb.getSheet(Metamodel_hierarchy.getName());
+				int startRow = sheet.getLastRowNum();//得到已经写入数据的最后一行index
+
+				for(int i=0;i<metadataList.size();i++){
+					row = sheet.createRow(i+startRow+1);
+					setExcelCellContent(row,fatherMetadata,metadataList.get(i));//设置单元格内容
+
+					exportSonMetadataToExcel(wb,metadataList.get(i));
+				}
+			}
+		}
+	}
+
+
+	/**
+	 * 
+	 * 作者:allen
 	 * 时间:2018年4月19日
 	 * 作用:查找元数据
 	 */
-	public List<Map<String, Object>> searchMetadata(String key) {
-		List<Map<String, Object>> searchMetadataList = new ArrayList<Map<String, Object>>();
-		List<Metadata> metadataList = imetadataManagementDao.searchMetadata(key);
-		Map<String, Object> map = null;
-		for(Metadata metadata : metadataList){
-			map = new HashMap<String, Object>();
-			map.put("ID", metadata.getID());
-			map.put("NAME", metadata.getNAME());
-			map.put("DESCRIPTION", metadata.getDESCRIPTION());
-			map.put("CREATETIME", metadata.getCREATETIME());
-			map.put("UPDATETIME", metadata.getUPDATETIME());
-			map.put("VERSION", metadata.getVERSION());
-			map.put("COLLECTJOBID", metadata.getCOLLECTJOBID());
-			map.put("CHECKSTATUS", metadata.getCHECKSTATUS());
-			map.put("METAMODELID", metadata.getMETAMODELID());
+	public PageParam searchMetadata(String key,int currPage,int pageSize) {
+		
+		PageParam pageParam = null;
+		
+		int rowCount=imetadataManagementDao.searchMetadataCount(key);//总记录数
+		
+		if(rowCount!=0){
+			List<Map<String, Object>> searchMetadataList = new ArrayList<Map<String, Object>>();
+			int startIndex = (currPage-1)*pageSize;
+			
+			Map<String,Object> param = new HashMap<String,Object>();
+			param.put("key", key);
+			param.put("startIndex", startIndex);
+			param.put("pageSize", pageSize);
+			
+			List<Metadata> metadataList = imetadataManagementDao.searchMetadataPage(param);
+			Map<String, Object> map = null;
+			for(Metadata metadata : metadataList){
+				map = new HashMap<String, Object>();
+				map.put("ID", metadata.getID());
+				map.put("NAME", metadata.getNAME());
+				map.put("DESCRIPTION", metadata.getDESCRIPTION());
+				map.put("CREATETIME", metadata.getCREATETIME());
+				map.put("UPDATETIME", metadata.getUPDATETIME());
+				map.put("VERSION", metadata.getVERSION());
+				map.put("COLLECTJOBID", metadata.getCOLLECTJOBID());
+				map.put("CHECKSTATUS", metadata.getCHECKSTATUS());
+				map.put("METAMODELID", metadata.getMETAMODELID());
 
-			searchMetadataList.add(map);
+				searchMetadataList.add(map);
+			}
+			
+			pageParam = new PageParam();
+			pageParam.setCurrPage(currPage);
+			pageParam.setPageSize(pageSize);
+			pageParam.setRowCount(rowCount);
+			pageParam.setDate(searchMetadataList);
 		}
-		return searchMetadataList;
+		return pageParam;
 	}
 
 	/**
@@ -507,7 +650,7 @@ public class MetadataManagementService {
 		}
 		return historyMetadataMapList;
 	}
-	
+
 	/**
 	 * 
 	 * 作者:allen
@@ -527,14 +670,14 @@ public class MetadataManagementService {
 	 */
 	public Map<String,Object> getMetamodelPrivateInfo(String metamodelidStr) {
 		List<Metamodel_datatype> metamodel_datatypes = imetadataManagementDao.getMetamodelPrivateInfo(metamodelidStr);
-		
+
 		Map<String,Object> metamodelInfo = new HashMap();
 		Metamodel_datatype metamodel_datatype = null;
 		for(int i=0;i<metamodel_datatypes.size();i++){
 			metamodel_datatype = metamodel_datatypes.get(i);
 			metamodelInfo.put(metamodel_datatype.getName(), metamodel_datatype.getDesribe());
 		}
-		
+
 		return metamodelInfo;
 	}
 
@@ -583,7 +726,7 @@ public class MetadataManagementService {
 	public List<Map<String, Object>> getMetadataOtherNode(String metadataid) {
 		return TraverseBoolean(imetadataManagementDao.getMetadataOtherNode(metadataid));
 	}
-	
+
 	/**
 	 * 
 	 * 作者:allen

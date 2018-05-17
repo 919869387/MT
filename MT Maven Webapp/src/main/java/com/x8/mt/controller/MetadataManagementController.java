@@ -1,5 +1,14 @@
 package com.x8.mt.controller;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -8,12 +17,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,6 +34,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.x8.mt.common.GlobalMethodAndParams;
 import com.x8.mt.common.Log;
+import com.x8.mt.common.PageParam;
 import com.x8.mt.entity.MetadataViewNode;
 import com.x8.mt.entity.Metamodel_hierarchy;
 import com.x8.mt.service.MetadataManagementService;
@@ -46,7 +58,67 @@ public class MetadataManagementController {
 	MetadataViewNodeService metadataViewNodeService;
 	@Resource
 	SystemLogService systemLogService;
-	
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年5月16日
+	 * 作用:导出元数据到excel
+	 * 参数：metadataid、filename
+	 */
+	@RequestMapping(value = "/exportMetadataToExcel",method = RequestMethod.GET)
+	@ResponseBody
+	@Log(operationType="metadata",operationDesc="导出元数据到excel")
+	public JSONObject exportMetadataToExcel(HttpServletRequest request, HttpServletResponse response) throws IOException{
+		JSONObject responsejson = new JSONObject();
+
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
+
+		String metadataid = request.getParameter("metadataid");
+		String filename =request.getParameter("filename");
+
+		HSSFWorkbook wb = metadataManagementService.exportMetadataToExcel(metadataid);
+
+		BufferedInputStream bis = null;
+		BufferedOutputStream bos = null;
+
+		try  
+		{
+			response.reset();
+			response.setContentType("application/vnd.ms-excel;charset=utf-8");
+			response.setHeader("Content-Disposition", "attachment;filename="+ new String((filename + ".xls").getBytes("utf-8"), "utf-8"));
+			
+			ByteArrayOutputStream os = new ByteArrayOutputStream();
+			wb.write(os);
+
+			byte[] content = os.toByteArray();
+			InputStream is = new ByteArrayInputStream(content);
+			ServletOutputStream out = response.getOutputStream();
+			bis = new BufferedInputStream(is);
+			bos = new BufferedOutputStream(out);
+			
+			byte[] buff = new byte[2048];
+			int bytesRead;
+
+			while (-1 != (bytesRead = bis.read(buff, 0, buff.length))) {
+				bos.write(buff, 0, bytesRead);
+			}
+			
+			responsejson.put("result", true);
+			responsejson.put("count",1);
+		}catch (IOException e) {
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+		}finally{
+			if (bis != null)
+				bis.close();
+			if (bos != null)
+				bos.close();
+		}
+
+		return responsejson;
+	}
+
 	/**
 	 * 
 	 * 作者:itcoder
@@ -60,23 +132,23 @@ public class MetadataManagementController {
 	@Log(operationType="metadata",operationDesc="得到历史版本元数据的公共属性")
 	public JSONObject getModifedMetadataNumbers(HttpServletRequest request, HttpServletResponse response,@RequestBody Map<String,String> map) {
 		JSONObject responsejson = new JSONObject();
-		
+
 		//检测参数是否正确
 		if(!map.containsKey("systemusername")||map.get("systemusername").trim().equals("")){
 			responsejson.put("result", false);
 			responsejson.put("count",0);
 			return responsejson;
 		}
-		
+
 		String systemusername = map.get("systemusername");
-		
+
 		int count = systemLogService.getModifiedNumbers(systemusername);
-		
+
 		responsejson.put("result", true);
 		responsejson.put("count",count);
 		return responsejson;
 	}
-	
+
 	/**
 	 * 
 	 * 作者:allen
@@ -86,7 +158,7 @@ public class MetadataManagementController {
 	 * 参数：metamodelId、parentMetadataId、NAME、DESCRIPTION、
 	 * mappingtype、sourcetableid、targettableid
 	 */
-	
+
 	/**
 	 * 
 	 * 作者:allen
@@ -102,16 +174,16 @@ public class MetadataManagementController {
 	public JSONObject addTableFieldMappingMetadata(HttpServletRequest request,
 			HttpServletResponse response,@RequestBody List<Map<String, Object>> list){
 		JSONObject responsejson = new JSONObject();
-		
+
 		//检查传参是否正确
 		if(list.size()==0){
 			responsejson.put("result", false);
 			responsejson.put("count",0);
 			return responsejson;
 		}
-		
+
 		boolean result = metadataManagementService.addTableFieldMappingMetadata(list);
-		
+
 		if(result){
 			responsejson.put("result", true);
 			responsejson.put("count", list.size());
@@ -121,7 +193,7 @@ public class MetadataManagementController {
 		}
 		return responsejson;
 	}
-	
+
 	/**
 	 * 
 	 * 作者:allen
@@ -136,22 +208,22 @@ public class MetadataManagementController {
 	public JSONObject getHistoryMetadataPrivateInfo(HttpServletRequest request,
 			HttpServletResponse response,@RequestBody Map<String, Object> map){
 		JSONObject responsejson = new JSONObject();
-		
+
 		//检查传参是否正确
 		if(!map.containsKey("tankid") || !map.containsKey("metamodelid")){
 			responsejson.put("result", false);
 			responsejson.put("count",0);
 			return responsejson;
 		}
-		
+
 		String tankidStr = map.get("tankid").toString();
 		String metamodelidStr = map.get("metamodelid").toString();
-		
+
 		List<Map<String,Object>> historyMetadataPrivateInfoList = new ArrayList();
-		
+
 		JSONObject historyMetadataPrivateInfo = metadataManagementService.getHistoryMetadataPrivateInfo(tankidStr);
 		Map<String,Object> metamodelInfo = metadataManagementService.getMetamodelPrivateInfo(metamodelidStr);
-		
+
 		Iterator it = historyMetadataPrivateInfo.entrySet().iterator(); 
 		Map<String,Object> privateInfo = null;
 		while (it.hasNext()) {
@@ -163,16 +235,16 @@ public class MetadataManagementController {
 			privateInfo = new HashMap();
 			privateInfo.put("key", cnKey);
 			privateInfo.put("value", value);
-			
+
 			historyMetadataPrivateInfoList.add(privateInfo);
 		} 
-		
+
 		responsejson.put("result", true);
 		responsejson.put("PrivateInfo",historyMetadataPrivateInfoList);
 		responsejson.put("count",1);
 		return responsejson;
 	}
-	
+
 	/**
 	 * 
 	 * 作者:allen
@@ -187,24 +259,24 @@ public class MetadataManagementController {
 	public JSONObject getHistoryMetadataCommonInfo(HttpServletRequest request,
 			HttpServletResponse response,@RequestBody Map<String, Object> map){
 		JSONObject responsejson = new JSONObject();
-		
+
 		//检查传参是否正确
 		if(!map.containsKey("metadataid")){
 			responsejson.put("result", false);
 			responsejson.put("count",0);
 			return responsejson;
 		}
-		
+
 		String metadataidStr = map.get("metadataid").toString();
-		
+
 		List<Map<String,Object>> historyMetadataCommonInfoList = metadataManagementService.getHistoryMetadataCommonInfo(metadataidStr);
-		
+
 		responsejson.put("result", true);
 		responsejson.put("CommonInfo",historyMetadataCommonInfoList);
 		responsejson.put("count",historyMetadataCommonInfoList.size());
 		return responsejson;
 	}
-	
+
 	/**
 	 * 
 	 * 作者:allen
@@ -219,18 +291,18 @@ public class MetadataManagementController {
 	public JSONObject deleteMetadataDepend(HttpServletRequest request,
 			HttpServletResponse response,@RequestBody Map<String, Object> map){
 		JSONObject responsejson = new JSONObject();
-		
+
 		//检查传参是否正确
 		if(!map.containsKey("relationid")){
 			responsejson.put("result", false);
 			responsejson.put("count",0);
 			return responsejson;
 		}
-		
+
 		String relationidStr = map.get("relationid").toString();
-		
+
 		boolean delateResult = metadataManagementService.deleteMetadataDepend(relationidStr);
-		
+
 		if(delateResult){
 			responsejson.put("result", true);
 			responsejson.put("count",1);
@@ -240,7 +312,7 @@ public class MetadataManagementController {
 		}
 		return responsejson;
 	}
-	
+
 	/**
 	 * 
 	 * 作者:allen
@@ -255,24 +327,24 @@ public class MetadataManagementController {
 	public JSONObject showMetadataDepend(HttpServletRequest request,
 			HttpServletResponse response,@RequestBody Map<String, Object> map){
 		JSONObject responsejson = new JSONObject();
-		
+
 		//检查传参是否正确
 		if(!map.containsKey("metadataid")){
 			responsejson.put("result", false);
 			responsejson.put("count",0);
 			return responsejson;
 		}
-		
+
 		String metadataidStr = map.get("metadataid").toString();
-		
+
 		List<Map<String,Object>> dependMetadataList = metadataManagementService.showMetadataDepend(metadataidStr);
-		
+
 		responsejson.put("result", true);
 		responsejson.put("data", dependMetadataList);
 		responsejson.put("count",dependMetadataList.size());
 		return responsejson;
 	}
-	
+
 	/**
 	 * 
 	 * 作者:allen
@@ -287,17 +359,17 @@ public class MetadataManagementController {
 	public JSONObject addMetadataDepend(HttpServletRequest request,
 			HttpServletResponse response,@RequestBody Map<String, Object> map){
 		JSONObject responsejson = new JSONObject();
-		
+
 		//检查传参是否正确
 		if(!map.containsKey("sourcemetadataid") || !map.containsKey("targetmetadataid")){
 			responsejson.put("result", false);
 			responsejson.put("count",0);
 			return responsejson;
 		}
-		
+
 		String sourcemetadataidStr = map.get("sourcemetadataid").toString();
 		String targetmetadataidStr = map.get("targetmetadataid").toString();
-		
+
 		boolean addResult = metadataManagementService.addMetadataDepend(sourcemetadataidStr,targetmetadataidStr);
 		if(addResult){
 			responsejson.put("result", true);
@@ -306,10 +378,10 @@ public class MetadataManagementController {
 			responsejson.put("result", false);
 			responsejson.put("count",0);
 		}
-		
+
 		return responsejson;
 	}
-	
+
 	/**
 	 * 
 	 * 作者:allen
@@ -324,24 +396,24 @@ public class MetadataManagementController {
 	public JSONObject getDependMetadata(HttpServletRequest request,
 			HttpServletResponse response,@RequestBody Map<String, Object> map){
 		JSONObject responsejson = new JSONObject();
-		
+
 		//检查传参是否正确
 		if(!map.containsKey("metadataid")){
 			responsejson.put("result", false);
 			responsejson.put("count",0);
 			return responsejson;
 		}
-		
+
 		String metadataidStr = map.get("metadataid").toString();
-		
+
 		List<Map<String,Object>> dependMetadataList = metadataManagementService.getDependMetadata(metadataidStr);
-		
+
 		responsejson.put("result", true);
 		responsejson.put("data", dependMetadataList);
 		responsejson.put("count",dependMetadataList.size());
 		return responsejson;
 	}
-	
+
 	/**
 	 * 
 	 * 作者:allen
@@ -349,6 +421,8 @@ public class MetadataManagementController {
 	 * 作用:查找元数据(元数据name和description中含有该关键字的，展示公共属性)
 	 *  
 	 * 参数： key
+	 * currPage 从1开始
+	 * pageSize
 	 */
 	@RequestMapping(value = "/searchMetadata", method = RequestMethod.POST)
 	@ResponseBody
@@ -356,24 +430,31 @@ public class MetadataManagementController {
 	public JSONObject searchMetadata(HttpServletRequest request,
 			HttpServletResponse response,@RequestBody Map<String, Object> map){
 		JSONObject responsejson = new JSONObject();
-		
+
 		//检查传参是否正确
-		if(!map.containsKey("key")){
+		if(!map.containsKey("key") || !map.containsKey("currPage") || !map.containsKey("pageSize") ){
 			responsejson.put("result", false);
 			responsejson.put("count",0);
 			return responsejson;
 		}
-		
+
 		String key = map.get("key").toString();
+		int currPage = Integer.parseInt(map.get("currPage").toString());
+		int pageSize = Integer.parseInt(map.get("pageSize").toString());
+
+		PageParam pageParam = metadataManagementService.searchMetadata(key,currPage,pageSize);
 		
-		List<Map<String,Object>> searchMetadataList = metadataManagementService.searchMetadata(key);
-		
-		responsejson.put("result", true);
-		responsejson.put("data", searchMetadataList);
-		responsejson.put("count",searchMetadataList.size());
+		if(pageParam==null){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+		}else{
+			responsejson.put("result", true);
+			responsejson.put("data", pageParam);
+			responsejson.put("count",1);
+		}
 		return responsejson;
 	}
-	
+
 	/**
 	 * 
 	 * 作者:allen
@@ -388,24 +469,24 @@ public class MetadataManagementController {
 	public JSONObject getFieldMetadataList(HttpServletRequest request,
 			HttpServletResponse response,@RequestBody Map<String, Object> map){
 		JSONObject responsejson = new JSONObject();
-		
+
 		//检查传参是否正确
 		if(!map.containsKey("metadataid")){
 			responsejson.put("result", false);
 			responsejson.put("count",0);
 			return responsejson;
 		}
-		
+
 		String metadataId = map.get("metadataid").toString();
-		
+
 		List<Map<String,Object>> getFieldMetadataList = metadataManagementService.getFieldMetadataList(metadataId);
-		
+
 		responsejson.put("result", true);
 		responsejson.put("field", getFieldMetadataList);
 		responsejson.put("count",getFieldMetadataList.size());
 		return responsejson;
 	}
-	
+
 	/**
 	 * 
 	 * 作者:allen
@@ -420,18 +501,18 @@ public class MetadataManagementController {
 	public JSONObject getTableMetadataList(HttpServletRequest request,
 			HttpServletResponse response,@RequestBody Map<String, Object> map){
 		JSONObject responsejson = new JSONObject();
-		
+
 		//检查传参是否正确
 		if(!map.containsKey("metadataid")){
 			responsejson.put("result", false);
 			responsejson.put("count",0);
 			return responsejson;
 		}
-		
+
 		String metadataId = map.get("metadataid").toString();
-		
+
 		List<Map<String,Object>> getTableMetadataList = metadataManagementService.getTableMetadataList(metadataId);
-		
+
 		responsejson.put("result", true);
 		responsejson.put("table", getTableMetadataList);
 		responsejson.put("count",getTableMetadataList.size());
@@ -680,7 +761,7 @@ public class MetadataManagementController {
 			responsejson.put("count",0);
 			return responsejson;
 		}
-		
+
 		int metadataId = metadataManagementService.addMetadata(map);
 		if(metadataId>0){
 			responsejson.put("result", true);
@@ -781,7 +862,7 @@ public class MetadataManagementController {
 			String metamodelname = metamodel_hierarchyService.getMetamodel_hierarchy(Integer.parseInt(metamodelIdStr)).getName();
 
 			List<JSONObject> includeMetaModel = metadataManagementService.getCOMPOSITIONMetamodel(metamodelIdStr);
-			
+
 			if(includeMetaModel==null){
 				responsejson.put("result", false);
 				responsejson.put("count",0);
@@ -907,7 +988,7 @@ public class MetadataManagementController {
 		responsejson.put("count", fieldMetadatas.size());
 		return responsejson;
 	}
-	
+
 	/**
 	 * 
 	 * 作者:allen
@@ -922,26 +1003,26 @@ public class MetadataManagementController {
 	public JSONObject getMetadataViewTreeNode(HttpServletRequest request,
 			HttpServletResponse response,@RequestBody Map<String, Object> map){
 		JSONObject responsejson = new JSONObject();
-		
+
 		List<Map<String, Object>> treeNode = null;
 		if(map.containsKey("viewid")){//第一层试图节点
 			String viewidStr = map.get("viewid").toString();
-			
+
 			treeNode = metadataManagementService.getViewNode(viewidStr);
 		}else if(map.containsKey("id")){//元数据的第一层节点
 			String id = map.get("id").toString();
-			
+
 			treeNode = metadataManagementService.getMetadataFirstNode(id);
 		}else if(map.containsKey("metadataid")){//元数据的其他层次节点
 			String metadataid = map.get("metadataid").toString();
-			
+
 			treeNode = metadataManagementService.getMetadataOtherNode(metadataid);
 		}else{
 			responsejson.put("result", false);
 			responsejson.put("count", 0);
 			return responsejson;
 		}
-		
+
 		responsejson.put("result", true);
 		responsejson.put("data", treeNode);
 		responsejson.put("count", treeNode.size());
