@@ -4,6 +4,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.x8.mt.dao.IMetadataManagementDao">
 
+	<select id="getSonMetadata" resultType="com.x8.mt.entity.Metadata">
+		select * from
+		metadata where id in (select relatedmetadataid from metadata_relation
+		where metadataid=#{metadataid} and type='COMPOSITION')
+	</select>
+
+	<select id="getMetamodelByMetadataid" resultType="com.x8.mt.entity.Metamodel_hierarchy">
+		select * from
+		metamodel_hierarchy where id in (select metamodelid from metadata
+		where id=#{metadataid})
+	</select>
+
 	<select id="getViewNode" resultType="java.util.Map">
 		select id,name as
 		label,IF((SELECT count(*) FROM metadata WHERE
@@ -13,30 +25,38 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 	<select id="getMetadataFirstNode" resultType="java.util.Map">
 		select metadata.id
-		as id,name as label,metamodelid,IF((SELECT count(*) FROM metadata_relation
+		as id,name as label,metamodelid,IF((SELECT count(*) FROM
+		metadata_relation
 		WHERE
-		metadataid=metadata.id and type='COMPOSITION')>0,'false','true')
+		metadataid=metadata.id and
+		type='COMPOSITION')>0,'false','true')
 		AS leaf
-		from metadata where metamodelid in (select childmetamodelid
+		from metadata where
+		metamodelid in (select childmetamodelid
 		from
-		metadata_view_node where id=#{id}) and id not in
+		metadata_view_node where
+		id=#{id}) and id not in
 		(select
 		relatedmetadataid from
-		metadata_relation where
+		metadata_relation
+		where
 		type='COMPOSITION');
 	</select>
 
 	<select id="getMetadataOtherNode" resultType="java.util.Map">
 		select metadata.id
-		as id,name as label,metamodelid,IF((SELECT count(*) FROM metadata_relation
+		as id,name as label,metamodelid,IF((SELECT count(*) FROM
+		metadata_relation
 		WHERE
-		metadataid=metadata.id and type='COMPOSITION')>0,'false','true')
+		metadataid=metadata.id and
+		type='COMPOSITION')>0,'false','true')
 		AS leaf
 		from metadata where id in
 		(select
 		relatedmetadataid from
 		metadata_relation
-		where metadataid=#{metadataid} and type='COMPOSITION');
+		where
+		metadataid=#{metadataid} and type='COMPOSITION');
 	</select>
 
 	<select id="getMetamodelPrivateInfo" resultType="com.x8.mt.entity.Metamodel_datatype">
@@ -90,9 +110,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		t4.type='DEPENDENCY');
 	</select>
 
-	<select id="searchMetadata" resultType="com.x8.mt.entity.Metadata">
-		select * from metadata
+	<select id="searchMetadataCount" resultType="Integer">
+		select count(*) from metadata
 		where name like "%"#{key}"%" or description like "%"#{key}"%";
+	</select>
+	
+	<select id="searchMetadataPage" resultType="com.x8.mt.entity.Metadata">
+		select * from metadata
+		where name like "%"#{key}"%" or description like "%"#{key}"%" order by id limit #{startIndex},#{pageSize};
 	</select>
 
 	<select id="getMetadataList" parameterType="Map" resultType="java.util.Map">
@@ -164,40 +189,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		select * from metadata
 		where
 		id=#{metadataId};
-	</select>
-
-	<!-- allen -->
-	<select id="getMetadataViewFirstLevel" parameterType="int"
-		resultType="java.util.Map">
-		select
-		t4.package_id,t4.package_name,t4.metadata_id,t4.metadata_name,t4.metadata_metamodelid
-		from
-		(select t2.id as package_id,t2.name as package_name,t3.id as
-		metadata_id,t3.name as metadata_name,t3.metamodelid as
-		metadata_metamodelid from metadata as t3 RIGHT JOIN
-		(select
-		t1.id,t1.name,t1.childmetamodelid from metadata_view_node as
-		t1
-		where
-		t1.viewid=#{viewID}) as t2
-		ON
-		t3.metamodelid =
-		t2.childmetamodelid) as t4
-		where t4.metadata_id not in (select
-		t5.relatedmetadataid from
-		metadata_relation as t5 where
-		t4.metadata_id=t5.relatedmetadataid and
-		t5.type='COMPOSITION') order by
-		t4.package_id asc;
-	</select>
-
-	<!-- allen -->
-	<select id="getSonMetadata" resultType="java.util.Map">
-		select t1.id as
-		metadata_id,t1.name as metadata_name,t1.metamodelid as
-		metadata_metamodelid from metadata as t1 where t1.id in (select
-		relatedmetadataid from metadata_relation where
-		metadataid=#{metadata_id} and type='COMPOSITION')
 	</select>
 
 	<!-- allen -->

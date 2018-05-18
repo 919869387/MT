@@ -34,14 +34,33 @@ public class ExternallnterfaceTest {
 	}
 	
 	@Test
-	public void getProtocolMetadata(){
+	public void getProtocolInfo(){
+		HttpServletRequest request = null;
+		HttpServletResponse response = null;
+		
+		System.out.println(externalInterfaceController.getProtocolInfo(request, response));
+	}
+	
+	@Test
+	public void getProtocolMetadataByprotocolType(){
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
 		Map<String, String> map = new HashMap<String, String>();
 		map.put("protocolType", "modbus");
+		//map.put("protocolType11", "aaa");
+		
+		System.out.println(externalInterfaceController.getProtocolMetadataByprotocolType(request, response,map));
+	}
+	
+	@Test
+	public void getProtocolMetadataByprotocolId(){
+		HttpServletRequest request = null;
+		HttpServletResponse response = null;
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("protocolId", "modbus1");
 		//map.put("protocolType", "opc");
 		
-		System.out.println(externalInterfaceController.getProtocolMetadata(request, response,map));
+		System.out.println(externalInterfaceController.getProtocolMetadataByprotocolId(request, response,map));
 	}
 	
 }

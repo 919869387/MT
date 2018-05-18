@@ -32,6 +32,17 @@ public class MetadataManagementTest {
 	MetadataManagementController metadataManagementController;
 	
 	@Test
+	public void exportMetadataToExcel(){
+		HttpServletRequest request = null;
+		HttpServletResponse response = null;
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("metadataid", 100);
+		map.put("filename", "表字段映射元数据1");
+		
+		//System.out.println(metadataManagementController.exportMetadataToExcel(request, response,map));
+	}
+	
+	@Test
 	public void addTableFieldMappingMetadata(){
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
@@ -148,7 +159,9 @@ public class MetadataManagementTest {
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("key", "id1");
+		map.put("key", "ID");
+		map.put("currPage", "1");
+		map.put("pageSize", "10");
 		
 		System.out.println(metadataManagementController.searchMetadata(request, response, map));
 	}
@@ -275,11 +288,6 @@ public class MetadataManagementTest {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("tableMetadataId", 1322);
 		System.out.println(metadataManagementController.getFieldMetadata(request,response,map));
-	}
-	
-	@Test
-	public void getMetadataViewFirstLevel(){
-		System.out.println(metadataManagementService.getMetadataViewFirstLevel(1));
 	}
 
 	@Test

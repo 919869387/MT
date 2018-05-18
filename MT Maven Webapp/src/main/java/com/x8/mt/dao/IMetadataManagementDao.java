@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import com.x8.mt.entity.Metadata;
 import com.x8.mt.entity.MetadataTank;
 import com.x8.mt.entity.Metamodel_datatype;
+import com.x8.mt.entity.Metamodel_hierarchy;
 /**
  * 作者： Administrator
  * 时间：2018年3月15日
@@ -14,30 +15,21 @@ import com.x8.mt.entity.Metamodel_datatype;
  */
 @Repository
 public interface IMetadataManagementDao {
+	/**
+	 * 
+	 * 作者:allen 
+	 * 时间:2018年5月17日 
+	 * 作用:查找分页元数据
+	 */
+	List<Metadata> searchMetadataPage(Map<String,Object> param);
 	
 	/**
 	 * 
 	 * 作者:allen 
 	 * 时间:2018年4月19日 
-	 * 作用:查找元数据
+	 * 作用:查找元数据总记录数
 	 */
-	List<Metadata> searchMetadata(String key);
-	
-    /**
-	 * 
-	 * 作者:allen 
-	 * 时间:2017年3月16日 
-	 * 作用:查询元数据视图第一层
-	 */
-    List<Map<Object, Object>> getMetadataViewFirstLevel(int viewID);
-    
-    /**
-	 * 
-	 * 作者:allen 
-	 * 时间:2017年3月16日 
-	 * 作用:查询儿子元数据
-	 */
-    List<Map<Object, Object>> getSonMetadata(String metadata_id);
+	int searchMetadataCount(String key);
     
     /**
 	 * 
@@ -192,4 +184,21 @@ public interface IMetadataManagementDao {
 	 * 作用:请求元数据的其他层次节点
 	 */
 	List<Map<String, Object>> getMetadataOtherNode(String metadataid);
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年5月16日
+	 * 作用:根据元数据id得到相应元模型
+	 */
+	Metamodel_hierarchy getMetamodelByMetadataid(
+			String metadataid);
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年5月17日
+	 * 作用:根据父元数据id得到儿子元数据
+	 */
+	List<Metadata> getSonMetadata(String metadataid);
 }

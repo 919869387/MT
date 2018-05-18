@@ -11,6 +11,7 @@ public class GlobalMethodAndParams {
 	public static final int protocolParamArrayMetamodelID= 1002;
 
 	public static final String JSONKey_protocolType= "$.protocolType";
+	public static final String JSONKey_protocolId= "$.protocolId";
 	
 	/**
 	 * 字段编号,字段名
@@ -213,12 +214,11 @@ public class GlobalMethodAndParams {
 	 * 作用:设置跨域返回头
 	 */
 	public static final void setHttpServletResponse(HttpServletRequest request,HttpServletResponse response){
-		response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
-		response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
-		response.setHeader("Access-Control-Max-Age", "0");
-		response.setHeader("Access-Control-Allow-Headers", "Origin, No-Cache, X-Requested-With, If-Modified-Since, Pragma, Last-Modified, Cache-Control, Expires, Content-Type, X-E4M-With,userId,token");
-		response.setHeader("Access-Control-Allow-Credentials", "true");
-		response.setHeader("XDomainRequestAllowed","1");
+		response.setHeader("Access-Control-Allow-Origin", "*");
+		response.setHeader("Access-Control-Allow-Headers","Origin, X-Requested-With, Content-Type, Accept");
+		response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE"); 
+		response.setHeader("Access-Control-Max-Age", "3600");
+		response.setHeader("Access-Control-Allow-Credentials","true");
 	}
 	
 	
