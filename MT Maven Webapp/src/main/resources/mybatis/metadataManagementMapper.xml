@@ -110,12 +110,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		t4.type='DEPENDENCY');
 	</select>
 
-	<select id="searchMetadataCount" resultType="java.lang.Integer">
+	<select id="searchMetadataCount" resultType="Integer">
 		select count(*) from metadata
 		where name like "%"#{key}"%" or description like "%"#{key}"%";
 	</select>
 	
-	<select id="searchMetadataPage" parameterType="com.x8.mt.entity.Metadata">
+	<select id="searchMetadataPage" resultType="com.x8.mt.entity.Metadata">
 		select * from metadata
 		where name like "%"#{key}"%" or description like "%"#{key}"%" order by id limit #{startIndex},#{pageSize};
 	</select>

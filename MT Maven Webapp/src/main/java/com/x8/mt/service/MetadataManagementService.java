@@ -183,7 +183,6 @@ public class MetadataManagementService {
 		PageParam pageParam = null;
 		
 		int rowCount=imetadataManagementDao.searchMetadataCount(key);//总记录数
-		
 		if(rowCount!=0){
 			List<Map<String, Object>> searchMetadataList = new ArrayList<Map<String, Object>>();
 			int startIndex = (currPage-1)*pageSize;

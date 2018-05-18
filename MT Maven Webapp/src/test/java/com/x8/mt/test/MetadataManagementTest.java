@@ -159,7 +159,7 @@ public class MetadataManagementTest {
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("key", "id");
+		map.put("key", "ID");
 		map.put("currPage", "1");
 		map.put("pageSize", "10");
 		
