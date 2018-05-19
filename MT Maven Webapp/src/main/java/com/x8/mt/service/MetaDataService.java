@@ -170,6 +170,21 @@ public class MetaDataService {
 		}
 	}
 	
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年5月10日
+	 * 作用:根据数据库名称查找元数据
+	 */
+	public List<Metadata> getMetadataByDatabaseName(String name) {
+		try{			
+			return iMetadataDao.getMetadataByDatabaseName(name);
+		}catch(Exception e){
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
 	
 	
 }

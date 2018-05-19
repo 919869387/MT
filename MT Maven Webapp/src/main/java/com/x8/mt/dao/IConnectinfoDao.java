@@ -65,5 +65,13 @@ public interface IConnectinfoDao {
 	 * 作用:获取全部记录
 	 */
 	List<Connectinfo> getConnectinfo();
+	
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年5月17日
+	 * 作用:根据挂载点id查找数据源记录
+	 */
+	List<Connectinfo> getConnectinfoListBymountmetadataid(int mountmetadataid);
 
 }

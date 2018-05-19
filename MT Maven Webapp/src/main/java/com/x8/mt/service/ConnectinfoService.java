@@ -129,6 +129,16 @@ public class ConnectinfoService {
 	public List<Connectinfo> getConnectinfoList(){
 		return iConnectinfoDao.getConnectinfo();
 	}
+	
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年5月17日
+	 * 作用:获取全部记录
+	 */
+	public List<Connectinfo> getConnectinfoListBymountmetadataid(int id){
+		return iConnectinfoDao.getConnectinfoListBymountmetadataid(id);
+	}
 
 
 }

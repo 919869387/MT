@@ -7,8 +7,14 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -29,39 +35,20 @@ import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entries.special.JobEntrySpecial;
 import org.pentaho.di.job.entries.trans.JobEntryTrans;
 import org.pentaho.di.job.entry.JobEntryCopy;
-import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.di.repository.LongObjectId;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.RepositoryDirectoryInterface;
 import org.pentaho.di.repository.kdr.KettleDatabaseRepository;
 import org.springframework.stereotype.Service;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import com.x8.mt.common.LogUtil;
 import com.x8.mt.common.PageParam;
 import com.x8.mt.common.TransformMetadata;
 import com.x8.mt.dao.ICollectJobDao;
-import com.x8.mt.dao.IDispatchDao;
-import com.x8.mt.dao.IETLJobDao;
 import com.x8.mt.dao.IConnectinfoDao;
 import com.x8.mt.dao.IDatasource_connectinfoDao;
+import com.x8.mt.dao.IDispatchDao;
+import com.x8.mt.dao.IETLJobDao;
 import com.x8.mt.dao.IMetaDataDao;
 import com.x8.mt.entity.Datasource_connectinfo;
 import com.x8.mt.entity.Dispatch;
@@ -86,21 +73,21 @@ public class ETLJobService {
 	IDatasource_connectinfoDao iDatasource_connectinfoDao;
 	@Resource
 	IDispatchDao iDispatchDao;
-	
+
 	@Resource
 	KettleMetadataCollectService kettleMetadataCollectService;
 	@Resource
 	Datasource_connectinfoService datasource_connectinfoService;
 	@Resource
 	CollectJobService collectJobService;
-	
+
 	//正在执行的作业队列
 	public static Map<Integer,Job> theJob = new HashMap<Integer,Job>();
-	
+
 	//正在执行的调度队列
 	public static Map<String,Job> theSchedule = new HashMap<String,Job>();
 
-	
+
 	/**
 	 * 
 	 * 作者:GodDispose 
@@ -109,12 +96,12 @@ public class ETLJobService {
 	 */
 	public boolean stopETLJob(int index){
 		if(theJob.containsKey(index)){
-		((Job)theJob.get(index)).stopAll();
-		return true;
+			((Job)theJob.get(index)).stopAll();
+			return true;
 		}		
 		else return false;		
 	}
-	
+
 	/**
 	 * 
 	 * 作者:GodDispose 
@@ -131,34 +118,34 @@ public class ETLJobService {
 			SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			dispatch.setEndtime(sdf.parse(sdf.format(new Date())));
 			iDispatchDao.updateDispatch(dispatch);
-		
+
 			return true;
 		}
 		return false;		
 	}
-	
+
 	public int getRowCount(String description){
 		return eTLJobDao.getRowCount(description);
 	}
-	
+
 	public PageParam getETLJobListByPage(PageParam pageParam) {
 		int currPage = pageParam.getCurrPage();
 		if(currPage>0){
-		int offset = (currPage-1)*pageParam.getPageSize();//计算出偏移量，起始位置
-		int size = pageParam.getPageSize();//一页的数量
-		Map<String,Object> params = new HashMap<String,Object>();
-		params.put("offset", offset);
-		params.put("size", size);
+			int offset = (currPage-1)*pageParam.getPageSize();//计算出偏移量，起始位置
+			int size = pageParam.getPageSize();//一页的数量
+			Map<String,Object> params = new HashMap<String,Object>();
+			params.put("offset", offset);
+			params.put("size", size);
 
-		List<ETLJob> ETLJobList = eTLJobDao.selectByParams(params);
-		pageParam.setDate(ETLJobList);
+			List<ETLJob> ETLJobList = eTLJobDao.selectByParams(params);
+			pageParam.setDate(ETLJobList);
 
-		return pageParam;
+			return pageParam;
 		}else{
 			return pageParam;
 		}
 	}
-	
+
 	/**
 	 * 
 	 * 作者:GodDispose 
@@ -173,8 +160,8 @@ public class ETLJobService {
 			return false;
 		}
 	}
-	
-	
+
+
 	/**
 	 * 
 	 * 作者:GodDispose 
@@ -190,36 +177,36 @@ public class ETLJobService {
 		theJob.put(etlJob.getMappingid(),job);
 		job.start();		
 		job.waitUntilFinished();
-			
+
 		theJob.remove(etlJob.getMappingid());
 		etlJob.setStatus(job.getStatus());
 		etlJob.setRecently_run_date(new Date());
-	    LogUtil logUtil = new LogUtil(job,job.getJobMeta());
-	    String log=logUtil.getJobLog(job);
-	    if(etlJob.getStatus().equals("Finished")){
-	    	if(log.indexOf("完成处理")>-1){
-	    		log = log.substring(log.indexOf("完成处理"));
-	    		log = log.substring(log.indexOf("W="));
-	    		log = log.substring(2,log.indexOf(", U"));            
-	    		log = "此次抽取了 "+log+" 条数据";
-	    		etlJob.setLog(log);
-	    	}else{
-	    		etlJob.setLog("此次没有抽取到数据！");
-	    		eTLJobDao.update(etlJob);
-	    		return false;
-	    	}
-	    }else if(etlJob.getStatus().equals("Stopped")){
-	    	etlJob.setLog("作业已停止");
-	    	eTLJobDao.update(etlJob);
-	    	return false;
-	    }
+		LogUtil logUtil = new LogUtil(job,job.getJobMeta());
+		String log=logUtil.getJobLog(job);
+		if(etlJob.getStatus().equals("Finished")){
+			if(log.indexOf("完成处理")>-1){
+				log = log.substring(log.indexOf("完成处理"));
+				log = log.substring(log.indexOf("W="));
+				log = log.substring(2,log.indexOf(", U"));            
+				log = "此次抽取了 "+log+" 条数据";
+				etlJob.setLog(log);
+			}else{
+				etlJob.setLog("此次没有抽取到数据！");
+				eTLJobDao.update(etlJob);
+				return false;
+			}
+		}else if(etlJob.getStatus().equals("Stopped")){
+			etlJob.setLog("作业已停止");
+			eTLJobDao.update(etlJob);
+			return false;
+		}
 
-	    eTLJobDao.update(etlJob);
+		eTLJobDao.update(etlJob);
 
-       
-        return true;
+
+		return true;
 	}
-	
+
 	/**
 	 * 
 	 * 作者:GodDispose 
@@ -232,31 +219,31 @@ public class ETLJobService {
 			Metadata metadata = iMetaDataDao.getMetadataById(etlJob.getMetadata_id());
 			Datasource_connectinfo res = datasource_connectinfoService.getDatasource_connectinfoListByparentid(
 					collectJobService.getCollectJobById(metadata.getCOLLECTJOBID()).getConnectinfoId());			
-			
+
 			KettleDatabaseRepository kettleDatabaseRepository = kettleMetadataCollectService.connectKettleDatabaseRepository(res);
 			ObjectId objectId = new LongObjectId(new Long(0));
-		       RepositoryDirectoryInterface directory = kettleDatabaseRepository.findDirectory(objectId);
+			RepositoryDirectoryInterface directory = kettleDatabaseRepository.findDirectory(objectId);
 
 			JobMeta jobMeta = kettleDatabaseRepository.loadJob(metadata.getNAME(),directory,null,null);
-			
+
 			Job job = new Job(kettleDatabaseRepository,jobMeta);
-			
+
 			theJob.put(etlJob.getMetadata_id(),job);
 			etlJob.setStatus("Excuting");
 			etlJob.setRecently_run_date(new Date());
 			eTLJobDao.update(etlJob);				
-			
+
 			job.start();
 			job.waitUntilFinished();
 			kettleDatabaseRepository.disconnect();
-			
+
 			return true;
 		}catch(Exception e){
 			e.printStackTrace();
 			return false;
 		}
 	}
-	
+
 	/**
 	 * 
 	 * 作者:GodDispose 
@@ -265,48 +252,48 @@ public class ETLJobService {
 	 */
 	public boolean excuteSchedule(Dispatch dispatch) throws Exception{
 		KettleEnvironment.init();
-//		if(dispatch.getType().equals("LOCAL")){
-			JobMeta jobMeta = new JobMeta(dispatch.getName()+ ".kjb", null);
-			Job job = new Job(null,jobMeta);		
-			
-			theSchedule.put(dispatch.getDispatchid() + " Schedule",job);
-			dispatch.setStatus(2);
-			SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			dispatch.setRecenttime(sdf.parse(sdf.format(new Date())));
-			iDispatchDao.updateDispatch(dispatch);
-			
-			job.start();				
-			job.waitUntilFinished();
-			
+		//		if(dispatch.getType().equals("LOCAL")){
+		JobMeta jobMeta = new JobMeta(dispatch.getName()+ ".kjb", null);
+		Job job = new Job(null,jobMeta);		
 
-//		}else if(dispatch.getType().equals("EXTERNAL")){
-//			Metadata metadata = iMetaDataDao.getMetadataById(Integer.parseInt(dispatch.getJobname()));
-//			Datasource_connectinfo res = datasource_connectinfoService.getDatasource_connectinfoListByparentid(
-//					collectJobService.getCollectJobById(metadata.getCOLLECTJOBID()).getConnectinfoId());			
-//			
-//			KettleDatabaseRepository kettleDatabaseRepository = kettleMetadataCollectService.connectKettleDatabaseRepository(res);
-//			ObjectId objectId = new LongObjectId(new Long(0));
-//		       RepositoryDirectoryInterface directory = kettleDatabaseRepository.findDirectory(objectId);
-//
-//			JobMeta jobMeta = kettleDatabaseRepository.loadJob(metadata.getNAME(),directory,null,null);
-//			
-//			Job job = new Job(kettleDatabaseRepository,jobMeta);
-//			
-//			theSchedule.put(dispatch.getDispatchid() + " Schedule",job);
-//			job.start();
-//			job.waitUntilFinished();
-//			
-//			dispatch.setStatus(2);
-//			SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//			dispatch.setRecenttime(sdf.parse(sdf.format(new Date())));
-//			iDispatchDao.updateDispatch(dispatch);	
-//		}
+		theSchedule.put(dispatch.getDispatchid() + " Schedule",job);
+		dispatch.setStatus(2);
+		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		dispatch.setRecenttime(sdf.parse(sdf.format(new Date())));
+		iDispatchDao.updateDispatch(dispatch);
 
-       
-        return true;
+		job.start();				
+		job.waitUntilFinished();
+
+
+		//		}else if(dispatch.getType().equals("EXTERNAL")){
+		//			Metadata metadata = iMetaDataDao.getMetadataById(Integer.parseInt(dispatch.getJobname()));
+		//			Datasource_connectinfo res = datasource_connectinfoService.getDatasource_connectinfoListByparentid(
+		//					collectJobService.getCollectJobById(metadata.getCOLLECTJOBID()).getConnectinfoId());			
+		//			
+		//			KettleDatabaseRepository kettleDatabaseRepository = kettleMetadataCollectService.connectKettleDatabaseRepository(res);
+		//			ObjectId objectId = new LongObjectId(new Long(0));
+		//		       RepositoryDirectoryInterface directory = kettleDatabaseRepository.findDirectory(objectId);
+		//
+		//			JobMeta jobMeta = kettleDatabaseRepository.loadJob(metadata.getNAME(),directory,null,null);
+		//			
+		//			Job job = new Job(kettleDatabaseRepository,jobMeta);
+		//			
+		//			theSchedule.put(dispatch.getDispatchid() + " Schedule",job);
+		//			job.start();
+		//			job.waitUntilFinished();
+		//			
+		//			dispatch.setStatus(2);
+		//			SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		//			dispatch.setRecenttime(sdf.parse(sdf.format(new Date())));
+		//			iDispatchDao.updateDispatch(dispatch);	
+		//		}
+
+
+		return true;
 	}
-	
-	
+
+
 	/**
 	 * 
 	 * 作者:GodDispose 
@@ -320,7 +307,7 @@ public class ETLJobService {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * 
 	 * 作者:GodDispose 
@@ -335,7 +322,7 @@ public class ETLJobService {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * 
 	 * 作者:GodDispose 
@@ -345,7 +332,7 @@ public class ETLJobService {
 	public List<String> queryTargetTableIdAndName(){		
 		return eTLJobDao.queryTargetTableIdAndName();
 	}
-	
+
 	/**
 	 * 
 	 * 作者:GodDispose 
@@ -353,10 +340,10 @@ public class ETLJobService {
 	 * 作用:获取已经定义好的字段映射元数据(所有的)
 	 */
 	public List<String> queryTargetTableId(){
-		
+
 		return eTLJobDao.queryTargetTableId();
 	}
-	
+
 	/**
 	 * 
 	 * 作者:GodDispose 
@@ -371,7 +358,7 @@ public class ETLJobService {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * 
 	 * 作者:GodDispose 
@@ -391,7 +378,7 @@ public class ETLJobService {
 		int length=metadatas.size();
 		for(int i=1; i<length;i++){
 			fieldStream+=","+iMetaDataDao.getMetadataById(Integer.parseInt((String) TransformMetadata.transformMetadataToMap(metadatas.get(i)).get("sourcefieldid"))).getNAME();
-			fieldDatabase+=","+iMetaDataDao.getMetadataById(Integer.parseInt((String)TransformMetadata.transformMetadataToMap(metadatas.get(i)).get("sourcefieldid"))).getNAME();	
+			fieldDatabase+=","+iMetaDataDao.getMetadataById(Integer.parseInt((String)TransformMetadata.transformMetadataToMap(metadatas.get(i)).get("targetfieldid"))).getNAME();	
 		}
 		Datasource_connectinfo datasource_connectinfo =iDatasource_connectinfoDao.getDatasource_connectinfoListByparentid(iCollectJobDao.getCollectJobById(iMetaDataDao.getMetadataById(srctableid).getCOLLECTJOBID()).getConnectinfoId());
 		Datasource_connectinfo datatarget_connectinfo =iDatasource_connectinfoDao.getDatasource_connectinfoListByparentid(iCollectJobDao.getCollectJobById(iMetaDataDao.getMetadataById(etlJob.getMappingid()).getCOLLECTJOBID()).getConnectinfoId());
@@ -403,12 +390,12 @@ public class ETLJobService {
 		job.setFieldSteram(fieldStream);
 		job.setFieldDatabase(fieldDatabase);
 		TransDataService transDataService= new TransDataService();
-		
+
 		transDataService.saveJob(job);
-       
-        return true;
+
+		return true;
 	}
-	
+
 	/*
 	 * 作者:GodDispose
 	 * 时间:2018年4月25日
@@ -420,20 +407,20 @@ public class ETLJobService {
 			JobMeta jobMeta = new JobMeta();
 			jobMeta.setName("jobMeta");
 			int x=50,y =50;
-			
+
 			JobEntrySpecial jobEntrySpecial = new JobEntrySpecial( "START", true, false );
 			jobEntrySpecial.setRepeat(true);
 			jobEntrySpecial.setSchedulerType((int)map.get("schedulerType"));	//0 no,1 interval,2 day,3 week,4 month
 			//以下两个方法只会在设置为INTERVAL的时候用
 			//jobEntrySpecial.setIntervalSeconds((int)map.get("intervalSeconds"));
 			//jobEntrySpecial.setIntervalMinutes((int)map.get("intervalMinutes"));
-			
+
 			//选用2或者以上会用到一下方法
 			jobEntrySpecial.setHour(Integer.parseInt(map.get("hour").toString()));
 			jobEntrySpecial.setMinutes(Integer.parseInt(map.get("minutes").toString()));
 			String runinterval = "每天"+Integer.parseInt(map.get("hour").toString())+"时"
-								+Integer.parseInt(map.get("minutes").toString())+"分执行";
-			
+					+Integer.parseInt(map.get("minutes").toString())+"分执行";
+
 			if(Integer.parseInt(map.get("schedulerType").toString()) == 3){	
 				jobEntrySpecial.setWeekDay(Integer.parseInt(map.get("week").toString()));
 				runinterval = "每周"+getWeek(Integer.parseInt(map.get("week").toString()))
@@ -441,24 +428,24 @@ public class ETLJobService {
 						+Integer.parseInt(map.get("minutes").toString())+"分执行";
 			}
 			//jobEntrySpecial.setDayOfMonth((int)map.get("week"));
-			
-		    JobEntryCopy jobEntry = new JobEntryCopy();
-		    jobEntry.setObjectId( null );
-		    jobEntry.setEntry( jobEntrySpecial );
-		    jobEntry.setLocation( 50, 50 );
-		    jobEntry.setDrawn( false );
-		    jobEntry.setDescription( BaseMessages.getString( JobMeta.class, "JobMeta.StartJobEntry.Description" ) );
-		    
+
+			JobEntryCopy jobEntry = new JobEntryCopy();
+			jobEntry.setObjectId( null );
+			jobEntry.setEntry( jobEntrySpecial );
+			jobEntry.setLocation( 50, 50 );
+			jobEntry.setDrawn( false );
+			jobEntry.setDescription( BaseMessages.getString( JobMeta.class, "JobMeta.StartJobEntry.Description" ) );
+
 			JobEntryCopy startCopy = jobEntry;
 			startCopy.setLocation(x, y);
 			startCopy.setDrawn();
 			jobMeta.addJobEntry(startCopy);
 			JobEntryCopy lastCopy = startCopy;
-			
+
 			JobEntryTrans jobEntryTrans = new JobEntryTrans();
 			jobEntryTrans.setSpecificationMethod(ObjectLocationSpecificationMethod.FILENAME);
 			jobEntryTrans.setFileName(name+ ".ktr");
-			
+
 			JobEntryCopy transCopy = new JobEntryCopy(jobEntryTrans);
 			transCopy.setName("Execute" + name+ ".ktr");
 			x+=100;
@@ -469,20 +456,20 @@ public class ETLJobService {
 			jobMeta.addJobHop(transHop);
 			lastCopy = transCopy;
 			jobMeta.setObjectId(new LongObjectId(new Long(1)));
-			
+
 			String jobName = name + " Schedule"+".kjb";
 			File file = new File(jobName);
 			if (file.exists() && file.isFile()) {
 				if (file.delete()) {}
 			}
-			
+
 			String xml = XMLHandler.getXMLHeader() + jobMeta.getXML();
 			DataOutputStream dos = new DataOutputStream(KettleVFS.getOutputStream(jobName,true));
 			dos.write(xml.getBytes(Const.XML_ENCODING));
 			dos.close();
-			
+
 			KettleEnvironment.shutdown();
-			
+
 			Dispatch dispatch = new Dispatch();
 			dispatch.setName(name + " Schedule");
 			dispatch.setDescription(map.get("description").toString());
@@ -492,15 +479,15 @@ public class ETLJobService {
 			dispatch.setCreatetime(sdf.parse(sdf.format(new Date())));			
 			dispatch.setRuninterval(runinterval);
 			dispatch.setType("LOCAL");
-			
+
 			iDispatchDao.addDispatch(dispatch);
-			
+
 			return true;
 		}catch(Exception e){
 			e.printStackTrace();
 			return  false;
 		}
-		
+
 	}
 
 	/**
@@ -517,7 +504,7 @@ public class ETLJobService {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * 
 	 * 作者:GodDispose
@@ -530,18 +517,18 @@ public class ETLJobService {
 	public Map<String, Object> judgeJobOrSchedule(int id){
 		try{
 			Map<String, Object> map = new HashMap<String, Object>();
-			
+
 			KettleEnvironment.init();
 			Metadata metadata = iMetaDataDao.getMetadataById(id);
 			Datasource_connectinfo res = datasource_connectinfoService.getDatasource_connectinfoListByparentid(
 					collectJobService.getCollectJobById(metadata.getCOLLECTJOBID()).getConnectinfoId());			
-			
+
 			KettleDatabaseRepository kettleDatabaseRepository = kettleMetadataCollectService.connectKettleDatabaseRepository(res);
 			ObjectId objectId = new LongObjectId(new Long(0));
-		       RepositoryDirectoryInterface directory = kettleDatabaseRepository.findDirectory(objectId);
+			RepositoryDirectoryInterface directory = kettleDatabaseRepository.findDirectory(objectId);
 
 			JobMeta jobMeta = kettleDatabaseRepository.loadJob(metadata.getNAME(),directory,null,null);			
-				
+
 			JobEntryCopy startEntry = jobMeta.getStart();
 			JobEntrySpecial start = (JobEntrySpecial) startEntry.getEntry();
 			boolean flag = start.isRepeat();
@@ -552,16 +539,16 @@ public class ETLJobService {
 				map.put("minutes", start.getMinutes());
 				map.put("week", start.getWeekDay());
 			}
-			
+
 			kettleDatabaseRepository.disconnect();
-			
+
 			return map;
 		}catch(Exception e){
 			e.printStackTrace();
 			return null;
 		}
 	}
-	
+
 	/**
 	 * 
 	 * 作者:GodDispose
@@ -583,32 +570,128 @@ public class ETLJobService {
 		}
 	}
 
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年5月17日 
+	 * 作用:分页获取调度信息
+	 */
 	public PageParam getETLJobListByDescrption(PageParam pageParam,String description) {
 		int currPage = pageParam.getCurrPage();
 		if(currPage>0){
-		int offset = (currPage-1)*pageParam.getPageSize();//计算出偏移量，起始位置
-		int size = pageParam.getPageSize();//一页的数量
+			int offset = (currPage-1)*pageParam.getPageSize();//计算出偏移量，起始位置
+			int size = pageParam.getPageSize();//一页的数量
 
-		List<ETLJob> ETLJobList = eTLJobDao.selectByDescription(description,offset,size);
-		pageParam.setDate(ETLJobList);
+			List<ETLJob> ETLJobList = eTLJobDao.selectByDescription(description,offset,size);
+			pageParam.setDate(ETLJobList);
 
-		return pageParam;
+			return pageParam;
 		}else{
 			return pageParam;
 		}
 	}
-	
+
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年5月17日 
+	 * 作用:获取星期具体日子
+	 */
 	public String getWeek(int day){
 		switch(day){
-			case 0:return "日";
-			case 1:return "一";
-			case 2:return "二";
-			case 3:return "三";
-			case 4:return "四";
-			case 5:return "五";
-			case 6:return "六";
+		case 0:return "日";
+		case 1:return "一";
+		case 2:return "二";
+		case 3:return "三";
+		case 4:return "四";
+		case 5:return "五";
+		case 6:return "六";
 		}
 		return "一";
 	}
-	
+
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年5月17日 
+	 * 作用:动态建表
+	 */
+	public boolean dynamicCreateTable(ETLJob etlJob){		
+		boolean result = false;
+		
+		Datasource_connectinfo datasource_connectinfo =iDatasource_connectinfoDao.getDatasource_connectinfoListByparentid(iCollectJobDao.getCollectJobById(iMetaDataDao.getMetadataById(etlJob.getMappingid()).getCOLLECTJOBID()).getConnectinfoId());
+		
+		//声明Connection对象
+		Connection con;
+		//驱动程序名
+		String driver = "com.mysql.jdbc.Driver";
+		//URL指向要访问的数据库名
+		String url = "jdbc:mysql://" + datasource_connectinfo.getUrl() + ":" + datasource_connectinfo.getPort() + "/" + datasource_connectinfo.getDatabasename();
+		//MySQL配置时的用户名
+		String user = datasource_connectinfo.getUsername();
+		//MySQL配置时的密码
+		String password = datasource_connectinfo.getPassword();
+		//遍历查询结果集
+		try {
+			//加载驱动程序
+			Class.forName(driver);
+			//1.getConnection()方法，连接MySQL数据库！！
+			con = DriverManager.getConnection(url,user,password);
+			if(!con.isClosed())
+				System.out.println("Succeeded connecting to the Database!");
+			//2.创建statement类对象，用来执行SQL语句！！
+			Statement statement = con.createStatement();
+			//要执行的SQL语句			
+			List<Metadata> metadatas = iMetaDataDao.getMetadataByMap("$.targettableid", String.valueOf(etlJob.getMappingid()));
+			List<Integer> fieldIds = new ArrayList<Integer>();
+			for(Metadata metadata : metadatas){
+				Map<String, Object> metadataMap = TransformMetadata.transformMetadataToMap(metadata);
+				fieldIds.add(Integer.parseInt((String)metadataMap.get("targetfieldid")));
+			}
+			String fieldSql = "";
+			for(int i=0; i < fieldIds.size();i++){
+				Metadata metadata = iMetaDataDao.getMetadataById(fieldIds.get(i));
+				Map<String, Object> metadataMap = TransformMetadata.transformMetadataToMap(metadata);
+				if(i == 0){
+					fieldSql += metadata.getNAME() 
+							+ " " + metadataMap.get("fieldtype").toString()+ "(" + (metadataMap.get("length") ==null ? 255 : metadataMap.get("length")) + ")"
+							+ " " + (metadataMap.get("allownull").equals("false") ? "NOT NULL" : "")
+							+ " " + "PRIMARY KEY,";
+				}else if(i == (fieldIds.size()-1)){
+					fieldSql += metadata.getNAME() 
+							+ " " + metadataMap.get("fieldtype").toString()+ "(" + (metadataMap.get("length") ==null ? 255 : metadataMap.get("length")) + ")"
+							+ " " + (metadataMap.get("allownull").equals("false") ? "NOT NULL" : "");
+				}else{
+					fieldSql += metadata.getNAME() 
+							+ " " + metadataMap.get("fieldtype").toString()+ "(" + (metadataMap.get("length") ==null ? 255 : metadataMap.get("length")) + ")"
+							+ " " + (metadataMap.get("allownull").equals("false") ? "NOT NULL," : "");
+				}
+			}
+			
+			String creatsql = "CREATE TABLE " + iMetaDataDao.getMetadataById(etlJob.getMappingid()).getNAME() +  "("
+					+ fieldSql
+					+ ")charset=utf8;";
+			System.out.println(creatsql);
+			if(0 == statement.executeLargeUpdate(creatsql)){
+				System.out.println("成功创建表！");
+			}else{
+				System.out.println("创建表失败！");
+			}
+			con.close();
+			result = true;
+		} catch(ClassNotFoundException e) {   
+			//数据库驱动类异常处理
+			System.out.println("Sorry,can`t find the Driver!");   
+			e.printStackTrace();   
+		} catch(SQLException e) {
+			//数据库连接失败异常处理
+			e.printStackTrace();  
+		}catch (Exception e) {
+			e.printStackTrace();
+		}finally{
+			return result;
+		}
+
+	}
+
 }

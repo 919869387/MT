@@ -95,6 +95,9 @@ public class ETLJobController {
 			ETLJob etlJob = new ETLJob();
 			etlJob.setMappingid(Integer.parseInt((String)map.get("target_table_id")));
 			etlJob.setMetadata_id(metadata.getID());
+			if(Integer.parseInt(map.get("createTable").toString()) == 1){
+				etlJobService.dynamicCreateTable(etlJob);
+			}
 			if(map.containsKey("description")){			
 				etlJob.setDescription((String)map.get("description"));
 			}

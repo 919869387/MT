@@ -1,5 +1,7 @@
 package com.x8.mt.controller;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -20,15 +22,18 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.x8.mt.common.CalDataSize;
 import com.x8.mt.common.GlobalMethodAndParams;
 import com.x8.mt.common.Log;
+import com.x8.mt.dao.IMetadataTankDao;
 import com.x8.mt.entity.CollectJob;
 import com.x8.mt.entity.Connectinfo;
 import com.x8.mt.entity.Datasource_connectinfo;
 import com.x8.mt.entity.File_connectinfo;
 import com.x8.mt.entity.Metadata;
+import com.x8.mt.entity.MetadataTank;
 import com.x8.mt.service.CollectJobService;
 import com.x8.mt.service.ConnectinfoService;
 import com.x8.mt.service.Datasource_connectinfoService;
 import com.x8.mt.service.File_connectinfoService;
+import com.x8.mt.service.KettleMetadataCollectService;
 import com.x8.mt.service.MetaDataService;
 import com.x8.mt.service.Metamodel_datatypeService;
 
@@ -48,6 +53,8 @@ public class Datasource_connectinfoController {
 	MetaDataService metaDataService;
 	@Resource
 	Metamodel_datatypeService metamodel_datatypeService;
+	@Resource
+	KettleMetadataCollectService kettleMetadataCollectService;
 	/**
 	 * 
 	 * 作者:GodDispose
@@ -150,51 +157,79 @@ public class Datasource_connectinfoController {
 		}
 		
 		JSONArray data = new JSONArray();
-//		Metadata metaData = metaDataService.getMetadataById(id);
-//		JSONObject json = JSONObject.fromObject(metaData.getAttributes());
-//		List<Metamodel_datatype> privateMetaModels = metamodel_datatypeService.getMetamodel_datatypeByMetaModelId(metaData.getMetaModelId());
-//		for(Metamodel_datatype pri : privateMetaModels){
-//			JSONObject node = new JSONObject();
-//			node.put("key", pri.getDesribe());
-//			node.put("value", json.get(pri.getName()));
-//			data.add(node);
-//		}	
-		Datasource_connectinfo datasource_connectinfo = datasource_connectinfoService.getDatasource_connectinfoListByparentid(id);
 		
-		JSONObject datasource_connectinfoId = new JSONObject();
-		datasource_connectinfoId.put("key","ID");
-		datasource_connectinfoId.put("value", datasource_connectinfo.getParentid());
-		data.add(datasource_connectinfoId);
-		
-		JSONObject url = new JSONObject();
-		url.put("key","主机名");
-		url.put("value", datasource_connectinfo.getUrl());
-		data.add(url);
-		
-		JSONObject port = new JSONObject();
-		port.put("key","端口号");
-		port.put("value", datasource_connectinfo.getPort());
-		data.add(port);
-		
-		JSONObject name = new JSONObject();
-		name.put("key","数据库名称");
-		name.put("value", datasource_connectinfo.getDatabasename());
-		data.add(name);
-		
-		JSONObject type = new JSONObject();
-		type.put("key","数据库类型");
-		type.put("value", datasource_connectinfo.getDatabasetype());
-		data.add(type);
-		
-		JSONObject userName = new JSONObject();
-		userName.put("key","数据库用户名");
-		userName.put("value", datasource_connectinfo.getUsername());
-		data.add(userName);
-		
-		JSONObject userPassword = new JSONObject();
-		userPassword.put("key","数据库密码");
-		userPassword.put("value", datasource_connectinfo.getPassword());
-		data.add(userPassword);
+		Connectinfo connectinfo = connectinfoService.getConnectinfoByid(id);
+		if(connectinfo.getType().equals("database")){
+			Datasource_connectinfo datasource_connectinfo = datasource_connectinfoService.getDatasource_connectinfoListByparentid(id);
+			
+			JSONObject datasource_connectinfoId = new JSONObject();
+			datasource_connectinfoId.put("key","ID");
+			datasource_connectinfoId.put("value", datasource_connectinfo.getParentid());
+			data.add(datasource_connectinfoId);
+			
+			JSONObject url = new JSONObject();
+			url.put("key","主机名");
+			url.put("value", datasource_connectinfo.getUrl());
+			data.add(url);
+			
+			JSONObject port = new JSONObject();
+			port.put("key","端口号");
+			port.put("value", datasource_connectinfo.getPort());
+			data.add(port);
+			
+			JSONObject name = new JSONObject();
+			name.put("key","数据库名称");
+			name.put("value", datasource_connectinfo.getDatabasename());
+			data.add(name);
+			
+			JSONObject type = new JSONObject();
+			type.put("key","数据库类型");
+			type.put("value", datasource_connectinfo.getDatabasetype());
+			data.add(type);
+			
+			JSONObject userName = new JSONObject();
+			userName.put("key","数据库用户名");
+			userName.put("value", datasource_connectinfo.getUsername());
+			data.add(userName);
+			
+			JSONObject userPassword = new JSONObject();
+			userPassword.put("key","数据库密码");
+			userPassword.put("value", datasource_connectinfo.getPassword());
+			data.add(userPassword);
+		}else if(connectinfo.getType().equals("file")){
+			File_connectinfo file_connectinfo = file_connectinfoService.getFile_connectinfoListByparentid(id);
+			
+			JSONObject file_connectinfoId = new JSONObject();
+			file_connectinfoId.put("key","ID");
+			file_connectinfoId.put("value", file_connectinfo.getParentid());
+			data.add(file_connectinfoId);
+			
+			JSONObject path = new JSONObject();
+			path.put("key","文件路径");
+			path.put("value", file_connectinfo.getPath());
+			data.add(path);
+			
+			JSONObject filename = new JSONObject();
+			filename.put("key","文件名");
+			filename.put("value", file_connectinfo.getFilename());
+			data.add(filename);
+			
+			JSONObject size = new JSONObject();
+			size.put("key","文件大小");
+			size.put("value", file_connectinfo.getSize());
+			data.add(size);
+			
+			JSONObject type = new JSONObject();
+			type.put("key","文件类型");
+			if(file_connectinfo.getFiletype() == 1){
+				type.put("value","EXCEL");
+			}else if (file_connectinfo.getFiletype() == 2){
+				type.put("value","JSON");
+			}else {
+				type.put("value", file_connectinfo.getFiletype() == 3 ? "XML" :"TXT");
+			}
+			data.add(type);
+		}
 		
 		responsejson.put("result", true);
 		responsejson.put("data", data);
@@ -318,30 +353,51 @@ public class Datasource_connectinfoController {
 				return responsejson;
 			}
 		}
-
-		Datasource_connectinfo datasource_connectinfo = new Datasource_connectinfo();
-		datasource_connectinfo.setParentid(Integer.parseInt(map.get("id").toString()));;
-		if(map.containsKey("url")){
-			datasource_connectinfo.setUrl(map.get("url").toString());
-		}
-		if(map.containsKey("port")){
-			datasource_connectinfo.setPort(map.get("port").toString());
-		}
-		if(map.containsKey("username")){
-			datasource_connectinfo.setUsername(map.get("username").toString());
-		}
-		if(map.containsKey("password")){
-			datasource_connectinfo.setPassword(map.get("password").toString());
-		}
-		if(map.containsKey("databasename")){
-			datasource_connectinfo.setDatabasename(map.get("databasename").toString());
-		}	
-		if(map.containsKey("databasetype")){
-			datasource_connectinfo.setDatabasetype(map.get("databasetype").toString());
-		}
 		
-		boolean result = datasource_connectinfoService.updateDatasource_connectinfo(datasource_connectinfo);
-		responsejson.put("result", result);
+		int id = Integer.parseInt(map.get("id").toString());
+		boolean result = false;
+		Connectinfo connectinfo = connectinfoService.getConnectinfoByid(id);
+		if(connectinfo.getType().equals("database")){
+			Datasource_connectinfo datasource_connectinfo = new Datasource_connectinfo();
+			datasource_connectinfo.setParentid(Integer.parseInt(map.get("id").toString()));;
+			if(map.containsKey("url")){
+				datasource_connectinfo.setUrl(map.get("url").toString());
+			}
+			if(map.containsKey("port")){
+				datasource_connectinfo.setPort(map.get("port").toString());
+			}
+			if(map.containsKey("username")){
+				datasource_connectinfo.setUsername(map.get("username").toString());
+			}
+			if(map.containsKey("password")){
+				datasource_connectinfo.setPassword(map.get("password").toString());
+			}
+			if(map.containsKey("databasename")){
+				datasource_connectinfo.setDatabasename(map.get("databasename").toString());
+			}	
+			if(map.containsKey("databasetype")){
+				datasource_connectinfo.setDatabasetype(map.get("databasetype").toString());
+			}
+			
+			result = datasource_connectinfoService.updateDatasource_connectinfo(datasource_connectinfo);
+			responsejson.put("result", result);
+		}else if(connectinfo.getType().equals("file")){
+			//更新文件数据源连接信息记录
+			File_connectinfo file_connectinfo = new File_connectinfo();
+			file_connectinfo.setParentid(Integer.parseInt(map.get("id").toString()));;
+			if(map.containsKey("filename")){
+				file_connectinfo.setFilename(map.get("filename").toString());
+			}
+			if(map.containsKey("filetype")){
+				file_connectinfo.setFiletype(Integer.parseInt(map.get("filetype").toString()));
+			}
+			if(map.containsKey("size")){
+				file_connectinfo.setSize(map.get("size").toString());
+			}
+			
+			result = file_connectinfoService.insertFile_connectinfo(file_connectinfo);
+		}
+
 		if(result){
 			responsejson.put("count",1);
 		}else{
@@ -550,46 +606,70 @@ public class Datasource_connectinfoController {
 			return responsejson;
 		}
 		
-		//插入数据源信息记录		
-		Connectinfo connectInfo = new Connectinfo();
-		connectInfo.setName(map.get("name").toString());
-		connectInfo.setType("database");
-		if(map.containsKey("describe")){
-			connectInfo.setDescription(map.get("describe").toString());
-		}
-		
-		int metaModelId = Integer.parseInt(map.get("mountmetadataid").toString());
-		connectInfo.setMountMetaDataId(metaModelId);
-		//connectInfo.setNeedCheck(Integer.parseInt(map.get("checkstatus").toString()));
-		connectInfo.setNeedCheck(1);
-		if(!connectinfoService.insertConnectinfo(connectInfo)){
+		if(!metaDataService.getMetadataByDatabaseName(map.get("databasename").toString()).isEmpty()){
 			responsejson.put("result", false);
+			responsejson.put("description", "该已经存在");
+			responsejson.put("count",0);
+			return responsejson;
+		}
+
+		
+		try{
+			//插入数据源信息记录		
+			Connectinfo connectInfo = new Connectinfo();
+			connectInfo.setName(map.get("name").toString());
+			connectInfo.setType("database");
+			if(map.containsKey("describe")){
+				connectInfo.setDescription(map.get("describe").toString());
+			}
+			
+			int metaModelId = Integer.parseInt(map.get("mountmetadataid").toString());
+			connectInfo.setNeedCheck(Integer.parseInt(map.get("checkstatus").toString()));
+			//connectInfo.setNeedCheck(1);
+			
+			//插入数据源连接信息记录
+			Datasource_connectinfo datasource_connectinfo = new Datasource_connectinfo();
+
+			datasource_connectinfo.setUrl(map.get("url").toString());
+			datasource_connectinfo.setPort(map.get("port").toString());
+			datasource_connectinfo.setUsername(map.get("username").toString());
+			datasource_connectinfo.setPassword(map.get("password").toString());
+			datasource_connectinfo.setDatabasename(map.get("databasename").toString());
+			datasource_connectinfo.setDatabasetype(map.get("databasetype").toString());
+			datasource_connectinfo.setParentid(connectInfo.getId());
+			if(metaModelId == 202){
+				datasource_connectinfo.setRepositoryname(map.get("resourceUserName").toString());
+				datasource_connectinfo.setRepositorypwd(map.get("resourcePassword").toString());
+			}
+			
+			//获取当前日期
+			Date createDate = null;
+			SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			createDate = sdf.parse(sdf.format(new Date()));			
+			
+			connectInfo.setMountMetaDataId(kettleMetadataCollectService.collectDatabaseMetadata(datasource_connectinfo, createDate, connectInfo.getName(), metaModelId));
+			if(!connectinfoService.insertConnectinfo(connectInfo)){
+				responsejson.put("result", false);
+				responsejson.put("count",0);
+				return responsejson;
+			}
+			
+			boolean result = datasource_connectinfoService.insertDatasource_connectinfo(datasource_connectinfo);
+			
+			responsejson.put("result", result);
+			if(result){
+				responsejson.put("count",1);
+			}else{
+				responsejson.put("count",0);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			responsejson.put("result", false);
+			responsejson.put("description", "运行错误");
 			responsejson.put("count",0);
 			return responsejson;
 		}
 		
-		//插入数据源连接信息记录
-		Datasource_connectinfo datasource_connectinfo = new Datasource_connectinfo();
-
-		datasource_connectinfo.setUrl(map.get("url").toString());
-		datasource_connectinfo.setPort(map.get("port").toString());
-		datasource_connectinfo.setUsername(map.get("username").toString());
-		datasource_connectinfo.setPassword(map.get("password").toString());
-		datasource_connectinfo.setDatabasename(map.get("databasename").toString());
-		datasource_connectinfo.setDatabasetype(map.get("databasetype").toString());
-		datasource_connectinfo.setParentid(connectInfo.getId());
-		if(metaModelId == 202){
-			datasource_connectinfo.setRepositoryname(map.get("resourceUserName").toString());
-			datasource_connectinfo.setRepositorypwd(map.get("resourcePassword").toString());
-		}
-		boolean result = datasource_connectinfoService.insertDatasource_connectinfo(datasource_connectinfo);
-		
-		responsejson.put("result", result);
-		if(result){
-			responsejson.put("count",1);
-		}else{
-			responsejson.put("count",0);
-		}
 		return responsejson;
 	}
 	
@@ -630,39 +710,49 @@ public class Datasource_connectinfoController {
 			return responsejson;
 		}
 		
-		//插入数据源信息记录		
-		Connectinfo connectInfo = new Connectinfo();
-		connectInfo.setName(map.get("name").toString());
-		connectInfo.setType("file");
-		if(map.containsKey("describe")){
-			connectInfo.setDescription(map.get("describe").toString());
-		}
-		
-		//int metaModelId = Integer.parseInt(map.get("mountmetadataid").toString());
-		connectInfo.setMountMetaDataId(110);
-		//connectInfo.setNeedCheck(Integer.parseInt(map.get("checkstatus").toString()));
-		connectInfo.setNeedCheck(1);
-		if(!connectinfoService.insertConnectinfo(connectInfo)){
+		try{
+			
+			//插入数据源信息记录		
+			Connectinfo connectInfo = new Connectinfo();
+			connectInfo.setName(map.get("name").toString());
+			connectInfo.setType("file");
+			if(map.containsKey("describe")){
+				connectInfo.setDescription(map.get("describe").toString());
+			}
+			
+			int metaModelId = Integer.parseInt(map.get("mountmetadataid").toString());
+			connectInfo.setMountMetaDataId(110);
+			//connectInfo.setNeedCheck(Integer.parseInt(map.get("checkstatus").toString()));
+			connectInfo.setNeedCheck(1);
+			
+			if(!connectinfoService.insertConnectinfo(connectInfo)){
+				responsejson.put("result", false);
+				responsejson.put("count",0);
+				return responsejson;
+			}
+			
+			//插入文件数据源连接信息记录
+			File_connectinfo file_connectinfo = new File_connectinfo();
+			file_connectinfo.setPath(GlobalMethodAndParams.PATH_NAME);
+			file_connectinfo.setFilename(map.get("filename").toString());
+			file_connectinfo.setFiletype(Integer.parseInt(map.get("filetype").toString()));
+			file_connectinfo.setSize(map.get("size").toString());
+			file_connectinfo.setParentid(connectInfo.getId());
+			
+			boolean result = file_connectinfoService.insertFile_connectinfo(file_connectinfo);
+			
+			responsejson.put("result", result);
+			if(result){
+				responsejson.put("count",1);
+			}else{
+				responsejson.put("count",0);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
 			responsejson.put("result", false);
+			responsejson.put("description", "运行错误");
 			responsejson.put("count",0);
 			return responsejson;
-		}
-		
-		//插入文件数据源连接信息记录
-		File_connectinfo file_connectinfo = new File_connectinfo();
-		file_connectinfo.setPath(GlobalMethodAndParams.PATH_NAME);
-		file_connectinfo.setFilename(map.get("filename").toString());
-		file_connectinfo.setFiletype(Integer.parseInt(map.get("filetype").toString()));
-		file_connectinfo.setSize(map.get("size").toString());
-		file_connectinfo.setParentid(connectInfo.getId());
-		
-		boolean result = file_connectinfoService.insertFile_connectinfo(file_connectinfo);
-		
-		responsejson.put("result", result);
-		if(result){
-			responsejson.put("count",1);
-		}else{
-			responsejson.put("count",0);
 		}
 		
 		return responsejson;
@@ -715,7 +805,7 @@ public class Datasource_connectinfoController {
 			Connectinfo connectInfo = new Connectinfo();
 			connectInfo.setName(metadata.getNAME());
 			connectInfo.setType("database");
-			connectInfo.setMountMetaDataId(metadata.getMETAMODELID());
+			connectInfo.setMountMetaDataId(id);
 			connectInfo.setNeedCheck(1);
 			if(!connectinfoService.insertConnectinfo(connectInfo)){
 				responsejson.put("result", false);
@@ -753,92 +843,92 @@ public class Datasource_connectinfoController {
 	}
 	
 	
-	/**
-	 * 
-	 * 作者:GodDispose
-	 * 时间:2018年5月8日
-	 * 作用:插入一条数据源记录
-	 * 参数：name、filename、filetype、desribe（可选）
-	 * 		filetype--enum(1,2,3,4)
-	 */
-	@RequestMapping(value = "/insertFileConnectinfoByMetadata",method=RequestMethod.POST)
-	@ResponseBody
-	@Log(operationType="connectinfo",operationDesc="插入数据源")
-	public JSONObject insertFileConnectinfoByMetadata(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map){
-		JSONObject responsejson = new JSONObject();
-		
-//		if(!GlobalMethodAndParams.checkLogin()){
+//	/**
+//	 * 
+//	 * 作者:GodDispose
+//	 * 时间:2018年5月8日
+//	 * 作用:插入一条数据源记录
+//	 * 参数：name、filename、filetype、desribe（可选）
+//	 * 		filetype--enum(1,2,3,4)
+//	 */
+//	@RequestMapping(value = "/insertFileConnectinfoByMetadata",method=RequestMethod.POST)
+//	@ResponseBody
+//	@Log(operationType="connectinfo",operationDesc="插入数据源")
+//	public JSONObject insertFileConnectinfoByMetadata(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map){
+//		JSONObject responsejson = new JSONObject();
+//		
+////		if(!GlobalMethodAndParams.checkLogin()){
+////			responsejson.put("result", false);
+////			responsejson.put("count",0);
+////			return responsejson;
+////		}
+//		GlobalMethodAndParams.setHttpServletResponse(request, response);
+//		
+//		//检查传参是否正确
+//		if(!(map.containsKey("id"))){
 //			responsejson.put("result", false);
 //			responsejson.put("count",0);
 //			return responsejson;
+//		}	
+//		
+//		String idstr = map.get("id").toString();
+//		int id = 0;
+//		id = Integer.parseInt(idstr);
+//		
+//		Metadata metadata = metaDataService.getMetadataById(id);
+//
+//		
+//		if(connectinfoService.getConnectinfoByName(metadata.getNAME()) != null){
+//			responsejson.put("result", false);
+//			responsejson.put("description", "数据源名称已经存在");
+//			responsejson.put("count",0);
+//			return responsejson;
 //		}
-		GlobalMethodAndParams.setHttpServletResponse(request, response);
-		
-		//检查传参是否正确
-		if(!(map.containsKey("id"))){
-			responsejson.put("result", false);
-			responsejson.put("count",0);
-			return responsejson;
-		}	
-		
-		String idstr = map.get("id").toString();
-		int id = 0;
-		id = Integer.parseInt(idstr);
-		
-		Metadata metadata = metaDataService.getMetadataById(id);
-
-		
-		if(connectinfoService.getConnectinfoByName(metadata.getNAME()) != null){
-			responsejson.put("result", false);
-			responsejson.put("description", "数据源名称已经存在");
-			responsejson.put("count",0);
-			return responsejson;
-		}
-		
-		try {
-			JSONObject json = JSONObject.fromObject(metadata.getATTRIBUTES());
-			//插入数据源信息记录		
-			Connectinfo connectInfo = new Connectinfo();
-			connectInfo.setName(metadata.getNAME());
-			connectInfo.setType("file");
-			if(json.containsKey("describe")){
-				connectInfo.setDescription(metadata.getDESCRIPTION());
-			}
-			
-			//int metaModelId = Integer.parseInt(map.get("mountmetadataid").toString());
-			connectInfo.setMountMetaDataId(110);
-			//connectInfo.setNeedCheck(Integer.parseInt(map.get("checkstatus").toString()));
-			connectInfo.setNeedCheck(1);
-			if(!connectinfoService.insertConnectinfo(connectInfo)){
-				responsejson.put("result", false);
-				responsejson.put("count",0);
-				return responsejson;
-			}
-			
-			//插入文件数据源连接信息记录
-			File_connectinfo file_connectinfo = new File_connectinfo();
-			file_connectinfo.setPath(GlobalMethodAndParams.PATH_NAME);
-			file_connectinfo.setFilename(json.get("filename").toString());
-			file_connectinfo.setFiletype(Integer.parseInt(json.get("filetype").toString()));
-			if(json.get("filelength") != null){
-				file_connectinfo.setSize(CalDataSize.getPrintSize(Long.parseLong(json.get("filelength").toString())));
-			}
-			file_connectinfo.setParentid(connectInfo.getId());
-			
-			boolean result = file_connectinfoService.insertFile_connectinfo(file_connectinfo);
-			
-			responsejson.put("result", result);
-			if(result){
-				responsejson.put("count",1);
-			}else{
-				responsejson.put("count",0);
-			}
-		}catch(Exception e){
-			responsejson.put("result", false);
-			responsejson.put("count",0);
-		}
-		return responsejson;
-	}
+//		
+//		try {
+//			JSONObject json = JSONObject.fromObject(metadata.getATTRIBUTES());
+//			//插入数据源信息记录		
+//			Connectinfo connectInfo = new Connectinfo();
+//			connectInfo.setName(metadata.getNAME());
+//			connectInfo.setType("file");
+//			if(json.containsKey("describe")){
+//				connectInfo.setDescription(metadata.getDESCRIPTION());
+//			}
+//			
+//			//int metaModelId = Integer.parseInt(map.get("mountmetadataid").toString());
+//			connectInfo.setMountMetaDataId(110);
+//			//connectInfo.setNeedCheck(Integer.parseInt(map.get("checkstatus").toString()));
+//			connectInfo.setNeedCheck(1);
+//			if(!connectinfoService.insertConnectinfo(connectInfo)){
+//				responsejson.put("result", false);
+//				responsejson.put("count",0);
+//				return responsejson;
+//			}
+//			
+//			//插入文件数据源连接信息记录
+//			File_connectinfo file_connectinfo = new File_connectinfo();
+//			file_connectinfo.setPath(GlobalMethodAndParams.PATH_NAME);
+//			file_connectinfo.setFilename(json.get("filename").toString());
+//			file_connectinfo.setFiletype(Integer.parseInt(json.get("filetype").toString()));
+//			if(json.get("filelength") != null){
+//				file_connectinfo.setSize(CalDataSize.getPrintSize(Long.parseLong(json.get("filelength").toString())));
+//			}
+//			file_connectinfo.setParentid(connectInfo.getId());
+//			
+//			boolean result = file_connectinfoService.insertFile_connectinfo(file_connectinfo);
+//			
+//			responsejson.put("result", result);
+//			if(result){
+//				responsejson.put("count",1);
+//			}else{
+//				responsejson.put("count",0);
+//			}
+//		}catch(Exception e){
+//			responsejson.put("result", false);
+//			responsejson.put("count",0);
+//		}
+//		return responsejson;
+//	}
 
 	/**
 	 * 

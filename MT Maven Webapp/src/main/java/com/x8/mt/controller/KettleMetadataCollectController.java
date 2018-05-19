@@ -374,31 +374,35 @@ public class KettleMetadataCollectController {
 		collectJobService.insertCollectJob(newCollectJob);				
 	
 		try {
-			//表示接下来采集的是数据库元数据，即对应的元模型Id为10
-			int mountmodelid = connectinfo.getMountMetaDataId();
+			
+			String json = JSON.toJSONString(map, true);
+			HashMap parseMap = JSON.parseObject(json, HashMap.class);
+			List<com.alibaba.fastjson.JSONObject> tableList = (List<com.alibaba.fastjson.JSONObject>) parseMap.get("multipleSelection");
+			
+			//解析需要采集的表名并封装成Table类
+			List<Table> tables = new ArrayList<>();
+			
+			for(com.alibaba.fastjson.JSONObject tableName :tableList){
+				Table table = new Table();
+				table.setName(tableName.getString("tablename"));
+				table.setOperationDescription(null);
+				table.setOperationName(null);
+				tables.add(table);
+			}
+			
+			//表示接下来采集元数据
+			Metadata metadata = metaDataService.getMetadataById(connectinfo.getMountMetaDataId());
+			int mountmodelid = metadata.getMETAMODELID();
 
 			if(mountmodelid == 10){	
 				Datasource_connectinfo datasource_connectinfo = datasource_connectinfoService.getDatasource_connectinfoListByparentid(id);	
-				String json = JSON.toJSONString(map, true);
-				HashMap parseMap = JSON.parseObject(json, HashMap.class);
-				List<com.alibaba.fastjson.JSONObject> tableList = (List<com.alibaba.fastjson.JSONObject>) parseMap.get("multipleSelection");
-				//解析需要采集的表名并封装成Table类
-				List<Table> tables = new ArrayList<>();
-				
-				for(com.alibaba.fastjson.JSONObject tableName :tableList){
-					Table table = new Table();
-					table.setName(tableName.getString("tablename"));
-					table.setOperationDescription(null);
-					table.setOperationName(null);
-					tables.add(table);
-				}
-				
+
 				//采集的数据库和表的数量以及大小
 				String tableSize ;
 				//采集的字段的数量以及大小
 				String fieldSize ;
 				
-				tableSize = kettleMetadataCollectService.collectDataBaseAndTableMetaData(datasource_connectinfo,newCollectJob.getId(),createDate,tables);
+				tableSize = kettleMetadataCollectService.collectDataBaseAndTableMetaData(datasource_connectinfo,newCollectJob.getId(),createDate,tables,connectinfo.getMountMetaDataId());
 				fieldSize = kettleMetadataCollectService.collectFieldMetaData(datasource_connectinfo,newCollectJob.getId(),createDate,tables);				
 				
 				for(Table table : tables){
@@ -420,7 +424,7 @@ public class KettleMetadataCollectController {
 			}else if(mountmodelid == 202){
 				Datasource_connectinfo datasource_connectinfo = datasource_connectinfoService.getDatasource_connectinfoListByparentid(id);	
 				String repositoryName = connectinfo.getName();				
-				List<Table> tables = kettleMetadataCollectService.collectKettleJob(datasource_connectinfo,newCollectJob.getId(),createDate,repositoryName);
+				kettleMetadataCollectService.collectKettleJob(datasource_connectinfo,newCollectJob.getId(),createDate,repositoryName,tables,connectinfo.getMountMetaDataId());
 			
 				for(Table table : tables){
 					JSONObject node = new JSONObject();
@@ -501,19 +505,24 @@ public class KettleMetadataCollectController {
 		} catch (Exception e) {
 		}
 		
+		Connectinfo connectinfo = connectinfoService.getConnectinfoByid(id);
+		List<Connectinfo> connectinfoList = connectinfoService.getConnectinfoListBymountmetadataid(connectinfo.getId());
+		
 		try {
-			List<CollectJob> collectJob = collectJobService.getCollectJobByConnectinfoId(id);
-			if(!collectJob.isEmpty()  || collectJob.size() > 0){
-				responsejson.put("result", false);
-				responsejson.put("flag",0);
-				responsejson.put("desciption","数据源已经采集");
-				responsejson.put("count",1);
-			}else{
-				responsejson.put("result", true);
-				responsejson.put("flag",1);
-				responsejson.put("desciption","数据源未采集");
-				responsejson.put("count",1);
-			}
+			for(Connectinfo connect : connectinfoList){
+				List<CollectJob> collectJob = collectJobService.getCollectJobByConnectinfoId(connect.getId());
+				if(!collectJob.isEmpty()  || collectJob.size() > 0){
+					responsejson.put("result", false);
+					responsejson.put("flag",0);
+					responsejson.put("desciption","数据源已经采集");
+					responsejson.put("count",1);
+					return responsejson;
+				}
+			}				
+			responsejson.put("result", true);
+			responsejson.put("flag",1);
+			responsejson.put("desciption","数据源未采集");
+			responsejson.put("count",1);
 		} catch (Exception e) {
 			responsejson.put("result", false);
 			responsejson.put("flag",2);

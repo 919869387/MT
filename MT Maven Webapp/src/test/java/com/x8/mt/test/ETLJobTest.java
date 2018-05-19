@@ -139,5 +139,11 @@ public class ETLJobTest {
 		etlJobService.executeLocalJob(etljob);
 	}
 	
-
+	@Test
+	public void testCreateTable(){
+		ETLJob etljob = new ETLJob();
+		etljob.setMappingid(83250);
+		etlJobService.dynamicCreateTable(etljob);
+	}
+	
 }

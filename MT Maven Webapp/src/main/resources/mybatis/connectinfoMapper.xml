@@ -12,6 +12,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		select * from connectinfo where parentid = #{parentid}
 	</select>
 	
+	<select id="getConnectinfoListBymountmetadataid" resultType="com.x8.mt.entity.Datasource_connectinfo">
+		select * from connectinfo where mountmetadataid=#{mountmetadataid}
+	</select>
+	
 	<select id="getConnectinfoByid" parameterType="int" resultType="com.x8.mt.entity.Connectinfo">
 		select * from connectinfo where id = #{id}
 	</select>

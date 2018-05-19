@@ -92,6 +92,14 @@ public interface IMetaDataDao {
 	 */
 	List<Metadata> getMetadataByMetaModelIdAndNoNull(int id);
 	
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年5月10日
+	 * 作用:根据数据库名称查找元数据
+	 */
+	List<Metadata> getMetadataByDatabaseName(String name);
+	
 	
 
 }

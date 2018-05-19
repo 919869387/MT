@@ -54,7 +54,7 @@ public class KettleMetadataCollectService {
 
 
 	Database database = null;
-	
+
 	/**
 	 * 作者:GodDispose
 	 * 时间:2018年3月12日
@@ -65,54 +65,11 @@ public class KettleMetadataCollectService {
 	 */
 	@Transactional
 	public String collectDataBaseAndTableMetaData(Datasource_connectinfo datasource_connectinfo,int collectjobid,Date createDate
-			,List<Table> tables) throws KettleException, SQLException, ParseException {
+			,List<Table> tables,int databaseId) throws KettleException, SQLException, ParseException {
 		int collectCount = 0;//表元数据、字段元数据记录数共同记录
 		database = initKettleEnvironment(datasource_connectinfo);
-		
-		//1.将数据库元数据存入元数据表
-		String[] tablenames = database.getTablenames();//获取数据库中所有表名		
-		Metadata metadataDatabase = new Metadata();
-		metadataDatabase.setNAME(datasource_connectinfo.getDatabasename());
-		metadataDatabase.setCOLLECTJOBID(collectjobid);
-		metadataDatabase.setMETAMODELID(10);
-		metadataDatabase.setCREATETIME(createDate);
-		metadataDatabase.setUPDATETIME(createDate);
-		metadataDatabase.setCHECKSTATUS("1");
-		metadataDatabase.setVERSION(1);
-		String databaseAttributes = "{\"dbtype\":\""+datasource_connectinfo.getDatabasetype()
-				+ "\",\"dbversion\":\"1" 
-				+"\",\"dbip\":\"" + datasource_connectinfo.getUrl()
-				+"\",\"dbport\":\"" + datasource_connectinfo.getPort()
-				+"\",\"dbuser\":\"" + datasource_connectinfo.getUsername()
-				+"\",\"dbpassword\":\"" + datasource_connectinfo.getPassword()
-				+"\",\"dbname\":\"" + datasource_connectinfo.getDatabasename()
-				+"\"}";	
-		
-		metadataDatabase.setATTRIBUTES(databaseAttributes);
-
-		if(!(iMetaDataDao.insertMetadata(metadataDatabase)>0 ? true:false)){//插入不成功
-			throw new RuntimeException("数据库元数据插入失败");
-		}
-		collectCount++;//记录数据库元数据
-		
-		//2.将数据库元数据加入metadata_tank表
 		MetadataTank metadataTank = new MetadataTank();
-		metadataTank.setCHECKSTATUS(metadataDatabase.getCHECKSTATUS());
-		metadataTank.setATTRIBUTES(metadataDatabase.getATTRIBUTES());
-		metadataTank.setCREATETIME(new Date());
-		metadataTank.setDESCRIPTION(metadataDatabase.getDESCRIPTION());
-		metadataTank.setKeyid(metadataDatabase.getID());
-		metadataTank.setMETAMODELID(metadataDatabase.getMETAMODELID());
-		metadataTank.setNAME(metadataDatabase.getNAME());
-		metadataTank.setUPDATETIME(new Date());
-		metadataTank.setVERSION(metadataDatabase.getVERSION());
-		metadataTank.setCOLLECTJOBID(collectjobid);
-
-		if(!(iMetadataTankDao.insertMetaDataTank(metadataTank)>0)){
-			throw new RuntimeException("insertMetaDataTank Error");
-		}
-		
-		
+		String[] tablenames = database.getTablenames();//获取数据库中所有表名
 		for(Table table : tables){
 			//表信息插入Metadata
 			Metadata metadataTable = new Metadata();
@@ -130,16 +87,16 @@ public class KettleMetadataCollectService {
 				throw new RuntimeException("表元数据插入失败");
 			}
 			collectCount++;//记录表元数据
-			
+
 			table.setId(metadataTable.getID());
 			table.setOperationDescription(null);
 			table.setOperationName(null);
-			
+
 			MetaDataRelation metadataRelation = new MetaDataRelation();
-			metadataRelation.setMetaDataId(metadataDatabase.getID());
+			metadataRelation.setMetaDataId(databaseId);
 			metadataRelation.setRelateMetaDataId(metadataTable.getID());
 			metadataRelation.setType("COMPOSITION");
-			
+
 			if(!(metaDataRelationService.insertMetaDataRelation(metadataRelation))){//插入不成功
 				throw new RuntimeException("元数据关系插入失败");
 			}
@@ -161,17 +118,17 @@ public class KettleMetadataCollectService {
 
 		}
 		shutdownKettleEnvironment(database);
-		
+
 		long size = 0 ;
-		
+
 		size += datasource_connectinfo.getDatabasename().getBytes().length;
 		for(String str : tablenames){
 			size += str.getBytes().length;
 		}
-		
+
 		return collectCount + "_" + size;
 	}
-	
+
 	/**
 	 * 作者:GodDispose
 	 * 时间:2018年4月8日
@@ -184,20 +141,20 @@ public class KettleMetadataCollectService {
 	public String collectFieldMetaData(Datasource_connectinfo datasource_connectinfo,int collectjobid,Date createDate
 			,List<Table> tables) throws KettleException, SQLException, ParseException {
 		int collectCount = 0;//表元数据、字段元数据记录数共同记录
-		
+
 		database = initKettleEnvironment(datasource_connectinfo);
 
 		String[] tablenames = database.getTablenames();//获取数据库中所有表名	
 		MetaDataRelation metadataRelation = new MetaDataRelation();
 		MetadataTank metadataTank = new MetadataTank();
-		
+
 		int size = 0;
-		
+
 		for(Table table : tables){
 			RowMetaInterface tableFields = database.getTableFields(table.getName());
 
 			String[] primaryKeyColumnNames = database.getPrimaryKeyColumnNames(table.getName());//得到表中所有主键名
-			
+
 			List<ValueMetaInterface> fieldNameTypeList = tableFields.getValueMetaList();
 			for(ValueMetaInterface fieldNameType : fieldNameTypeList){
 				Metadata metadataField = new Metadata();
@@ -209,14 +166,14 @@ public class KettleMetadataCollectService {
 				metadataField.setCHECKSTATUS("1");
 				metadataField.setVERSION(1);
 				String fieldAttributes = "{\"fieldname\":\""+ fieldNameType.getName()
-					+ "\",\"fieldtype\":\"" + fieldNameType.getOriginalColumnTypeName()
-					+"\",\"length\":\"" + fieldNameType.getLength()
-					+"\",\"isprimarykey\":\"" + isHave(primaryKeyColumnNames,fieldNameType.getName())
-					+"\",\"isforeignkey\":\"" + false
-					+"\",\"allownull\":\"" + false
-					+"\",\"defaultvalue\":\"" + 0
-					+"\"}";	
-				
+						+ "\",\"fieldtype\":\"" + fieldNameType.getOriginalColumnTypeName()
+						+"\",\"length\":\"" + fieldNameType.getLength()
+						+"\",\"isprimarykey\":\"" + isHave(primaryKeyColumnNames,fieldNameType.getName())
+						+"\",\"isforeignkey\":\"" + false
+						+"\",\"allownull\":\"" + false
+						+"\",\"defaultvalue\":\"" + 0
+						+"\"}";	
+
 				metadataField.setATTRIBUTES(fieldAttributes);
 				if(!(iMetaDataDao.insertMetadata(metadataField)>0 ? true:false)){//插入不成功
 					throw new RuntimeException("字段元数据插入失败");
@@ -226,7 +183,7 @@ public class KettleMetadataCollectService {
 				metadataRelation.setMetaDataId(table.getId());
 				metadataRelation.setRelateMetaDataId(metadataField.getID());
 				metadataRelation.setType("COMPOSITION");
-				
+
 				metadataTank.setCHECKSTATUS(metadataField.getCHECKSTATUS());
 				metadataTank.setATTRIBUTES(metadataField.getATTRIBUTES());
 				metadataTank.setCREATETIME(new Date());
@@ -241,21 +198,21 @@ public class KettleMetadataCollectService {
 				if(!(iMetadataTankDao.insertMetaDataTank(metadataTank)>0)){
 					throw new RuntimeException("insertMetaDataTank Error");
 				}
-				
+
 				if(!(metaDataRelationService.insertMetaDataRelation(metadataRelation))){//插入不成功
 					throw new RuntimeException("元数据关系插入失败");
 				}
-				
+
 				size = size + fieldNameType.getName().getBytes().length * 2
 						+ fieldNameType.getOriginalColumnTypeName().getBytes().length ;
 			}
 		}
 		shutdownKettleEnvironment(database);
-		
+
 		return collectCount + "_"  + size;
 	}
-	
-	
+
+
 	/**
 	 * 
 	 * 作者:GodDispose
@@ -265,86 +222,43 @@ public class KettleMetadataCollectService {
 	 */
 	@Transactional
 	public List<Table> collectKettleJob(Datasource_connectinfo datasource_connectinfo
-			,int collectjobid,Date createDate,String repositoryName) throws KettleException {
+			,int collectjobid,Date createDate,String repositoryName,List<Table> tables
+			,int databaseId) throws KettleException {
 		KettleDatabaseRepository kettleDatabaseRepository = connectKettleDatabaseRepository(datasource_connectinfo);
-       //绑定根目录
-       //RepositoryDirectoryInterface directory =kettleDatabaseRepository.loadRepositoryDirectoryTree();
+		//绑定根目录
+		//RepositoryDirectoryInterface directory =kettleDatabaseRepository.loadRepositoryDirectoryTree();
 
-       //LongObjectId是ObjectId的实现类，这里只能用LongObjectId ,用String失败Long.parseLong
-       //默认绑定根目录，所有作业都在根目录下创建
-       ObjectId objectId = new LongObjectId(new Long(0));
-       RepositoryDirectoryInterface directory = kettleDatabaseRepository.findDirectory(objectId);
-       
-		MetadataTank metadataTank = new MetadataTank();
-  		Metadata metadataKettleRepository = new Metadata();
-  		metadataKettleRepository.setNAME(datasource_connectinfo.getDatabasename());
-  		metadataKettleRepository.setCOLLECTJOBID(collectjobid);
-  		metadataKettleRepository.setMETAMODELID(202);
-  		metadataKettleRepository.setCREATETIME(createDate);
-  		metadataKettleRepository.setUPDATETIME(createDate);
-  		metadataKettleRepository.setCHECKSTATUS("1");
-  		metadataKettleRepository.setVERSION(1);
-		String repositoryAttributes = "{\"reposname\":\""+repositoryName
-				+"\",\"reposuser\":\""+datasource_connectinfo.getRepositoryname()
-				+"\",\"repospassword\":\"" + datasource_connectinfo.getRepositorypwd()
-				+"\",\"dbtype\":\"" + datasource_connectinfo.getDatabasetype()
-				+ "\",\"dbversion\":\"1" 
-				+"\",\"dbip\":\"" + datasource_connectinfo.getUrl()
-				+"\",\"dbport\":\"" + datasource_connectinfo.getPort()
-				+"\",\"dbuser\":\"" + datasource_connectinfo.getUsername()
-				+"\",\"dbpassword\":\"" + datasource_connectinfo.getPassword()
-				+"\",\"dbname\":\"" + datasource_connectinfo.getDatabasename()
-				+"\"}";	
-		
-		metadataKettleRepository.setATTRIBUTES(repositoryAttributes);
-		
-		if(!(iMetaDataDao.insertMetadata(metadataKettleRepository)>0 ? true:false)){//插入不成功
-			throw new RuntimeException("作业资源库元数据插入失败");
-		}
-		
-		metadataTank.setCHECKSTATUS(metadataKettleRepository.getCHECKSTATUS());
-		metadataTank.setATTRIBUTES(metadataKettleRepository.getATTRIBUTES());
-		metadataTank.setCREATETIME(new Date());
-		metadataTank.setDESCRIPTION(metadataKettleRepository.getDESCRIPTION());
-		metadataTank.setKeyid(metadataKettleRepository.getID());
-		metadataTank.setMETAMODELID(metadataKettleRepository.getMETAMODELID());
-		metadataTank.setNAME(metadataKettleRepository.getNAME());
-		metadataTank.setUPDATETIME(new Date());
-		metadataTank.setVERSION(metadataKettleRepository.getVERSION());
-		metadataTank.setCOLLECTJOBID(collectjobid);
-		
-		if(!(iMetadataTankDao.insertMetaDataTank(metadataTank)>0)){
-			throw new RuntimeException("insertMetaDataTank Error");
-		}
+		//LongObjectId是ObjectId的实现类，这里只能用LongObjectId ,用String失败Long.parseLong
+		//默认绑定根目录，所有作业都在根目录下创建
+		ObjectId objectId = new LongObjectId(new Long(0));
+		RepositoryDirectoryInterface directory = kettleDatabaseRepository.findDirectory(objectId);
 
-       List<Table> tables = new ArrayList<>();      
-       String[] jobNames = kettleDatabaseRepository.getJobNames(objectId, false);
-      
-       if(jobNames.length==0 || jobNames == null){
-           return tables;
-       }else{
-           for(int i = 0;i<jobNames.length;i++){
-               JobMeta jobMeta = kettleDatabaseRepository.loadJob(jobNames[i],directory,null,null);
+		if(tables.size()==0 || tables.isEmpty()){
+			return tables;
+		}else{
+			for(Table table : tables){
+				JobMeta jobMeta = kettleDatabaseRepository.loadJob(table.getName(),directory,null,null);
 
-	       		Metadata metadataKettleJob = new Metadata();
-	       		metadataKettleJob.setNAME(jobNames[i]);
-	       		metadataKettleJob.setCOLLECTJOBID(collectjobid);
-	       		metadataKettleJob.setMETAMODELID(203);
-	       		metadataKettleJob.setCREATETIME(createDate);
-	       		metadataKettleJob.setUPDATETIME(createDate);
-	       		metadataKettleJob.setCHECKSTATUS("1");
-	       		metadataKettleJob.setVERSION(1);
-	    		String jobAttributes = "{\"jobname\":\""+jobNames[i]
-	    				+"\",\"jobdescribe\":\"" + jobMeta.getDescription()
-	    				+"\",\"reposid\":\"" + metadataKettleRepository.getID()
-	    				+"\"}";	
-	    		
-	    		metadataKettleJob.setATTRIBUTES(jobAttributes);
-	    		
+				MetadataTank metadataTank = new MetadataTank();
+				Metadata metadataKettleJob = new Metadata();
+				metadataKettleJob.setNAME(table.getName());
+				metadataKettleJob.setCOLLECTJOBID(collectjobid);
+				metadataKettleJob.setMETAMODELID(203);
+				metadataKettleJob.setCREATETIME(createDate);
+				metadataKettleJob.setUPDATETIME(createDate);
+				metadataKettleJob.setCHECKSTATUS("1");
+				metadataKettleJob.setVERSION(1);
+				String jobAttributes = "{\"jobname\":\""+table.getName()
+						+"\",\"jobdescribe\":\"" + jobMeta.getDescription()
+						+"\",\"reposid\":\"" + databaseId
+						+"\"}";	
+
+				metadataKettleJob.setATTRIBUTES(jobAttributes);
+
 				if(!(iMetaDataDao.insertMetadata(metadataKettleJob)>0 ? true:false)){//插入不成功
 					throw new RuntimeException("kettle作业元数据插入失败");
 				}
-				
+
 				metadataTank.setCHECKSTATUS(metadataKettleJob.getCHECKSTATUS());
 				metadataTank.setATTRIBUTES(metadataKettleJob.getATTRIBUTES());
 				metadataTank.setCREATETIME(new Date());
@@ -355,64 +269,53 @@ public class KettleMetadataCollectService {
 				metadataTank.setUPDATETIME(new Date());
 				metadataTank.setVERSION(metadataKettleJob.getVERSION());
 				metadataTank.setCOLLECTJOBID(collectjobid);
-				
+
 				if(!(iMetadataTankDao.insertMetaDataTank(metadataTank)>0)){
 					throw new RuntimeException("insertMetaDataTank Error");
 				}
-				
+
 				MetaDataRelation metadataRelation = new MetaDataRelation();
-				
-				metadataRelation.setMetaDataId(metadataKettleRepository.getID());
+
+				metadataRelation.setMetaDataId(databaseId);
 				metadataRelation.setRelateMetaDataId(metadataKettleJob.getID());
 				metadataRelation.setType("COMPOSITION");
-				
+
 				if(!(metaDataRelationService.insertMetaDataRelation(metadataRelation))){//插入不成功
 					throw new RuntimeException("元数据关系插入失败");
 				}
-               
-				Table table = new Table();
-				table.setName(jobNames[i]);
-				table.setOperationDescription(jobMeta.getDescription());
-				table.setOperationName(null);
-				tables.add(table);
-				
-//               System.out.println(jobNames[i]+" ,"+jobMeta.getDescription()+" ,"+
-//                       jobMeta.getJobstatus()+" ,"+jobMeta.getCreatedDate()+" ,"+
-//                       jobMeta.getModifiedDate());
-               	
-           }
-       }
+			}
+		}
 
-       kettleDatabaseRepository.disconnect();
+		kettleDatabaseRepository.disconnect();
 
 
-       return tables;
+		return tables;
 	}
-	
-	 /**
-   * 创建探索资源库目录连接
-   *
-   * @param getRepositoryParam
-   * @return
-   * @throws KettleException
-   */
-  public KettleDatabaseRepository connectKettleDatabaseRepository(Datasource_connectinfo datasource_connectinfo) throws KettleException {
-      String dataBaseConType = "jdbc";
-      //连接类型
-      String dataBaseType = datasource_connectinfo.getDatabasetype();
-      //开始连接资源库，探索资源库
-      Map<String, Object> map = new HashMap();
-      //初始化kettle环境
-      try {
-          KettleEnvironment.init();
-      } catch (KettleException e) {
-          e.printStackTrace();
-      }
-      //创建资源库对象，此时的对象还是一个空对象
 
-      KettleDatabaseRepository kettleDatabaseRepository = new KettleDatabaseRepository();
-      //创建资源库数据库对象，类似我们在spoon里面创建资源库
-      DatabaseMeta dataMeta = new DatabaseMeta(GlobalMethodAndParams.DatabaseMetaName,
+	/**
+	 * 创建探索资源库目录连接
+	 *
+	 * @param getRepositoryParam
+	 * @return
+	 * @throws KettleException
+	 */
+	public KettleDatabaseRepository connectKettleDatabaseRepository(Datasource_connectinfo datasource_connectinfo) throws KettleException {
+		String dataBaseConType = "jdbc";
+		//连接类型
+		String dataBaseType = datasource_connectinfo.getDatabasetype();
+		//开始连接资源库，探索资源库
+		Map<String, Object> map = new HashMap();
+		//初始化kettle环境
+		try {
+			KettleEnvironment.init();
+		} catch (KettleException e) {
+			e.printStackTrace();
+		}
+		//创建资源库对象，此时的对象还是一个空对象
+
+		KettleDatabaseRepository kettleDatabaseRepository = new KettleDatabaseRepository();
+		//创建资源库数据库对象，类似我们在spoon里面创建资源库
+		DatabaseMeta dataMeta = new DatabaseMeta(GlobalMethodAndParams.DatabaseMetaName,
 				datasource_connectinfo.getDatabasetype(), 
 				GlobalMethodAndParams.kettleDatabaseMetaAccess_JDBC, 
 				datasource_connectinfo.getUrl(),
@@ -421,27 +324,27 @@ public class KettleMetadataCollectService {
 				datasource_connectinfo.getUsername(), 
 				datasource_connectinfo.getPassword());
 
-      dataMeta.testConnection();
-      Database database = new Database(null, dataMeta);
-      try {
-          database.connect();
-      } catch (KettleDatabaseException e) {
-          e.printStackTrace();
-      }
-      //id参数,名称参数，描述,资源库元对象等可以随便定义
-      KettleDatabaseRepositoryMeta kettleDatabaseMeta = new KettleDatabaseRepositoryMeta("null", null, null, dataMeta);
+		dataMeta.testConnection();
+		Database database = new Database(null, dataMeta);
+		try {
+			database.connect();
+		} catch (KettleDatabaseException e) {
+			e.printStackTrace();
+		}
+		//id参数,名称参数，描述,资源库元对象等可以随便定义
+		KettleDatabaseRepositoryMeta kettleDatabaseMeta = new KettleDatabaseRepositoryMeta("null", null, null, dataMeta);
 
-      //给资源库赋值
-      kettleDatabaseRepository.init(kettleDatabaseMeta);
-      //连接资源库
-      try {
-          kettleDatabaseRepository.connect(datasource_connectinfo.getRepositoryname(), datasource_connectinfo.getRepositorypwd());
-      } catch (KettleException e) {
-          e.printStackTrace();
-      }
-      return kettleDatabaseRepository;
-  }
-	
+		//给资源库赋值
+		kettleDatabaseRepository.init(kettleDatabaseMeta);
+		//连接资源库
+		try {
+			kettleDatabaseRepository.connect(datasource_connectinfo.getRepositoryname(), datasource_connectinfo.getRepositorypwd());
+		} catch (KettleException e) {
+			e.printStackTrace();
+		}
+		return kettleDatabaseRepository;
+	}
+
 	/**
 	 * 
 	 * 作者:GodDispose
@@ -452,35 +355,35 @@ public class KettleMetadataCollectService {
 	@Transactional
 	public List<Table> getTables(Datasource_connectinfo datasource_connectinfo,int metaModelId,int collectJobId) throws KettleException {
 		List<Table> tables = new ArrayList<>();
-		
+
 		if(metaModelId == 10){
-//			List<Metadata> metaDatas = iMetaDataDao.getMetadataByCollectJobById(collectJobId);			
-//			Map<String, Integer> map = new HashMap<String, Integer>();
-//			for(Metadata metaData : metaDatas){
-//				map.put(metaData.getNAME(), 1);
-//			}
-			
+			//			List<Metadata> metaDatas = iMetaDataDao.getMetadataByCollectJobById(collectJobId);			
+			//			Map<String, Integer> map = new HashMap<String, Integer>();
+			//			for(Metadata metaData : metaDatas){
+			//				map.put(metaData.getNAME(), 1);
+			//			}
+
 			database = initKettleEnvironment(datasource_connectinfo);
 			String[] tablenames = database.getTablenames();//获取数据库中所有表名
-			
+
 			shutdownKettleEnvironment(database);
 			for(String tablename : tablenames){
 				//if(map.get(tablename) == null){					
-					Table table = new Table();
-					table.setName(tablename);
-					table.setOperationDescription(null);
-					table.setOperationName(null);
-					tables.add(table);
+				Table table = new Table();
+				table.setName(tablename);
+				table.setOperationDescription(null);
+				table.setOperationName(null);
+				tables.add(table);
 				//}
 			}
 		}else if(metaModelId == 202){			
 			KettleDatabaseRepository kettleDatabaseRepository = connectKettleDatabaseRepository(datasource_connectinfo);
-		    ObjectId objectId = new LongObjectId(new Long(0));
-		    RepositoryDirectoryInterface directory = kettleDatabaseRepository.findDirectory(objectId);
-		     
-		    String[] jobNames = kettleDatabaseRepository.getJobNames(objectId, false);
+			ObjectId objectId = new LongObjectId(new Long(0));
+			RepositoryDirectoryInterface directory = kettleDatabaseRepository.findDirectory(objectId);
+
+			String[] jobNames = kettleDatabaseRepository.getJobNames(objectId, false);
 			for(String jobName : jobNames){
-	            JobMeta jobMeta = kettleDatabaseRepository.loadJob(jobName,directory,null,null);
+				JobMeta jobMeta = kettleDatabaseRepository.loadJob(jobName,directory,null,null);
 
 				Table table = new Table();
 				table.setName(jobName);
@@ -489,10 +392,10 @@ public class KettleMetadataCollectService {
 				tables.add(table);
 			}
 		}
-		
+
 		return tables;
 	}
-	
+
 
 	/**
 	 * 
@@ -514,7 +417,7 @@ public class KettleMetadataCollectService {
 				datasource_connectinfo.getPort(), 
 				datasource_connectinfo.getUsername(), 
 				datasource_connectinfo.getPassword());
-		
+
 
 		database = new Database(null, dataMeta);
 		database.connect();
@@ -532,7 +435,7 @@ public class KettleMetadataCollectService {
 		database.disconnect();
 		KettleEnvironment.shutdown();
 	}
-	
+
 	/**
 	 * 
 	 * 作者:allen
@@ -547,10 +450,10 @@ public class KettleMetadataCollectService {
 		} 
 		return false;//没找到返回false 
 	} 
-	
 
 
-	
+
+
 	/**
 	 * 
 	 * 作者:GodDipose
@@ -565,6 +468,103 @@ public class KettleMetadataCollectService {
 			return null;
 		}
 	}
-	
+
+	/**
+	 * 
+	 * 作者:GodDipose
+	 * 时间:2018年5月17日
+	 * 作用:根据id查找采集任务
+	 */
+	public int collectDatabaseMetadata(Datasource_connectinfo datasource_connectinfo
+			,Date createDate,String repositoryName,int type){
+		
+		try{
+			Metadata metaData = new Metadata();
+			MetadataTank metadataTank = new MetadataTank();
+			if(type == 110){				
+				//1.将数据库元数据存入元数据表
+				metaData.setNAME(datasource_connectinfo.getDatabasename());
+				metaData.setMETAMODELID(10);
+				metaData.setCREATETIME(createDate);
+				metaData.setUPDATETIME(createDate);
+				metaData.setCHECKSTATUS("1");
+				metaData.setVERSION(1);
+				String databaseAttributes = "{\"dbtype\":\""+datasource_connectinfo.getDatabasetype()
+						+ "\",\"dbversion\":\"1" 
+						+"\",\"dbip\":\"" + datasource_connectinfo.getUrl()
+						+"\",\"dbport\":\"" + datasource_connectinfo.getPort()
+						+"\",\"dbuser\":\"" + datasource_connectinfo.getUsername()
+						+"\",\"dbpassword\":\"" + datasource_connectinfo.getPassword()
+						+"\",\"dbname\":\"" + datasource_connectinfo.getDatabasename()
+						+"\"}";	
+				
+				metaData.setATTRIBUTES(databaseAttributes);
+				
+				if(!(iMetaDataDao.insertMetadata(metaData)>0 ? true:false)){//插入不成功
+					throw new RuntimeException("数据库元数据插入失败");
+				}
+				
+				//2.将数据库元数据加入metadata_tank表
+				metadataTank.setCHECKSTATUS(metaData.getCHECKSTATUS());
+				metadataTank.setATTRIBUTES(metaData.getATTRIBUTES());
+				metadataTank.setCREATETIME(new Date());
+				metadataTank.setDESCRIPTION(metaData.getDESCRIPTION());
+				metadataTank.setKeyid(metaData.getID());
+				metadataTank.setMETAMODELID(metaData.getMETAMODELID());
+				metadataTank.setNAME(metaData.getNAME());
+				metadataTank.setUPDATETIME(new Date());
+				metadataTank.setVERSION(metaData.getVERSION());
+				
+				if(!(iMetadataTankDao.insertMetaDataTank(metadataTank)>0)){
+					throw new RuntimeException("insertMetaDataTank Error");
+				}
+			}else if(type == 202){
+				metaData.setNAME(datasource_connectinfo.getDatabasename());
+				metaData.setMETAMODELID(202);
+				metaData.setCREATETIME(createDate);
+				metaData.setUPDATETIME(createDate);
+				metaData.setCHECKSTATUS("1");
+				metaData.setVERSION(1);
+				String repositoryAttributes = "{\"reposname\":\""+repositoryName
+						+"\",\"reposuser\":\""+datasource_connectinfo.getRepositoryname()
+						+"\",\"repospassword\":\"" + datasource_connectinfo.getRepositorypwd()
+						+"\",\"dbtype\":\"" + datasource_connectinfo.getDatabasetype()
+						+ "\",\"dbversion\":\"1" 
+						+"\",\"dbip\":\"" + datasource_connectinfo.getUrl()
+						+"\",\"dbport\":\"" + datasource_connectinfo.getPort()
+						+"\",\"dbuser\":\"" + datasource_connectinfo.getUsername()
+						+"\",\"dbpassword\":\"" + datasource_connectinfo.getPassword()
+						+"\",\"dbname\":\"" + datasource_connectinfo.getDatabasename()
+						+"\"}";	
+
+				metaData.setATTRIBUTES(repositoryAttributes);
+
+				if(!(iMetaDataDao.insertMetadata(metaData)>0 ? true:false)){//插入不成功
+					throw new RuntimeException("作业资源库元数据插入失败");
+				}
+
+				metadataTank.setCHECKSTATUS(metaData.getCHECKSTATUS());
+				metadataTank.setATTRIBUTES(metaData.getATTRIBUTES());
+				metadataTank.setCREATETIME(new Date());
+				metadataTank.setDESCRIPTION(metaData.getDESCRIPTION());
+				metadataTank.setKeyid(metaData.getID());
+				metadataTank.setMETAMODELID(metaData.getMETAMODELID());
+				metadataTank.setNAME(metaData.getNAME());
+				metadataTank.setUPDATETIME(new Date());
+				metadataTank.setVERSION(metaData.getVERSION());
+
+				if(!(iMetadataTankDao.insertMetaDataTank(metadataTank)>0)){
+					throw new RuntimeException("insertMetaDataTank Error");
+				}
+			}
+			return metaData.getID();
+		}catch(Exception e){
+			e.printStackTrace();
+			return -1;
+		}			
+	}
+
+
+
 
 }
