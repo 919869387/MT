@@ -2,8 +2,6 @@ package com.x8.mt.common;
 
 import java.util.List;
 
-import com.x8.mt.entity.ETLJob;
-
 /**
  * 
  * 作者:  allen
@@ -25,7 +23,7 @@ public class PageParam {
 	public int getTotalPage() {
 		return totalPage;
 	}
-	public void setTotalPage(int totalPage) {
+	private void setTotalPage(int totalPage) {
 		this.totalPage = totalPage;
 	}
 	public int getRowCount() {

@@ -1,22 +1,53 @@
-<%@ page language="java" import="java.util.*" pageEncoding="ISO-8859-1"%>
-
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!DOCTYPE html>
 <html>
   <head>
-    <title>My JSP 'index.jsp' starting page</title>
-
-	<meta http-equiv="pragma" content="no-cache">
-	<meta http-equiv="cache-control" content="no-cache">
-	<meta http-equiv="expires" content="0">    
-	<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
-	<meta http-equiv="description" content="This is my page">
-	<!--
-	<link rel="stylesheet" type="text/css" href="styles.css">
-	-->
-
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>测试导出</title>
+    <!-- <script src="./src/components/DataMapManagement/shapes.js"></script> -->
+    <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
   </head>
-  
   <body>
-    This is my JSP page. <br>
+    <div id="add" style="width:130px;height:40px;background-color: blue;"></div>
+    <script>
+        $("#add").click(function(){
+            console.log("==============");
+            var aa = {
+                   metadataid:"2070",
+                   filename:"aaa"
+                };
+            $.ajax({
+                type:"POST",
+                url:"http://192.168.1.123:8080/MT/metadataManagement/exportMetadataToExcel11",
+                contentType: "application/json;charset=utf-8;",
+                data:JSON.stringify(aa),
+                method: "post",
+            	/**重点在于这一行，设置返回类型，否则浏览器将会以奇怪的方式解析zi'ji**/
+            	dataType: 'blob',
+            	success: function(data){
+            		alert("qq");
+                	var blob = new Blob([data], {type: "application/vnd.ms-excel"});
+                	saveAs(blob, "file.xlsx");
+           		}
+            })
+        })
+		
+		function downloadFileByForm() {
+        //console.log("ajaxDownloadSynchronized");
+        var url = "http://192.168.1.123:8080/MT/metadataManagement/exportMetadataToExcel";
+        var fileName = "testAjaxDownload.txt";
+        var form = $("<form></form>").attr("action", url).attr("method", "post");
+        form.append($("<input></input>").attr("metadataid", 2070).attr("filename", "测试aaa"));
+        form.appendTo('body').submit();
+    }
+	
+    </script>
+	
+	<div>
+    <a href="<%=request.getContextPath()%>/ajaxDownloadServlet.do?fileName=testAjaxDownload.txt">同步下载文件</a><br />
+    <a href="#" onclick="downloadFilebyAjax()">ajax下载文件</a> <br />
+    <a href="#" onclick="downloadFileByForm()">模拟表单提交下载文件</a>
+</div>
+
   </body>
 </html>

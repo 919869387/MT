@@ -19,4 +19,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		DISTINCT JSON_UNQUOTE(JSON_EXTRACT(attributes, '$.protocolType')) from metadata
 		where metamodelid=1001;
 	</select>
+	
+	<select id="getProtocolInfo" resultType="java.lang.String">
+		SELECT JSON_UNQUOTE(attributes) from metadata
+		where metamodelid=1001;
+	</select>
 </mapper>
