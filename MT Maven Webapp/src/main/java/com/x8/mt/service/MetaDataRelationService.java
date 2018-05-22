@@ -30,10 +30,10 @@ public class MetaDataRelationService {
 	 * 
 	 * 作者:itcoder
 	 * 时间:2018年4月23日
-	 * 作用:根据metadataId,找到COMPOSITION关系的儿子元数据id
+	 * 作用:根据metadataId,找到具有关系的儿子元数据id
 	 */
 	public List<String> getMetadata_relationByMetadataid(int id) {
-		return iMetaDataRelationDao.getSonMetadataID(String.valueOf(id));
+		return iMetaDataRelationDao.getChildrenMetadataID(String.valueOf(id));
 	}
 
 	/**
