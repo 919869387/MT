@@ -70,4 +70,12 @@ public interface ICollectJobDao {
 	 * 作用:查询是否存在该名称
 	 */
 	CollectJob isExistName(String name);
+	
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年5月22日 
+	 * 作用:根据id，修改采集任务的审核状态
+	 */
+	boolean updateCollectJobCheckResult(CollectJob collectjob);
 }

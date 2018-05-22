@@ -65,8 +65,8 @@ public class KettleMetadataCollectController {
 	MetaDataService metaDataService;
 	@Resource
 	CollectJobService collectJobService;
-	@Resource
-	Metamodel_hierarchyService metamodel_hierarchyService;	
+	//@Resource
+	//Metamodel_hierarchyService metamodel_hierarchyService;	
 	@Resource
 	Metamodel_datatypeService metamodel_datatypeService;
 	
@@ -110,10 +110,14 @@ public class KettleMetadataCollectController {
 		try{
 			id = Integer.parseInt(idStr);			
 			boolean result = false;
+			CollectJob collectJob = new CollectJob();
+			collectJob.setId(id);
+			collectJob.setCheckResult(checkstatusStr);
+			
 			Metadata metadata = new Metadata();
 			metadata.setCHECKSTATUS(checkstatusStr);
 			metadata.setID(id);
-			result = metaDataService.updateMetadataCheckstatus(metadata);
+			result = (metaDataService.updateMetadataCheckstatus(metadata) && collectJobService.updateCollectJobCheckResult(collectJob));
 			System.out.println(result);
 			if(result==true){
 				responsejson.put("result", result);
@@ -896,13 +900,13 @@ public class KettleMetadataCollectController {
 				node.put("label", metadata.getNAME());
 				data.add(node);
 			}
-			metadatas = metaDataService.getMetadataByMetaModelId(202);
-			for(Metadata metadata : metadatas){
-				JSONObject node = new JSONObject();
-				node.put("id", metadata.getID());
-				node.put("label", metadata.getNAME());
-				data.add(node);
-			}
+//			metadatas = metaDataService.getMetadataByMetaModelId(202);
+//			for(Metadata metadata : metadatas){
+//				JSONObject node = new JSONObject();
+//				node.put("id", metadata.getID());
+//				node.put("label", metadata.getNAME());
+//				data.add(node);
+//			}
 			responsejson.put("result", true);
 			responsejson.put("data",data);
 			responsejson.put("count",data.size());

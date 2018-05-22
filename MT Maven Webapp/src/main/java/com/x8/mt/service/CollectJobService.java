@@ -120,4 +120,18 @@ public class CollectJobService {
 		}
 	}
 	
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年5月22日 
+	 * 作用:根据id，修改采集任务的审核状态
+	 */
+	public boolean updateCollectJobCheckResult(CollectJob collectjob){
+		try{
+			return (iCollectJobDao.updateCollectJobCheckResult(collectjob));
+		}catch(Exception e){
+			return false;
+		}
+	}
+	
 }

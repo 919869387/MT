@@ -2,9 +2,7 @@
 <!DOCTYPE mapper
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.x8.mt.dao.ICollectJobDao">
-
-	
+<mapper namespace="com.x8.mt.dao.ICollectJobDao">	
 	<select id="getCollectJobByDate" resultType="com.x8.mt.entity.CollectJob">
 		select * from collectjob 
 		<where>
@@ -40,4 +38,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<select id="isExistName" parameterType="String" resultType="com.x8.mt.entity.CollectJob">
 		select * from collectjob where name= #{name}
 	</select>
+	
+	<select id="updateCollectJobCheckResult" parameterType="String" resultType="com.x8.mt.entity.CollectJob">
+		update
+		collectjob set checkresult = #{checkresult} where id=#{id}
+	</select>
+	
+	
 </mapper>

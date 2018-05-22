@@ -369,7 +369,8 @@ public class ETLJobService {
 	@SuppressWarnings("unchecked")
 	public boolean saveJob(ETLJob etlJob) throws Exception{
 		ETLJobParam job= new ETLJobParam();
-		List<Metadata> metadatas = iMetaDataDao.getMetadataByMap("$.targettableid", String.valueOf(etlJob.getMappingid()));
+		List<Metadata> metadatas = iMetaDataDao.getMetadataByMap("$.targettableid", etlJob.getMappingid());
+		System.out.println(metadatas.size());
 		Map<String, Object> metadataMap = TransformMetadata.transformMetadataToMap(metadatas.get(0));
 		int srctableid = Integer.parseInt((String)metadataMap.get("sourcetableid"));
 		String source_table = iMetaDataDao.getMetadataById(srctableid).getNAME();
@@ -478,7 +479,6 @@ public class ETLJobService {
 			SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			dispatch.setCreatetime(sdf.parse(sdf.format(new Date())));			
 			dispatch.setRuninterval(runinterval);
-			dispatch.setType("LOCAL");
 
 			iDispatchDao.addDispatch(dispatch);
 
@@ -617,16 +617,20 @@ public class ETLJobService {
 	 * 作用:动态建表
 	 */
 	public boolean dynamicCreateTable(ETLJob etlJob){		
-		boolean result = false;
-		
 		Datasource_connectinfo datasource_connectinfo =iDatasource_connectinfoDao.getDatasource_connectinfoListByparentid(iCollectJobDao.getCollectJobById(iMetaDataDao.getMetadataById(etlJob.getMappingid()).getCOLLECTJOBID()).getConnectinfoId());
 		
 		//声明Connection对象
 		Connection con;
+		String driver = null;
+		if(datasource_connectinfo.getDatabasetype().toString().equals("mysql")){
+			driver = "com.mysql.jdbc.Driver";
+		}else if (datasource_connectinfo.getDatabasetype().toString().equals("postgresql")){
+			driver = "org.postgresql.Driver";
+		}
 		//驱动程序名
-		String driver = "com.mysql.jdbc.Driver";
+
 		//URL指向要访问的数据库名
-		String url = "jdbc:mysql://" + datasource_connectinfo.getUrl() + ":" + datasource_connectinfo.getPort() + "/" + datasource_connectinfo.getDatabasename();
+		String url = "jdbc:" + datasource_connectinfo.getDatabasetype().toString() +"://" + datasource_connectinfo.getUrl() + ":" + datasource_connectinfo.getPort() + "/" + datasource_connectinfo.getDatabasename();
 		//MySQL配置时的用户名
 		String user = datasource_connectinfo.getUsername();
 		//MySQL配置时的密码
@@ -635,63 +639,82 @@ public class ETLJobService {
 		try {
 			//加载驱动程序
 			Class.forName(driver);
-			//1.getConnection()方法，连接MySQL数据库！！
+			//1.getConnection()方法，连接数据库！！
 			con = DriverManager.getConnection(url,user,password);
-			if(!con.isClosed())
-				System.out.println("Succeeded connecting to the Database!");
 			//2.创建statement类对象，用来执行SQL语句！！
 			Statement statement = con.createStatement();
 			//要执行的SQL语句			
-			List<Metadata> metadatas = iMetaDataDao.getMetadataByMap("$.targettableid", String.valueOf(etlJob.getMappingid()));
+			List<Metadata> metadatas = iMetaDataDao.getMetadataByMap("$.targettableid",etlJob.getMappingid());
 			List<Integer> fieldIds = new ArrayList<Integer>();
 			for(Metadata metadata : metadatas){
 				Map<String, Object> metadataMap = TransformMetadata.transformMetadataToMap(metadata);
 				fieldIds.add(Integer.parseInt((String)metadataMap.get("targetfieldid")));
 			}
 			String fieldSql = "";
-			for(int i=0; i < fieldIds.size();i++){
-				Metadata metadata = iMetaDataDao.getMetadataById(fieldIds.get(i));
-				Map<String, Object> metadataMap = TransformMetadata.transformMetadataToMap(metadata);
-				if(i == 0){
-					fieldSql += metadata.getNAME() 
-							+ " " + metadataMap.get("fieldtype").toString()+ "(" + (metadataMap.get("length") ==null ? 255 : metadataMap.get("length")) + ")"
-							+ " " + (metadataMap.get("allownull").equals("false") ? "NOT NULL" : "")
-							+ " " + "PRIMARY KEY,";
-				}else if(i == (fieldIds.size()-1)){
-					fieldSql += metadata.getNAME() 
-							+ " " + metadataMap.get("fieldtype").toString()+ "(" + (metadataMap.get("length") ==null ? 255 : metadataMap.get("length")) + ")"
-							+ " " + (metadataMap.get("allownull").equals("false") ? "NOT NULL" : "");
-				}else{
-					fieldSql += metadata.getNAME() 
-							+ " " + metadataMap.get("fieldtype").toString()+ "(" + (metadataMap.get("length") ==null ? 255 : metadataMap.get("length")) + ")"
-							+ " " + (metadataMap.get("allownull").equals("false") ? "NOT NULL," : "");
+			if(datasource_connectinfo.getDatabasetype().toString().equals("postgresql")){
+				for(int i=0; i < fieldIds.size();i++){
+					Metadata metadata = iMetaDataDao.getMetadataById(fieldIds.get(i));
+					Map<String, Object> metadataMap = TransformMetadata.transformMetadataToMap(metadata);
+					if(i == 0){
+						fieldSql += metadata.getNAME() 
+								+ " " + metadataMap.get("fieldtype").toString()
+								+ getLengthWithPostgre(metadataMap.get("length").toString())							
+								+ " " + (metadataMap.get("allownull").equals("false") ? "NOT NULL" : "")
+								+ " " + "PRIMARY KEY,";
+					}else if(i == (fieldIds.size()-1)){
+						fieldSql += metadata.getNAME() 
+								+ " " + metadataMap.get("fieldtype").toString()
+								+ getLengthWithPostgre(metadataMap.get("length").toString())
+								+ " " + (metadataMap.get("allownull").equals("false") ? "NOT NULL" : "");
+					}else{
+						fieldSql += metadata.getNAME() 
+								+ " " + metadataMap.get("fieldtype").toString()
+								+ getLengthWithPostgre(metadataMap.get("length").toString())
+								+ " " + (metadataMap.get("allownull").equals("false") ? "NOT NULL," : "");
+					}
+				}
+			}else if(datasource_connectinfo.getDatabasetype().toString().equals("mysql")){				
+				for(int i=0; i < fieldIds.size();i++){
+					Metadata metadata = iMetaDataDao.getMetadataById(fieldIds.get(i));
+					Map<String, Object> metadataMap = TransformMetadata.transformMetadataToMap(metadata);
+					if(i == 0){
+						fieldSql += metadata.getNAME() 
+								+ " " + metadataMap.get("fieldtype").toString()
+								+ (metadataMap.get("length").equals("null") ? "" :"(" + metadataMap.get("length") + ")")							
+								+ " " + (metadataMap.get("allownull").equals("false") ? "NOT NULL" : "")
+								+ " " + "PRIMARY KEY,";
+					}else if(i == (fieldIds.size()-1)){
+						fieldSql += metadata.getNAME() 
+								+ " " + metadataMap.get("fieldtype").toString()
+								+ (metadataMap.get("length").equals("null") ? "" :"(" + metadataMap.get("length") + ")")
+								+ " " + (metadataMap.get("allownull").equals("false") ? "NOT NULL" : "");
+					}else{
+						fieldSql += metadata.getNAME() 
+								+ " " + metadataMap.get("fieldtype").toString()
+								+ (metadataMap.get("length").equals("null") ? "" :"(" + metadataMap.get("length") + ")")
+								+ " " + (metadataMap.get("allownull").equals("false") ? "NOT NULL," : "");
+					}
 				}
 			}
 			
 			String creatsql = "CREATE TABLE " + iMetaDataDao.getMetadataById(etlJob.getMappingid()).getNAME() +  "("
 					+ fieldSql
-					+ ")charset=utf8;";
-			System.out.println(creatsql);
-			if(0 == statement.executeLargeUpdate(creatsql)){
-				System.out.println("成功创建表！");
-			}else{
-				System.out.println("创建表失败！");
-			}
+					+ ");";
+			statement.executeUpdate(creatsql);
 			con.close();
-			result = true;
-		} catch(ClassNotFoundException e) {   
-			//数据库驱动类异常处理
-			System.out.println("Sorry,can`t find the Driver!");   
-			e.printStackTrace();   
-		} catch(SQLException e) {
-			//数据库连接失败异常处理
-			e.printStackTrace();  
+			return true; 
 		}catch (Exception e) {
 			e.printStackTrace();
-		}finally{
-			return result;
+			return false;
 		}
-
+	}
+	
+	public static String getLengthWithPostgre(String str){
+		if(str.equals("null") || str.equals("0")){
+			return "";
+		}else{
+			return "(" + str + ")";
+		}
 	}
 
 }

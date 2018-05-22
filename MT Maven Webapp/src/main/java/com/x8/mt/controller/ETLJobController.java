@@ -31,7 +31,9 @@ import com.x8.mt.common.Log;
 import com.x8.mt.common.PageParam;
 import com.x8.mt.entity.Dispatch;
 import com.x8.mt.entity.ETLJob;
+import com.x8.mt.entity.MetaDataRelation;
 import com.x8.mt.entity.Metadata;
+import com.x8.mt.entity.MetadataTank;
 import com.x8.mt.service.DispatchService;
 import com.x8.mt.service.ETLJobService;
 import com.x8.mt.service.MetaDataService;
@@ -78,7 +80,7 @@ public class ETLJobController {
 		
 		Subject subject = SecurityUtils.getSubject();  
 		Session session = subject.getSession();
-		String creater = session.getAttribute("username").toString();
+		//String creater = session.getAttribute("username").toString();
 		
 		Metadata metadata = new Metadata();
 		metadata.setNAME(metaDataService.getMetadataById(Integer.parseInt((String)map.get("target_table_id"))).getNAME());
@@ -91,6 +93,7 @@ public class ETLJobController {
 				+ "\",\"jobdescribe\":\"1" 
 				+"\",\"reposid\":\"" + "\"}";	
 		metadata.setATTRIBUTES(attributes);
+		
 		if(metaDataService.insertMetadataWithNoCollectJob(metadata)){
 			ETLJob etlJob = new ETLJob();
 			etlJob.setMappingid(Integer.parseInt((String)map.get("target_table_id")));
@@ -102,12 +105,17 @@ public class ETLJobController {
 				etlJob.setDescription((String)map.get("description"));
 			}
 			etlJob.setCreate_date(new Date());
-			etlJob.setCreateuserid(systemuserService.selectUser(creater).getId());
+			etlJob.setCreateuserid(systemuserService.selectUser("admin").getId());
 			etlJob.setType("LOCAL");
 			etlJob.setStatus("NewCreate");	
 			etlJob.setJobtype(0);
-			responsejson.put("result", etlJobService.saveJob(etlJob) && etlJobService.insertETLJob(etlJob));
+			if(etlJobService.saveJob(etlJob) && etlJobService.insertETLJob(etlJob)){
+				responsejson.put("result",true );
+			}else{				
+				responsejson.put("result", false);
+			}
 		}else{
+			metaDataService.deleteMetadataById(metadata.getID());
 			responsejson.put("result", false);
 		}
 		

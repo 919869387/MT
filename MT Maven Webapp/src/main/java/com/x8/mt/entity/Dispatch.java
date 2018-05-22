@@ -12,7 +12,6 @@ public class Dispatch {
 	private Date createtime;
 	private Date recenttime;
 	private Date endtime;
-	private String type;
 	public int getDispatchid() {
 		return dispatchid;
 	}
@@ -66,13 +65,6 @@ public class Dispatch {
 	}
 	public void setEndtime(Date endtime) {
 		this.endtime = endtime;
-	}
-	public void setType(String type){
-		this.type = type;
-	}
-	public String getType(){
-		return type;
-	}
-	
+	}	
 	
 }

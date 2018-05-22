@@ -4,10 +4,7 @@ package com.x8.mt.test;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,15 +13,12 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 //import oracle.net.aso.a;
 
-import org.apache.poi.hssf.usermodel.HSSFCell;
+
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.dom4j.Document;
-import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.junit.Test;
@@ -34,13 +28,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.x8.mt.common.GlobalMethodAndParams;
 import com.x8.mt.dao.IDatasource_connectinfoDao;
 import com.x8.mt.entity.CollectJob;
 import com.x8.mt.entity.Datasource_connectinfo;
+import com.x8.mt.entity.Metadata;
 import com.x8.mt.service.CollectJobService;
 import com.x8.mt.service.FileMetadataCollectService;
 import com.x8.mt.service.KettleMetadataCollectService;
+import com.x8.mt.service.MetaDataService;
 
 @RunWith(SpringJUnit4ClassRunner.class) 
 @ContextConfiguration({"classpath*:applicationContext.xml"}) 
@@ -55,6 +50,9 @@ public class CollectKettleMetadataTest {
 
 	@Autowired
 	FileMetadataCollectService fileMetadataCollectService;
+	
+	@Autowired
+	MetaDataService metadataService;
 
 	@Autowired
 	CollectJobService collectJobService;
@@ -104,7 +102,7 @@ public class CollectKettleMetadataTest {
 	@Test
 	public void testExcel() throws Exception{
 		//fileMetadataCollectService.collectExcelMetaData("new1.xls");
-		File file = new File("C:/Users/jason zhou/Desktop/file.xls"); 
+		File file = new File("C:/Users/jason zhou/Desktop/装备后勤软件数据库表结构信息.xls"); 
 		HSSFWorkbook workbook=new HSSFWorkbook(new FileInputStream(file));
 
 		//存储表格列名，name,type,default,isNull
@@ -129,13 +127,14 @@ public class CollectKettleMetadataTest {
 				String databaseName = database.split("（")[0];
 				String databaseDescription = database.substring(database.indexOf("（")+1,database.indexOf("）"));
 				HSSFRow tempRow = sheet.getRow(1);
+				System.out.println(databaseName + "......" + databaseDescription);
 				for(int j = 0 ; j < tempRow.getPhysicalNumberOfCells(); j++){
 					map.put(tempRow.getCell(j).toString(), j);
-					System.out.println(tempRow.getCell(j).toString());
 				}
 
 				for(int k = 2 ; k < sheet.getPhysicalNumberOfRows(); k++){
 					HSSFRow row = sheet.getRow(k);
+
 					String fieldTypeAndLength = row.getCell(map.get("type")).toString();
 					//            	   String fieldType = database.split("(")[0];
 					//            	   String fieldLength = database.substring(database.indexOf("(")+1,database.indexOf(")")); 
@@ -287,8 +286,15 @@ public class CollectKettleMetadataTest {
 		}
 		br.close();
 		insr.close();
-
-
+	}
+	
+	@Test
+	public void testGetMountMetadata(){
+		List<Metadata> metadatas = metadataService.getAvailableMountMetadata();
+		for (Metadata metadata : metadatas) {
+			System.out.println(metadata.getID());
+			System.out.println(metadata.getNAME());
+		}
 	}
 
 }

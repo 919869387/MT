@@ -73,7 +73,7 @@ public interface IMetaDataDao {
 	 * 时间:2018年3月12日
 	 * 作用:根据Map获取一组Metadata记录
 	 */
-	List<Metadata> 	getMetadataByMap(@Param("key")String key,@Param("value")String value);
+	List<Metadata> 	getMetadataByMap(@Param("key")String key,@Param("value")int value);
 
 	/**
 	 * 
@@ -100,6 +100,11 @@ public interface IMetaDataDao {
 	 */
 	List<Metadata> getMetadataByDatabaseName(String name);
 	
-	
-
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年5月19日
+	 * 作用:根据数据库名称查找元数据
+	 */
+	List<Metadata> getAvailableMountMetadata();
 }

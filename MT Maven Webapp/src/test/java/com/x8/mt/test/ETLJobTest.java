@@ -122,8 +122,7 @@ public class ETLJobTest {
 		params.put("jobtype", 0);
 		params.put("offset", 0);
 		params.put("size", 4);
-		if(ietlJobDao.selectByParams(params) != null){
-			
+		if(ietlJobDao.selectByParams(params) != null){			
 			System.out.println(ietlJobDao.selectByParams(params).size());
 		}else{
 			System.out.println(false);

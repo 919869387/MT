@@ -1,14 +1,18 @@
 package com.x8.mt.service;
 
+import java.util.Date;
+import java.util.List;
+
 import javax.annotation.Resource;
 
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 import com.x8.mt.dao.IMetaDataDao;
 import com.x8.mt.dao.IMetadataManagementDao;
+import com.x8.mt.dao.IMetadataTankDao;
+import com.x8.mt.entity.MetaDataRelation;
 import com.x8.mt.entity.Metadata;
+import com.x8.mt.entity.MetadataTank;
 
 @Service
 public class MetaDataService {
@@ -16,6 +20,10 @@ public class MetaDataService {
 	IMetaDataDao iMetadataDao;
 	@Resource
 	IMetadataManagementDao imetadataManagementDao;	
+	@Resource
+	IMetadataTankDao iMetadataTankDao;
+	@Resource
+	MetaDataRelationService metaDataRelationService;
 	
 	/**
 	 * 
@@ -128,7 +136,34 @@ public class MetaDataService {
 	 */
 	public boolean insertMetadataWithNoCollectJob(Metadata metadata){
 		try{
-			return imetadataManagementDao.insertMetadata(metadata) > 0 ? true : false;
+			boolean result = imetadataManagementDao.insertMetadata(metadata) > 0 ? true : false;
+			MetadataTank metadataTank = new MetadataTank();
+			
+			metadataTank.setCHECKSTATUS(metadata.getCHECKSTATUS());
+			metadataTank.setATTRIBUTES(metadata.getATTRIBUTES());
+			metadataTank.setCREATETIME(new Date());
+			metadataTank.setDESCRIPTION(metadata.getDESCRIPTION());
+			metadataTank.setKeyid(metadata.getID());
+			metadataTank.setMETAMODELID(metadata.getMETAMODELID());
+			metadataTank.setNAME(metadata.getNAME());
+			metadataTank.setUPDATETIME(new Date());
+			metadataTank.setVERSION(metadata.getVERSION());
+
+			if(!(iMetadataTankDao.insertMetaDataTank(metadataTank)>0)){
+				throw new RuntimeException("insertMetaDataTank Error");
+			}
+
+			MetaDataRelation metadataRelation = new MetaDataRelation();
+
+			metadataRelation.setMetaDataId(1);
+			metadataRelation.setRelateMetaDataId(metadata.getID());
+			metadataRelation.setType("COMPOSITION");
+
+			if(!(metaDataRelationService.insertMetaDataRelation(metadataRelation))){//插入不成功
+				throw new RuntimeException("元数据关系插入失败");
+			}
+			
+			return true;
 		}catch(Exception e){
 			e.printStackTrace();
 			return false;
@@ -185,6 +220,19 @@ public class MetaDataService {
 		}
 	}
 	
-	
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年5月19日
+	 * 作用:根据数据库名称查找元数据
+	 */
+	public List<Metadata> getAvailableMountMetadata(){
+		try{
+			return iMetadataDao.getAvailableMountMetadata();			
+		}catch(Exception e){
+			e.printStackTrace();
+			return null;
+		}
+	}
 	
 }

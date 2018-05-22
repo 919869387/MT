@@ -170,6 +170,9 @@ public class FileMetadataCollectService {
 
 					for(int k = 2 ; k < sheet.getPhysicalNumberOfRows(); k++){
 						HSSFRow row = sheet.getRow(k);
+						if(row == null ||row.getCell(0) == null || row.getRowNum() == 0 ){
+							break;
+						}
 						String fieldTypeAndLength = row.getCell(map.get("type")).toString();
 						String fieldType = null;
 						String fieldLength = null;

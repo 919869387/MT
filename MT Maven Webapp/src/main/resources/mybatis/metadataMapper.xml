@@ -43,7 +43,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</select>
 	
 	<select id="getMetadataByMap" parameterType="Map" resultType="com.x8.mt.entity.Metadata">
-		select * from metadata where json_extract(attributes,#{key}) = #{value}
+		select * from metadata 
+		where json_extract(attributes,#{key}) = #{value} 
+		and metamodelid = 100
 	</select>
 	
 	<select id="getMetadataByDatabaseName" resultType="com.x8.mt.entity.Metadata">
@@ -52,4 +54,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		and metamodelid = 10
 	</select>
 	
+	<select id="getAvailableMountMetadata" resultType="com.x8.mt.entity.Metadata">
+		select * from metadata 
+		where metamodelid in (select id from metamodel_hierarchy where mountnode = 1)
+		and collectjobid is NULL
+	</select>
 </mapper>
