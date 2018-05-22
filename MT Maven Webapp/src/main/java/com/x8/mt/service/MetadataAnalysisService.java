@@ -120,6 +120,8 @@ public class MetadataAnalysisService {
 			status="表类型";
 		}else if(metadata.getMETAMODELID()==10){
 			status="数据库类型";
+		}else{
+			status="";
 		}
 
 		Map<String, String> mapNode=new HashMap<String, String>();
