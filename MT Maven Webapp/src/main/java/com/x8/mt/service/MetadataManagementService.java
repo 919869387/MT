@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.annotation.Resource;
 
@@ -380,7 +381,8 @@ public class MetadataManagementService {
 		metadataTank.setUPDATETIME(updateDataTime);
 		metadataTank.setVERSION(metadata.getVERSION());
 		metadataTank.setCOLLECTJOBID(metadata.getCOLLECTJOBID());
-
+		metadataTank.setATTRIBUTES(metadata.getATTRIBUTES());
+		
 		if(!(iMetadataTankDao.insertMetaDataTank(metadataTank)>0)){
 			throw new RuntimeException("insertMetaDataTank Error");
 		}
@@ -689,6 +691,10 @@ public class MetadataManagementService {
 	@Transactional
 	public boolean addTableFieldMappingMetadata(List<Map<String, Object>> list) {
 		for(Map<String, Object> map:list){
+			for (Entry<String, Object> entry : map.entrySet()) {//将数据改为String  
+				map.put(entry.getKey(), entry.getValue().toString());
+			}  
+			
 			if(addMetadata(map)<=0){
 				throw new RuntimeException("addTableFieldMappingMetadata Error");
 			}

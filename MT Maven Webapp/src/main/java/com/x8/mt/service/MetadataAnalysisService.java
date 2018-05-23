@@ -45,6 +45,7 @@ public class MetadataAnalysisService {
 		paramMap.put("value", fieldid);
 		
 		List<Metadata> metadataLists = iMetadataAnalysisDao.getMetadataByJson(paramMap);//查找到字段元数据
+		
 		if(metadataLists.size()==0){
 			//说明分析在没有目标字段，终止递归
 			return;
