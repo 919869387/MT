@@ -112,7 +112,7 @@ public class DatamapitemsController {
 						node.put("id", ++count);
 						node.put("x", 800);
 						node.put("y", 110 * count);
-						node.put("status", metadata.getCHECKSTATUS());
+						node.put("time", metadata.getCREATETIME());
 						node.put("name", metadata.getNAME());
 						node.put("bgcolor", "rgba(48, 208, 198, 0.5)");
 						node.put("fontcolor", "#fff");
@@ -143,7 +143,7 @@ public class DatamapitemsController {
 					node.put("id", ++count);
 					node.put("x", 400);
 					node.put("y", 110 * num);
-					node.put("status", metadata.getCHECKSTATUS());
+					node.put("time", metadata.getCREATETIME());
 					node.put("name", metadata.getNAME());
 					node.put("bgcolor", "rgba(48, 208, 198, 0.5)");
 					node.put("fontcolor", "#fff");
@@ -175,7 +175,7 @@ public class DatamapitemsController {
 				node.put("id", datamapitems.getId());
 				node.put("x", datamapitems.getPosx());
 				node.put("y", datamapitems.getPosy());
-				node.put("status", metadata.getCHECKSTATUS());
+				node.put("time", metadata.getCREATETIME());
 				node.put("name", metadata.getNAME());
 				node.put("bgcolor", datamapitems.getBackgroundcolor());
 				node.put("fontcolor", datamapitems.getFontcolor());
@@ -254,7 +254,7 @@ public class DatamapitemsController {
 	 * 作者:itcoder 
 	 * 时间:2018年4月18日 
 	 * 作用:获取第二层数据地图
-	 * 参数：sourceid，targetid
+	 * 参数：sourceid，targetid,sourcename,targetname
 	 */
 	@RequestMapping(value = "/getSecondDatamap", method = RequestMethod.POST)
 	@ResponseBody
@@ -279,6 +279,9 @@ public class DatamapitemsController {
 			return responsejson;
 		}
 		
+		String sourceName = map.get("sourcename").toString();
+		String targetName = map.get("targetname").toString();
+		
 		String sourceidStr = map.get("sourceid").toString();
 		int sourceid = Integer.parseInt(sourceidStr);
 		String targetidStr = map.get("targetid").toString();
@@ -300,7 +303,7 @@ public class DatamapitemsController {
 				datamapitems.setPosx(400);
 				datamapitems.setPosy(110 * num++);
 				datamapitems.setWidth(100);
-				datamapitems.setHeight(100);
+				datamapitems.setHeight(70);
 				datamapitems.setBackgroundcolor("rgba(48, 208, 198, 0.5)");
 				datamapitems.setFontcolor("#fff");
 				datamapitemsService.insertDatamapitems(datamapitems);
@@ -311,7 +314,7 @@ public class DatamapitemsController {
 			node.put("id", itemNode.getId());
 			node.put("x", itemNode.getPosx());
 			node.put("y", itemNode.getPosy());
-			node.put("status", tableMetadata.getCHECKSTATUS());
+			node.put("source", targetName);
 			node.put("name", tableMetadata.getNAME());
 			node.put("bgcolor", itemNode.getBackgroundcolor());
 			node.put("fontcolor", itemNode.getFontcolor());
@@ -333,7 +336,7 @@ public class DatamapitemsController {
 				datamapitems.setPosx(800);
 				datamapitems.setPosy(110 * num++);
 				datamapitems.setWidth(100);
-				datamapitems.setHeight(100);
+				datamapitems.setHeight(70);
 				datamapitems.setBackgroundcolor("rgba(48, 208, 198, 0.5)");
 				datamapitems.setFontcolor("#fff");
 				datamapitemsService.insertDatamapitems(datamapitems);
@@ -344,7 +347,7 @@ public class DatamapitemsController {
 			node.put("id", itemNode.getId());
 			node.put("x", itemNode.getPosx());
 			node.put("y", itemNode.getPosy());
-			node.put("status", tableMetadata.getCHECKSTATUS());
+			node.put("source", sourceName);
 			node.put("name", tableMetadata.getNAME());
 			node.put("bgcolor", itemNode.getBackgroundcolor());
 			node.put("fontcolor", itemNode.getFontcolor());
@@ -385,7 +388,7 @@ public class DatamapitemsController {
 	 * 作者:itcoder 
 	 * 时间:2018年5月8日 
 	 * 作用:获取第三层数据地图
-	 * 参数：sourceid，targetid
+	 * 参数：sourceid，targetid,sourcename,targetname
 	 */
 	@RequestMapping(value = "/getThreeDatamap", method = RequestMethod.POST)
 	@ResponseBody
@@ -409,6 +412,9 @@ public class DatamapitemsController {
 			responsejson.put("links", links);
 			return responsejson;
 		}
+		
+		String sourceName = map.get("sourcename").toString();
+		String targetName = map.get("targetname").toString();
 		
 		String sourceidStr = map.get("sourceid").toString();
 		int sourceid = Integer.parseInt(sourceidStr);
@@ -442,7 +448,7 @@ public class DatamapitemsController {
 			node.put("id", itemNode.getId());
 			node.put("x", itemNode.getPosx());
 			node.put("y", itemNode.getPosy());
-			node.put("status", tableMetadata.getCHECKSTATUS());
+			node.put("source", targetName);
 			node.put("name", tableMetadata.getNAME());
 			node.put("bgcolor", itemNode.getBackgroundcolor());
 			node.put("fontcolor", itemNode.getFontcolor());
@@ -464,7 +470,7 @@ public class DatamapitemsController {
 				datamapitems.setPosx(800);
 				datamapitems.setPosy(110 * num++);
 				datamapitems.setWidth(100);
-				datamapitems.setHeight(100);
+				datamapitems.setHeight(70);
 				datamapitems.setBackgroundcolor("rgba(48, 208, 198, 0.5)");
 				datamapitems.setFontcolor("#fff");
 				datamapitemsService.insertDatamapitems(datamapitems);
@@ -475,7 +481,7 @@ public class DatamapitemsController {
 			node.put("id", itemNode.getId());
 			node.put("x", itemNode.getPosx());
 			node.put("y", itemNode.getPosy());
-			node.put("status", tableMetadata.getCHECKSTATUS());
+			node.put("source", sourceName);
 			node.put("name", tableMetadata.getNAME());
 			node.put("bgcolor", itemNode.getBackgroundcolor());
 			node.put("fontcolor", itemNode.getFontcolor());
