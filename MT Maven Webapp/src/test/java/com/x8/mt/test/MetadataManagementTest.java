@@ -47,17 +47,17 @@ public class MetadataManagementTest {
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
 		List<Map<String, Object>> list = new ArrayList();
-		
+		//{"mappingtype": "DIRECT", "sourcefieldid": "83259", "sourcetableid": 83250, "targetfieldid": 83239, "targettableid": 83237}
 		Map<String, Object> map1 = new HashMap<String, Object>();
 		map1.put("metamodelId", 100);
-		map1.put("parentMetadataId", 83328);
+		map1.put("parentMetadataId", 83973);
 		map1.put("NAME", "表字段映射元数据1");
 		map1.put("DESCRIPTION", "表字段映射元数据测试");
 		map1.put("mappingtype", "DIRECT");
-		map1.put("sourcetableid", 83237);
-		map1.put("sourcefieldid", 83239);
-		map1.put("targettableid", 83250);
-		map1.put("targetfieldid", 83259);
+		map1.put("sourcetableid", 83250);
+		map1.put("sourcefieldid", 83259);
+		map1.put("targettableid", 83237);
+		map1.put("targetfieldid", 83239);
 		
 //		Map<String, Object> map2 = new HashMap<String, Object>();
 //		map2.put("metamodelId", 100);

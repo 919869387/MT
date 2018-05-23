@@ -26,7 +26,7 @@ public class MetadataAnalysisTest {
 		HttpServletResponse response = null;
 		
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("quanlianid", 83237);
+		map.put("quanlianid", 83259);
 		
 		System.out.println(metadataAnalysisController.fieldChain(request, response, map));
 	}
@@ -48,7 +48,7 @@ public class MetadataAnalysisTest {
 		HttpServletResponse response = null;
 		
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("yingxiangid", 2070);
+		map.put("yingxiangid", 83259);
 		
 		System.out.println(metadataAnalysisController.fieldImpact(request, response, map));
 	}
