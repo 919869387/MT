@@ -19,6 +19,8 @@ public interface IDatamapitemsDao {
 	int isExist(int id);
 
 	int updateDatamapitems(Datamapitems datamapitems);
+
+	boolean deleteAllDatamapitems();
 	
 	
 }

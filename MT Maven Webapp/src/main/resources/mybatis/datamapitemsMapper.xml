@@ -39,4 +39,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		update datamapitems set posx = #{posx},posy = #{posy} where id = #{id}
 	</update>
 	
+	<delete id="deleteAllDatamapitems">
+		delete * from datamapitems
+	</delete>
+	
 </mapper>

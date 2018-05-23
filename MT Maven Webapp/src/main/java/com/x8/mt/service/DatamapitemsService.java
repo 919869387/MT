@@ -49,6 +49,10 @@ public class DatamapitemsService {
 		return iDatamapitemsDao.updateDatamapitems(datamapitems);
 	}
 
+	public boolean deleteAllDatamapitems() {
+		return iDatamapitemsDao.deleteAllDatamapitems();
+	}
+
 	
 	
 }

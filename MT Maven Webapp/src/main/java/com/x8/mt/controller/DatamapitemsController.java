@@ -566,4 +566,38 @@ public class DatamapitemsController {
 		return responsejson;
 	}
 	
+	/**
+	 * 
+	 * 作者:itcoder 
+	 * 时间:2018年5月23日 
+	 * 作用:删除数据地图图元
+	 * 
+	 */
+	@RequestMapping(value = "/ReGetDatamapPosition", method = RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType = "ReGetDatamapPosition", operationDesc = "删除数据地图图元")
+	public JSONObject modifyDatamapPosition(HttpServletRequest request,
+			HttpServletResponse response) {
+		JSONObject responsejson = new JSONObject();
+
+		// if(!GlobalMethodAndParams.checkLogin()){
+		// responsejson.put("result", false);
+		// responsejson.put("count",0);
+		// return responsejson;
+		// }
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
+		boolean result = false;
+		
+		result = datamapitemsService.deleteAllDatamapitems();
+		
+		if(result){
+			responsejson.put("result", result);
+			responsejson.put("count", 1);
+		}else{
+			responsejson.put("result", result);
+			responsejson.put("count", 0);
+		}
+		return responsejson;
+	}
+	
 }
