@@ -47,6 +47,14 @@ public interface IMetaDataDao {
 	 * 
 	 * 作者:GodDispose
 	 * 时间:2018年3月12日
+	 * 作用:插入一条Metadata记录
+	 */
+	int insertMetadataWithoutCollecjob(Metadata Metadata);
+	
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年3月12日
 	 * 作用:根据id获取一条Metadata记录
 	 */
 	Metadata getMetadataById(int id);
@@ -107,4 +115,12 @@ public interface IMetaDataDao {
 	 * 作用:根据数据库名称查找元数据
 	 */
 	List<Metadata> getAvailableMountMetadata();
+	
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年5月19日
+	 * 作用:查找文件元数据所挂载的数据库元数据
+	 */
+	Metadata getFileSourceMetadata(int id);
 }

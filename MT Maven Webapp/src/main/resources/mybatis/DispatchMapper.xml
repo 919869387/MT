@@ -16,9 +16,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<insert id="addDispatch" parameterType="com.x8.mt.entity.Dispatch"
 		useGeneratedKeys="true" keyProperty="id">
 		insert into
-		dispatch(name,description,jobname,status,runinterval,createtime,recenttime,endtime,type)
+		dispatch(name,description,jobname,status,runinterval,createtime,recenttime,endtime)
 		values(#{name}, #{description},#{jobname},#{status},
-		#{runinterval},#{createtime},#{recenttime},#{endtime},#{type})
+		#{runinterval},#{createtime},#{recenttime},#{endtime})
 	</insert>
 	
 	<delete id="deleteETLSchedule" parameterType="int">
@@ -37,7 +37,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			<if test="createtime!=null">createtime=#{createtime},</if>
 			<if test="recenttime!=null">recenttime=#{recenttime},</if>
 			<if test="endtime!=null">endtime=#{endtime},</if>
-			<if test="type!=null">type=#{type},</if>
 		</trim>
 		where dispatchid=#{dispatchid}
 	</update>

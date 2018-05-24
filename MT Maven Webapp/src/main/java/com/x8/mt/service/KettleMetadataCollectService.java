@@ -353,7 +353,7 @@ public class KettleMetadataCollectService {
 	 * 
 	 */
 	@Transactional
-	public List<Table> getTables(Datasource_connectinfo datasource_connectinfo,int metaModelId,int collectJobId) throws KettleException {
+	public List<Table> getTables(Datasource_connectinfo datasource_connectinfo,int metaModelId) throws KettleException {
 		List<Table> tables = new ArrayList<>();
 
 		if(metaModelId == 10){
@@ -473,7 +473,7 @@ public class KettleMetadataCollectService {
 	 * 
 	 * 作者:GodDipose
 	 * 时间:2018年5月17日
-	 * 作用:根据id查找采集任务
+	 * 作用:根据返回元数据id
 	 */
 	public int collectDatabaseMetadata(Datasource_connectinfo datasource_connectinfo
 			,Date createDate,String repositoryName,int type){
@@ -481,7 +481,7 @@ public class KettleMetadataCollectService {
 		try{
 			Metadata metaData = new Metadata();
 			MetadataTank metadataTank = new MetadataTank();
-			if(type == 110){				
+			if(type == 1){				
 				//1.将数据库元数据存入元数据表
 				metaData.setNAME(datasource_connectinfo.getDatabasename());
 				metaData.setMETAMODELID(10);
@@ -500,10 +500,9 @@ public class KettleMetadataCollectService {
 				
 				metaData.setATTRIBUTES(databaseAttributes);
 				
-				if(!(iMetaDataDao.insertMetadata(metaData)>0 ? true:false)){//插入不成功
+				if(!(iMetaDataDao.insertMetadataWithoutCollecjob(metaData)>0 ? true:false)){//插入不成功
 					throw new RuntimeException("数据库元数据插入失败");
 				}
-				
 				//2.将数据库元数据加入metadata_tank表
 				metadataTank.setCHECKSTATUS(metaData.getCHECKSTATUS());
 				metadataTank.setATTRIBUTES(metaData.getATTRIBUTES());
@@ -518,7 +517,7 @@ public class KettleMetadataCollectService {
 				if(!(iMetadataTankDao.insertMetaDataTank(metadataTank)>0)){
 					throw new RuntimeException("insertMetaDataTank Error");
 				}
-			}else if(type == 202){
+			}else if(type == 0){
 				metaData.setNAME(datasource_connectinfo.getDatabasename());
 				metaData.setMETAMODELID(202);
 				metaData.setCREATETIME(createDate);
@@ -539,7 +538,7 @@ public class KettleMetadataCollectService {
 
 				metaData.setATTRIBUTES(repositoryAttributes);
 
-				if(!(iMetaDataDao.insertMetadata(metaData)>0 ? true:false)){//插入不成功
+				if(!(iMetaDataDao.insertMetadataWithoutCollecjob(metaData)>0 ? true:false)){//插入不成功
 					throw new RuntimeException("作业资源库元数据插入失败");
 				}
 
@@ -564,7 +563,15 @@ public class KettleMetadataCollectService {
 		}			
 	}
 
-
+	public String getCheckResult(String type){
+		switch(type){
+			case "0": return "无需审核";
+			case "1": return "待审核";
+			case "2": return "审核已通过";
+			case "3": return "审核未通过";
+		}
+		return "";
+	}
 
 
 }

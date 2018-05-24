@@ -56,7 +56,7 @@ public class FileMetadataCollectService {
 	 * 时间:2018年5月7日
 	 * 作用:根据file_connectinfo信息，自动采集Excel文件元数据
 	 */
-	public void collectExcelMetaData(String filename,int collectjobid ,Date createDate){
+	public void collectExcelMetaData(String filename,int collectjobid ,Date createDate,int databaseid){
 		try{
 			File file = new File(GlobalMethodAndParams.PATH_NAME + filename); 			
 			HSSFWorkbook workbook=new HSSFWorkbook(new FileInputStream(file));
@@ -65,44 +65,7 @@ public class FileMetadataCollectService {
 			Map<String,Integer> map = new HashMap<String, Integer>();
 
 			MetaDataRelation metadataRelation = new MetaDataRelation();
-
-			//1.将文件元数据存入元数据表	
-			Metadata metadataFile = new Metadata();
-			metadataFile.setNAME(filename);
-			metadataFile.setCOLLECTJOBID(collectjobid);
-			metadataFile.setMETAMODELID(110);
-			metadataFile.setCREATETIME(createDate);
-			metadataFile.setUPDATETIME(createDate);
-			metadataFile.setCHECKSTATUS("1");
-			metadataFile.setVERSION(1);
-			String fileAttributes = "{\"filename\":\""+ filename
-					+"\",\"filetype\":\"" + "1"
-					+"\",\"filelength\":\"" + CalDataSize.getPrintSize(file.length())
-					+"\",\"filepath\":\"" + GlobalMethodAndParams.PATH_NAME
-					+"\"}";	
-
-			metadataFile.setATTRIBUTES(fileAttributes);
-
-			if(!(iMetaDataDao.insertMetadata(metadataFile)>0 ? true:false)){//插入不成功
-				throw new RuntimeException("文件元数据插入失败");
-			}
-
-			//2.将文件元数据加入metadata_tank表
 			MetadataTank metadataTank = new MetadataTank();
-			metadataTank.setCHECKSTATUS(metadataFile.getCHECKSTATUS());
-			metadataTank.setATTRIBUTES(metadataFile.getATTRIBUTES());
-			metadataTank.setCREATETIME(new Date());
-			metadataTank.setDESCRIPTION(metadataFile.getDESCRIPTION());
-			metadataTank.setKeyid(metadataFile.getID());
-			metadataTank.setMETAMODELID(metadataFile.getMETAMODELID());
-			metadataTank.setNAME(metadataFile.getNAME());
-			metadataTank.setUPDATETIME(new Date());
-			metadataTank.setVERSION(metadataFile.getVERSION());
-			metadataTank.setCOLLECTJOBID(collectjobid);
-
-			if(!(iMetadataTankDao.insertMetaDataTank(metadataTank)>0)){
-				throw new RuntimeException("insertMetaDataTank Error");
-			}
 
 			HSSFSheet sheet=null;
 
@@ -125,7 +88,7 @@ public class FileMetadataCollectService {
 					Metadata metadataTable = new Metadata();
 					metadataTable.setNAME(tableName);
 					metadataTable.setCOLLECTJOBID(collectjobid);
-					metadataTable.setMETAMODELID(110);
+					metadataTable.setMETAMODELID(31);
 					metadataTable.setCREATETIME(createDate);
 					metadataTable.setUPDATETIME(createDate);
 					metadataTable.setCHECKSTATUS("1");
@@ -155,9 +118,9 @@ public class FileMetadataCollectService {
 						throw new RuntimeException("insertMetaDataTank Error");
 					}
 
-					metadataRelation.setMetaDataId(metadataFile.getID());
+					metadataRelation.setMetaDataId(databaseid);
 					metadataRelation.setRelateMetaDataId(metadataTable.getID());
-					metadataRelation.setType("DEPENDENCY");
+					metadataRelation.setType("COMPOSITION");
 
 					if(!(metaDataRelationService.insertMetaDataRelation(metadataRelation))){//插入不成功
 						throw new RuntimeException("元数据关系插入失败");
@@ -165,7 +128,8 @@ public class FileMetadataCollectService {
 
 					HSSFRow tempRow = sheet.getRow(1);
 					for(int j = 0 ; j < tempRow.getPhysicalNumberOfCells(); j++){
-						map.put(tempRow.getCell(i).toString(), j);
+						map.put(tempRow.getCell(j).toString(), j);
+						System.out.println(tempRow.getCell(i).toString() + "..." + j);
 					}
 
 					for(int k = 2 ; k < sheet.getPhysicalNumberOfRows(); k++){
@@ -174,8 +138,8 @@ public class FileMetadataCollectService {
 							break;
 						}
 						String fieldTypeAndLength = row.getCell(map.get("type")).toString();
-						String fieldType = null;
-						String fieldLength = null;
+						String fieldType = fieldTypeAndLength;
+						String fieldLength = "0";
 						if(fieldTypeAndLength.contains("（")){
 							fieldType = fieldTypeAndLength.split("（")[0];
 							fieldLength = fieldTypeAndLength.substring(fieldTypeAndLength.indexOf("（")+1,fieldTypeAndLength.indexOf("）"));
@@ -248,51 +212,13 @@ public class FileMetadataCollectService {
 	 * 时间:2018年5月7日
 	 * 作用:根据file_connectinfo信息，自动采集XML文件元数据
 	 */
-	public  void collectXmlMetadata(String filename,int collectjobid ,Date createDate){
+	public  void collectXmlMetadata(String filename,int collectjobid ,Date createDate,int databaseId){
 		try {
 			File file = new File(GlobalMethodAndParams.PATH_NAME + filename);
 
 
 			MetaDataRelation metadataRelation = new MetaDataRelation();
-
-			//1.将文件元数据存入元数据表	
-			Metadata metadataFile = new Metadata();
-			metadataFile.setNAME(filename);
-			metadataFile.setCOLLECTJOBID(collectjobid);
-			metadataFile.setMETAMODELID(110);
-			metadataFile.setCREATETIME(createDate);
-			metadataFile.setUPDATETIME(createDate);
-			metadataFile.setCHECKSTATUS("1");
-			metadataFile.setVERSION(1);
-			String databaseAttributes = "{\"filename\":\""+ filename
-					+"\",\"filetype\":\"" + "1"
-					+"\",\"filelength\":\"" + CalDataSize.getPrintSize(file.length())
-					+"\",\"filepath\":\"" + GlobalMethodAndParams.PATH_NAME
-					+"\"}";	
-
-			metadataFile.setATTRIBUTES(databaseAttributes);
-
-			if(!(iMetaDataDao.insertMetadata(metadataFile)>0 ? true:false)){//插入不成功
-				throw new RuntimeException("数据库元数据插入失败");
-			}
-
-			//2.将文件元数据加入metadata_tank表
 			MetadataTank metadataTank = new MetadataTank();
-			metadataTank.setCHECKSTATUS(metadataFile.getCHECKSTATUS());
-			metadataTank.setATTRIBUTES(metadataFile.getATTRIBUTES());
-			metadataTank.setCREATETIME(new Date());
-			metadataTank.setDESCRIPTION(metadataFile.getDESCRIPTION());
-			metadataTank.setKeyid(metadataFile.getID());
-			metadataTank.setMETAMODELID(metadataFile.getMETAMODELID());
-			metadataTank.setNAME(metadataFile.getNAME());
-			metadataTank.setUPDATETIME(new Date());
-			metadataTank.setVERSION(metadataFile.getVERSION());
-			metadataTank.setCOLLECTJOBID(collectjobid);
-
-			if(!(iMetadataTankDao.insertMetaDataTank(metadataTank)>0)){
-				throw new RuntimeException("insertMetaDataTank Error");
-			}
-
 			SAXReader reader=new SAXReader();
 			//读取xml文件到Document中
 			Document doc=reader.read(file);
@@ -340,7 +266,7 @@ public class FileMetadataCollectService {
 					throw new RuntimeException("insertMetaDataTank Error");
 				}
 
-				metadataRelation.setMetaDataId(metadataFile.getID());
+				metadataRelation.setMetaDataId(databaseId);
 				metadataRelation.setRelateMetaDataId(metadataTable.getID());
 				metadataRelation.setType("DEPENDENCY");
 
@@ -357,7 +283,7 @@ public class FileMetadataCollectService {
 
 					String fieldTypeAndLength = map.get("type").toString();
 					String fieldType = fieldTypeAndLength;
-					String fieldLength = null;
+					String fieldLength = "0";
 					if(fieldTypeAndLength.contains("（")){
 						fieldType = fieldTypeAndLength.split("（")[0];
 						fieldLength = fieldTypeAndLength.substring(fieldTypeAndLength.indexOf("（")+1,fieldTypeAndLength.indexOf("）"));
@@ -386,7 +312,7 @@ public class FileMetadataCollectService {
 						throw new RuntimeException("字段元数据插入失败");
 					}
 
-					metadataRelation.setMetaDataId(metadataFile.getID());
+					metadataRelation.setMetaDataId(metadataTable.getID());
 					metadataRelation.setRelateMetaDataId(metadataField.getID());
 					metadataRelation.setType("COMPOSITION");
 
@@ -423,49 +349,12 @@ public class FileMetadataCollectService {
 	 * 作用:根据file_connectinfo信息，自动采集JSON文件元数据
 	 * @throws Exception 
 	 */
-	public  void collectJSONMetadata(String filename,int collectjobid ,Date createDate){
+	public  void collectJSONMetadata(String filename,int collectjobid ,Date createDate,int databaseId){
 		try{
 			File file =  new File(GlobalMethodAndParams.PATH_NAME + filename);			
 
 			MetaDataRelation metadataRelation = new MetaDataRelation();
-
-			//1.将文件元数据存入元数据表	
-			Metadata metadataFile = new Metadata();
-			metadataFile.setNAME(filename);
-			metadataFile.setCOLLECTJOBID(collectjobid);
-			metadataFile.setMETAMODELID(110);
-			metadataFile.setCREATETIME(createDate);
-			metadataFile.setUPDATETIME(createDate);
-			metadataFile.setCHECKSTATUS("1");
-			metadataFile.setVERSION(1);
-			String databaseAttributes = "{\"filename\":\""+ filename
-					+"\",\"filetype\":\"" + "1"
-					+"\",\"filelength\":\"" + CalDataSize.getPrintSize(file.length())
-					+"\",\"filepath\":\"" + GlobalMethodAndParams.PATH_NAME
-					+"\"}";	
-
-			metadataFile.setATTRIBUTES(databaseAttributes);
-
-			if(!(iMetaDataDao.insertMetadata(metadataFile)>0 ? true:false)){//插入不成功
-				throw new RuntimeException("文件元数据插入失败");
-			}
-
-			//2.将文件元数据加入metadata_tank表
 			MetadataTank metadataTank = new MetadataTank();
-			metadataTank.setCHECKSTATUS(metadataFile.getCHECKSTATUS());
-			metadataTank.setATTRIBUTES(metadataFile.getATTRIBUTES());
-			metadataTank.setCREATETIME(new Date());
-			metadataTank.setDESCRIPTION(metadataFile.getDESCRIPTION());
-			metadataTank.setKeyid(metadataFile.getID());
-			metadataTank.setMETAMODELID(metadataFile.getMETAMODELID());
-			metadataTank.setNAME(metadataFile.getNAME());
-			metadataTank.setUPDATETIME(new Date());
-			metadataTank.setVERSION(metadataFile.getVERSION());
-			metadataTank.setCOLLECTJOBID(collectjobid);
-
-			if(!(iMetadataTankDao.insertMetaDataTank(metadataTank)>0)){
-				throw new RuntimeException("insertMetaDataTank Error");
-			}
 
 			ObjectMapper mapper = new ObjectMapper();
 			JSONObject maps = mapper.readValue(file, JSONObject.class);
@@ -509,7 +398,7 @@ public class FileMetadataCollectService {
 					throw new RuntimeException("insertMetaDataTank Error");
 				}
 
-				metadataRelation.setMetaDataId(metadataFile.getID());
+				metadataRelation.setMetaDataId(databaseId);
 				metadataRelation.setRelateMetaDataId(metadataTable.getID());
 				metadataRelation.setType("DEPENDENCY");
 
@@ -522,7 +411,7 @@ public class FileMetadataCollectService {
 					JSONObject fieldJson = (JSONObject)table.get(j);
 					String fieldTypeAndLength = fieldJson.get("type").toString();
 					String fieldType = fieldTypeAndLength;
-					String fieldLength = null;
+					String fieldLength = "0";
 					if(fieldTypeAndLength.contains("（")){
 						fieldType = fieldTypeAndLength.split("（")[0];
 						fieldLength = fieldTypeAndLength.substring(fieldTypeAndLength.indexOf("（")+1,fieldTypeAndLength.indexOf("）"));
@@ -551,7 +440,7 @@ public class FileMetadataCollectService {
 						throw new RuntimeException("字段元数据插入失败");
 					}
 
-					metadataRelation.setMetaDataId(metadataFile.getID());
+					metadataRelation.setMetaDataId(metadataTable.getID());
 					metadataRelation.setRelateMetaDataId(metadataField.getID());
 					metadataRelation.setType("COMPOSITION");
 
@@ -586,51 +475,14 @@ public class FileMetadataCollectService {
 	 * 时间:2018年5月7日
 	 * 作用:根据file_connectinfo信息，自动采集TXT文件元数据
 	 */
-	public void collectTXTMetadata(String filename,String flag,int collectjobid ,Date createDate){
+	public void collectTXTMetadata(String filename,String flag,int collectjobid ,Date createDate,int databaseId){
 		File file = new File(GlobalMethodAndParams.PATH_NAME + filename);
 		try {
 			MetaDataRelation metadataRelation = new MetaDataRelation();
+			MetadataTank metadataTank = new MetadataTank();
 			//存储表格列名，name,type,default,isNull,description
 			Map<String,Integer> map = new HashMap<String, Integer>();
-
-			//1.将文件元数据存入元数据表	
-			Metadata metadataFile = new Metadata();
-			metadataFile.setNAME(filename);
-			metadataFile.setCOLLECTJOBID(collectjobid);
-			metadataFile.setMETAMODELID(110);
-			metadataFile.setCREATETIME(createDate);
-			metadataFile.setUPDATETIME(createDate);
-			metadataFile.setCHECKSTATUS("1");
-			metadataFile.setVERSION(1);
-			String databaseAttributes = "{\"filename\":\""+ filename
-					+"\",\"filetype\":\"" + "1"
-					+"\",\"filelength\":\"" + CalDataSize.getPrintSize(file.length())
-					+"\",\"filepath\":\"" + GlobalMethodAndParams.PATH_NAME
-					+"\"}";	
-
-			metadataFile.setATTRIBUTES(databaseAttributes);
-
-			if(!(iMetaDataDao.insertMetadata(metadataFile)>0 ? true:false)){//插入不成功
-				throw new RuntimeException("文件元数据插入失败");
-			}
-
-			//2.将文件元数据加入metadata_tank表
-			MetadataTank metadataTank = new MetadataTank();
-			metadataTank.setCHECKSTATUS(metadataFile.getCHECKSTATUS());
-			metadataTank.setATTRIBUTES(metadataFile.getATTRIBUTES());
-			metadataTank.setCREATETIME(new Date());
-			metadataTank.setDESCRIPTION(metadataFile.getDESCRIPTION());
-			metadataTank.setKeyid(metadataFile.getID());
-			metadataTank.setMETAMODELID(metadataFile.getMETAMODELID());
-			metadataTank.setNAME(metadataFile.getNAME());
-			metadataTank.setUPDATETIME(new Date());
-			metadataTank.setVERSION(metadataFile.getVERSION());
-			metadataTank.setCOLLECTJOBID(collectjobid);
-
-			if(!(iMetadataTankDao.insertMetaDataTank(metadataTank)>0)){
-				throw new RuntimeException("insertMetaDataTank Error");
-			}
-
+			
 			InputStreamReader insr = new InputStreamReader(new FileInputStream(file));
 			BufferedReader br = new BufferedReader(insr);
 			String start = br.readLine();
@@ -680,7 +532,7 @@ public class FileMetadataCollectService {
 						throw new RuntimeException("insertMetaDataTank Error");
 					}
 
-					metadataRelation.setMetaDataId(metadataFile.getID());
+					metadataRelation.setMetaDataId(databaseId);
 					metadataRelation.setRelateMetaDataId(metadataTable.getID());
 					metadataRelation.setType("DEPENDENCY");
 
@@ -697,7 +549,7 @@ public class FileMetadataCollectService {
 						String[] data = temp.split("\t");
 						String fieldTypeAndLength = data[Integer.parseInt((map.get("type")).toString())];
 						String fieldType = fieldTypeAndLength;
-						String fieldLength = null;
+						String fieldLength = "0";
 						if(fieldTypeAndLength.contains("（")){
 							fieldType = fieldTypeAndLength.split("（")[0];
 							fieldLength = fieldTypeAndLength.substring(fieldTypeAndLength.indexOf("（")+1,fieldTypeAndLength.indexOf("）"));

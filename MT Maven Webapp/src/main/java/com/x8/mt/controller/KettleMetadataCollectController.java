@@ -20,6 +20,7 @@ import org.apache.shiro.session.Session;
 import org.apache.shiro.subject.Subject;
 import org.pentaho.di.core.exception.KettleException;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -70,6 +71,7 @@ public class KettleMetadataCollectController {
 	@Resource
 	Metamodel_datatypeService metamodel_datatypeService;
 	
+	
 	/**
 	 * 
 	 * 作者:itcoder
@@ -80,6 +82,7 @@ public class KettleMetadataCollectController {
 	 */
 	@RequestMapping(value = "/updateMetaDataCheckstatus",method=RequestMethod.POST)
 	@ResponseBody
+	@Transactional
 	@Log(operationType="metadata",operationDesc="根据入参id，describe修改描述字段")
 	public JSONObject updateMetaDataCheckstatus(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map) {
 		JSONObject responsejson = new JSONObject();
@@ -146,6 +149,7 @@ public class KettleMetadataCollectController {
 	 */
 	@RequestMapping(value = "/deleteMetadataById",method=RequestMethod.POST)
 	@ResponseBody
+	@Transactional
 	@Log(operationType="metadata",operationDesc="根据入参id删除元数据")
 	public JSONObject deleteMetadataById(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map) {
 		JSONObject responsejson = new JSONObject();
@@ -197,6 +201,7 @@ public class KettleMetadataCollectController {
 	 */
 	@RequestMapping(value = "/updateMetaDataDescribeById",method=RequestMethod.POST)
 	@ResponseBody
+	@Transactional
 	@Log(operationType="metadata",operationDesc="根据入参id，describe修改描述字段")
 	public JSONObject updateMetaDataDescribeById(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map) {
 		JSONObject responsejson = new JSONObject();
@@ -317,6 +322,7 @@ public class KettleMetadataCollectController {
 	 */
 	@RequestMapping(value = "/metadataAutoCollect",method=RequestMethod.POST)
 	@ResponseBody
+	@Transactional
 	@Log(operationType="metadata,metadata_relation",operationDesc="kettle自动采集关系型数据库元数据")
 	public JSONObject metadataAutoCollect(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map) throws KettleException{
 		JSONObject responsejson = new JSONObject();
@@ -369,10 +375,14 @@ public class KettleMetadataCollectController {
 		Connectinfo connectinfo = connectinfoService.getConnectinfoByid(id);
 		
 		//删除以前采集的元数据
-		CollectJob oldCollectJob = collectJobService.getRecentCollectJobByConnectinfoId(id);
-		if(oldCollectJob != null){
-			metaDataService.deleteMetadataByCollectJobId(oldCollectJob.getId());		
-		}
+		List<Connectinfo> connectinfoList = connectinfoService.getConnectinfoListBymountmetadataid(connectinfo.getMountMetaDataId());
+		for(Connectinfo connect : connectinfoList){
+			CollectJob oldCollectJob = collectJobService.getRecentCollectJobByConnectinfoId(id);
+			if(oldCollectJob != null){
+				metaDataService.deleteMetadataByCollectJobId(oldCollectJob.getId());		
+			}
+		}	
+
 		
 		CollectJob newCollectJob = new CollectJob(name,connectinfoid,mode,checkResult,createDate,creater);			
 		collectJobService.insertCollectJob(newCollectJob);				
@@ -397,66 +407,69 @@ public class KettleMetadataCollectController {
 			//表示接下来采集元数据
 			Metadata metadata = metaDataService.getMetadataById(connectinfo.getMountMetaDataId());
 			int mountmodelid = metadata.getMETAMODELID();
-
-			if(mountmodelid == 10){	
-				Datasource_connectinfo datasource_connectinfo = datasource_connectinfoService.getDatasource_connectinfoListByparentid(id);	
-
-				//采集的数据库和表的数量以及大小
-				String tableSize ;
-				//采集的字段的数量以及大小
-				String fieldSize ;
-				
-				tableSize = kettleMetadataCollectService.collectDataBaseAndTableMetaData(datasource_connectinfo,newCollectJob.getId(),createDate,tables,connectinfo.getMountMetaDataId());
-				fieldSize = kettleMetadataCollectService.collectFieldMetaData(datasource_connectinfo,newCollectJob.getId(),createDate,tables);				
-				
-				for(Table table : tables){
-					JSONObject node = new JSONObject();
-					node.put("tablename", table.getName());
-					node.put("operationname", table.getOperationName());
-					node.put("operationdescribe", table.getOperationDescription());
-					data.add(node);
-				}			
-				String[] temp = tableSize.split("_");
-				responsejson.put("tableLength",temp[0]);
-				responsejson.put("tableSize",CalDataSize.getPrintSize(Integer.parseInt(temp[1])));
-				
-				temp = fieldSize.split("_");				
-				responsejson.put("fieldLength",temp[0]);
-				responsejson.put("fieldSize",CalDataSize.getPrintSize(Integer.parseInt(temp[1])));
-				responsejson.put("collectionId",newCollectJob.getId());			
-
-			}else if(mountmodelid == 202){
-				Datasource_connectinfo datasource_connectinfo = datasource_connectinfoService.getDatasource_connectinfoListByparentid(id);	
-				String repositoryName = connectinfo.getName();				
-				kettleMetadataCollectService.collectKettleJob(datasource_connectinfo,newCollectJob.getId(),createDate,repositoryName,tables,connectinfo.getMountMetaDataId());
 			
-				for(Table table : tables){
-					JSONObject node = new JSONObject();
-					node.put("tablename", table.getName());
-					node.put("operationname", table.getOperationName());
-					node.put("operationdescribe", table.getOperationDescription());
-					data.add(node);
-				}	
-				responsejson.put("collectionId",newCollectJob.getId());	
-			}else if(mountmodelid == 110){
+			if(connectinfo.getType().equals("file")){
 				File_connectinfo file_connectinfo = file_connectinfoService.getFile_connectinfoListByparentid(id);
 				String filename = file_connectinfo.getFilename();
 				if(file_connectinfo.getFiletype() == 1){					
-					fileMetadataCollectService.collectExcelMetaData(filename,newCollectJob.getId(),createDate);
+					fileMetadataCollectService.collectExcelMetaData(filename,newCollectJob.getId(),createDate,connectinfo.getMountMetaDataId());
 				}else if(file_connectinfo.getFiletype() == 2){
-					fileMetadataCollectService.collectJSONMetadata(filename,newCollectJob.getId(),createDate);
+					fileMetadataCollectService.collectJSONMetadata(filename,newCollectJob.getId(),createDate,connectinfo.getMountMetaDataId());
 				}else if(file_connectinfo.getFiletype() == 3){
-					fileMetadataCollectService.collectXmlMetadata(filename,newCollectJob.getId(),createDate);
+					fileMetadataCollectService.collectXmlMetadata(filename,newCollectJob.getId(),createDate,connectinfo.getMountMetaDataId());
 				}else if(file_connectinfo.getFiletype() == 4){
-					fileMetadataCollectService.collectTXTMetadata(filename, ";",newCollectJob.getId(),createDate);;
+					fileMetadataCollectService.collectTXTMetadata(filename, ";",newCollectJob.getId(),createDate,connectinfo.getMountMetaDataId());;
 				}
 				JSONObject node = new JSONObject();
 				node.put("tablename", file_connectinfo.getFilename());
 				node.put("operationname", null);
 				node.put("operationdescribe", null);
 				data.add(node);
+			}else if(connectinfo.getType().equals("database")){
+				if(mountmodelid == 10){	
+					Datasource_connectinfo datasource_connectinfo = datasource_connectinfoService.getDatasource_connectinfoListByparentid(id);	
+
+					//采集的数据库和表的数量以及大小
+					String tableSize ;
+					//采集的字段的数量以及大小
+					String fieldSize ;
+					
+					tableSize = kettleMetadataCollectService.collectDataBaseAndTableMetaData(datasource_connectinfo,newCollectJob.getId(),createDate,tables,connectinfo.getMountMetaDataId());
+					fieldSize = kettleMetadataCollectService.collectFieldMetaData(datasource_connectinfo,newCollectJob.getId(),createDate,tables);				
+					
+					for(Table table : tables){
+						JSONObject node = new JSONObject();
+						node.put("tablename", table.getName());
+						node.put("operationname", table.getOperationName());
+						node.put("operationdescribe", table.getOperationDescription());
+						data.add(node);
+					}			
+					String[] temp = tableSize.split("_");
+					responsejson.put("tableLength",temp[0]);
+					responsejson.put("tableSize",CalDataSize.getPrintSize(Integer.parseInt(temp[1])));
+					
+					temp = fieldSize.split("_");				
+					responsejson.put("fieldLength",temp[0]);
+					responsejson.put("fieldSize",CalDataSize.getPrintSize(Integer.parseInt(temp[1])));
+		
+
+				}else if(mountmodelid == 202){
+					Datasource_connectinfo datasource_connectinfo = datasource_connectinfoService.getDatasource_connectinfoListByparentid(id);	
+					String repositoryName = connectinfo.getName();				
+					kettleMetadataCollectService.collectKettleJob(datasource_connectinfo,newCollectJob.getId(),createDate,repositoryName,tables,connectinfo.getMountMetaDataId());
+				
+					for(Table table : tables){
+						JSONObject node = new JSONObject();
+						node.put("tablename", table.getName());
+						node.put("operationname", table.getOperationName());
+						node.put("operationdescribe", table.getOperationDescription());
+						data.add(node);
+					}	
+					responsejson.put("collectionId",newCollectJob.getId());	
+				}
 			}
 			
+			responsejson.put("collectionId",newCollectJob.getId());	
 			responsejson.put("result", true);
 			responsejson.put("data",data);
 			responsejson.put("count",data.size());
@@ -510,12 +523,12 @@ public class KettleMetadataCollectController {
 		}
 		
 		Connectinfo connectinfo = connectinfoService.getConnectinfoByid(id);
-		List<Connectinfo> connectinfoList = connectinfoService.getConnectinfoListBymountmetadataid(connectinfo.getId());
+		List<Connectinfo> connectinfoList = connectinfoService.getConnectinfoListBymountmetadataid(connectinfo.getMountMetaDataId());
 		
 		try {
 			for(Connectinfo connect : connectinfoList){
 				List<CollectJob> collectJob = collectJobService.getCollectJobByConnectinfoId(connect.getId());
-				if(!collectJob.isEmpty()  || collectJob.size() > 0){
+				if(collectJob.size() > 1){
 					responsejson.put("result", false);
 					responsejson.put("flag",0);
 					responsejson.put("desciption","数据源已经采集");
@@ -528,6 +541,7 @@ public class KettleMetadataCollectController {
 			responsejson.put("desciption","数据源未采集");
 			responsejson.put("count",1);
 		} catch (Exception e) {
+			e.printStackTrace();
 			responsejson.put("result", false);
 			responsejson.put("flag",2);
 			responsejson.put("count",0);
@@ -545,6 +559,7 @@ public class KettleMetadataCollectController {
 	 */
 	@RequestMapping(value = "/getTables",method=RequestMethod.POST)
 	@ResponseBody
+	@Transactional
 	@Log(operationType="null",operationDesc="根据数据源信息获取表结构，并判断采集名称是否正确")
 	public JSONObject getTables(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map){
 		JSONObject responsejson = new JSONObject();
@@ -588,20 +603,34 @@ public class KettleMetadataCollectController {
 		
 		try {
 			Connectinfo connectinfo = connectinfoService.getConnectinfoByid(id);
-			Datasource_connectinfo datasource_connectinfo = datasource_connectinfoService.getDatasource_connectinfoListByparentid(id);	
-			//CollectJob collectJob = collectJobService.getRecentCollectJobByConnectinfoId(id);
-			List<Table> tables = kettleMetadataCollectService.getTables(datasource_connectinfo,connectinfo.getMountMetaDataId(),0);
-			JSONArray data = new JSONArray();
-			for(Table table : tables){
+			if(connectinfo.getType().equals("file")){
+				JSONArray data = new JSONArray();
 				JSONObject node = new JSONObject();
-				node.put("tablename", table.getName());
-				node.put("operationname", table.getOperationName());
-				node.put("operationdescribe", table.getOperationDescription());
+				node.put("tablename", connectinfo.getName());
+				node.put("operationname", connectinfo.getName());
+				node.put("operationdescribe", connectinfo.getDescription());
 				data.add(node);
+				responsejson.put("result", true);
+				responsejson.put("data",data);
+				responsejson.put("count",data.size());
+			}else if (connectinfo.getType().equals("database")){
+				Metadata metadata = metaDataService.getMetadataById(connectinfo.getMountMetaDataId());
+				Datasource_connectinfo datasource_connectinfo = datasource_connectinfoService.getDatasource_connectinfoListByparentid(id);	
+				//CollectJob collectJob = collectJobService.getRecentCollectJobByConnectinfoId(id);
+				List<Table> tables = kettleMetadataCollectService.getTables(datasource_connectinfo,metadata.getMETAMODELID());
+				JSONArray data = new JSONArray();
+				for(Table table : tables){
+					JSONObject node = new JSONObject();
+					node.put("tablename", table.getName());
+					node.put("operationname", table.getOperationName());
+					node.put("operationdescribe", table.getOperationDescription());
+					data.add(node);
+				}
+				responsejson.put("result", true);
+				responsejson.put("data",data);
+				responsejson.put("count",data.size());
 			}
-			responsejson.put("result", true);
-			responsejson.put("data",data);
-			responsejson.put("count",data.size());
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			responsejson.put("result", false);
@@ -730,7 +759,7 @@ public class KettleMetadataCollectController {
 				node.put("databasename",connectinfoService.getConnectinfoByid(collectJob.getConnectinfoId()).getName());
 				node.put("createdate", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(collectJob.getCreateDate()));
 				node.put("creater", collectJob.getCreater());
-				node.put("checkresult", collectJob.getCheckResult().equals("1")?"已审核":"未审核");
+				node.put("checkresult", kettleMetadataCollectService.getCheckResult(collectJob.getCheckResult()));
 				data.add(node);
 			}
 			
@@ -798,7 +827,7 @@ public class KettleMetadataCollectController {
 				node.put("databasename",connectinfoService.getConnectinfoByid(collectJob.getConnectinfoId()).getName());
 				node.put("createdate", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(collectJob.getCreateDate()));
 				node.put("creater", collectJob.getCreater());
-				node.put("checkresult", collectJob.getCheckResult().equals("1")?"已审核":"未审核");
+				node.put("checkresult",kettleMetadataCollectService.getCheckResult(collectJob.getCheckResult()));
 				data.add(node);
 			}
 			
@@ -856,7 +885,7 @@ public class KettleMetadataCollectController {
 				data.put("databasename",connectinfoService.getConnectinfoByid(collectJob.getConnectinfoId()).getName());
 				data.put("createdate", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(collectJob.getCreateDate()));
 				data.put("creater", collectJob.getCreater());
-				data.put("checkresult", collectJob.getCheckResult().equals("1")?"已审核":"未审核");		
+				data.put("checkresult", kettleMetadataCollectService.getCheckResult(collectJob.getCheckResult()));		
 				responsejson.put("result",true);
 				responsejson.put("data",data);
 				responsejson.put("count",data.size());

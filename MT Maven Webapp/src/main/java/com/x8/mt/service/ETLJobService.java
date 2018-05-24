@@ -382,7 +382,29 @@ public class ETLJobService {
 			fieldDatabase+=","+iMetaDataDao.getMetadataById(Integer.parseInt((String)TransformMetadata.transformMetadataToMap(metadatas.get(i)).get("targetfieldid"))).getNAME();	
 		}
 		Datasource_connectinfo datasource_connectinfo =iDatasource_connectinfoDao.getDatasource_connectinfoListByparentid(iCollectJobDao.getCollectJobById(iMetaDataDao.getMetadataById(srctableid).getCOLLECTJOBID()).getConnectinfoId());
+		if(datasource_connectinfo == null){
+			Datasource_connectinfo temp =  new Datasource_connectinfo();
+			Metadata metadata = iMetaDataDao.getFileSourceMetadata(etlJob.getMappingid());
+			Map<String, Object> map = TransformMetadata.transformMetadataToMap(metadata);
+			temp.setDatabasetype(map.get("dbtype").toString());
+			temp.setDatabasename(map.get("dbname").toString());
+			temp.setUrl(map.get("dbip").toString());
+			temp.setUsername(map.get("dbuser").toString());
+			temp.setPassword(map.get("dbname").toString());
+			datasource_connectinfo = temp;
+		}
 		Datasource_connectinfo datatarget_connectinfo =iDatasource_connectinfoDao.getDatasource_connectinfoListByparentid(iCollectJobDao.getCollectJobById(iMetaDataDao.getMetadataById(etlJob.getMappingid()).getCOLLECTJOBID()).getConnectinfoId());
+		if(datatarget_connectinfo == null){
+			Datasource_connectinfo temp =  new Datasource_connectinfo();
+			Metadata metadata = iMetaDataDao.getFileSourceMetadata(etlJob.getMappingid());
+			Map<String, Object> map = TransformMetadata.transformMetadataToMap(metadata);
+			temp.setDatabasetype(map.get("dbtype").toString());
+			temp.setDatabasename(map.get("dbname").toString());
+			temp.setUrl(map.get("dbip").toString());
+			temp.setUsername(map.get("dbuser").toString());
+			temp.setPassword(map.get("dbname").toString());
+			datatarget_connectinfo = temp;
+		}
 		job.setSource(datasource_connectinfo);
 		job.setTarget(datatarget_connectinfo);
 		job.setSource_table(source_table);
@@ -619,9 +641,24 @@ public class ETLJobService {
 	public boolean dynamicCreateTable(ETLJob etlJob){		
 		Datasource_connectinfo datasource_connectinfo =iDatasource_connectinfoDao.getDatasource_connectinfoListByparentid(iCollectJobDao.getCollectJobById(iMetaDataDao.getMetadataById(etlJob.getMappingid()).getCOLLECTJOBID()).getConnectinfoId());
 		
+		if(datasource_connectinfo == null){
+			Datasource_connectinfo temp =  new Datasource_connectinfo();
+			Metadata metadata = iMetaDataDao.getFileSourceMetadata(etlJob.getMappingid());
+			Map<String, Object> map = TransformMetadata.transformMetadataToMap(metadata);
+			temp.setDatabasetype(map.get("dbtype").toString());
+			temp.setDatabasename(map.get("dbname").toString());
+			temp.setUrl(map.get("dbip").toString());
+			temp.setUsername(map.get("dbuser").toString());
+			temp.setPassword(map.get("dbpassword").toString());
+			temp.setPort(map.get("dbport").toString());
+			datasource_connectinfo = temp;
+			System.out.println(datasource_connectinfo.getUrl());
+			System.out.println(datasource_connectinfo.getUsername());
+			System.out.println(datasource_connectinfo.getPassword());
+		}
 		//声明Connection对象
 		Connection con;
-		String driver = null;
+		String driver = "com.mysql.jdbc.Driver";
 		if(datasource_connectinfo.getDatabasetype().toString().equals("mysql")){
 			driver = "com.mysql.jdbc.Driver";
 		}else if (datasource_connectinfo.getDatabasetype().toString().equals("postgresql")){
@@ -639,6 +676,7 @@ public class ETLJobService {
 		try {
 			//加载驱动程序
 			Class.forName(driver);
+			System.out.println(url + "..." + user + "..." + password );
 			//1.getConnection()方法，连接数据库！！
 			con = DriverManager.getConnection(url,user,password);
 			//2.创建statement类对象，用来执行SQL语句！！

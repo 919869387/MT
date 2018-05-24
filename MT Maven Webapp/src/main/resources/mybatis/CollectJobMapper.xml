@@ -39,10 +39,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		select * from collectjob where name= #{name}
 	</select>
 	
-	<select id="updateCollectJobCheckResult" parameterType="String" resultType="com.x8.mt.entity.CollectJob">
+	<update id="updateCollectJobCheckResult" parameterType="com.x8.mt.entity.CollectJob">
 		update
-		collectjob set checkresult = #{checkresult} where id=#{id}
-	</select>
+		collectjob set checkresult = #{checkResult} where id=#{id}
+	</update>
 	
 	
 </mapper>

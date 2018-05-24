@@ -130,6 +130,7 @@ public class CollectJobService {
 		try{
 			return (iCollectJobDao.updateCollectJobCheckResult(collectjob));
 		}catch(Exception e){
+			e.printStackTrace();
 			return false;
 		}
 	}

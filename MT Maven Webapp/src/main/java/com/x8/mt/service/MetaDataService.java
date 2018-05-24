@@ -128,6 +128,22 @@ public class MetaDataService {
 			return false;
 		}		
 	}
+	
+	/**
+	 * 
+	 * 作者:GodDipose
+	 * 时间:2018年3月14日
+	 * 作用:插入元数据
+	 */
+	public boolean insertMetadataWithoutCollecjob(Metadata metadata){
+		try{
+			return iMetadataDao.insertMetadataWithoutCollecjob(metadata) > 0 ? true : false;
+		}catch(Exception e){
+			e.printStackTrace();
+			return false;
+		}		
+	}
+	
 	/**
 	 * 
 	 * 作者:GodDipose
@@ -171,7 +187,13 @@ public class MetaDataService {
 	}
 
 	public boolean updateMetadataCheckstatus(Metadata metadata) {
-		return imetadataManagementDao.updataMetadataCheckstatus(metadata);
+		try{
+			return imetadataManagementDao.updataMetadataCheckstatus(metadata);
+		}catch(Exception e){
+			e.printStackTrace();
+			return false;
+		}
+		
 	}
 
 	/**
@@ -229,6 +251,21 @@ public class MetaDataService {
 	public List<Metadata> getAvailableMountMetadata(){
 		try{
 			return iMetadataDao.getAvailableMountMetadata();			
+		}catch(Exception e){
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	/**
+	 * 
+	 * 作者:GodDispose
+	 * 时间:2018年5月19日
+	 * 作用:查找文件元数据所挂载的数据库元数据
+	 */
+	public Metadata getFileSourceMetadata(int id){
+		try{
+			return iMetadataDao.getFileSourceMetadata(id);			
 		}catch(Exception e){
 			e.printStackTrace();
 			return null;

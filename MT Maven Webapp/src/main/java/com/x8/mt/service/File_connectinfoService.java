@@ -76,7 +76,6 @@ public class File_connectinfoService {
 		try {
 			return iFile_connectinfoDao.insert(File_connectinfo)>0 ? true:false;
 		} catch (Exception e) {
-			System.out.println("datasource");
 			e.printStackTrace();
 			return false;
 		}

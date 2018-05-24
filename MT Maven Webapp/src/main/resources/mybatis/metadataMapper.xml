@@ -22,6 +22,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		values(#{NAME},#{COLLECTJOBID},#{DESCRIPTION},#{METAMODELID},#{CREATETIME},#{UPDATETIME},#{CHECKSTATUS},#{ATTRIBUTES},#{VERSION})
 	</insert>
 	
+	<insert id="insertMetadataWithoutCollecjob" parameterType="com.x8.mt.entity.Metadata" 
+	useGeneratedKeys="true" keyProperty="ID">
+		insert into 		
+		metadata(name,description,metamodelid,createtime,updatetime,checkstatus,attributes,version)
+		values(#{NAME},#{DESCRIPTION},#{METAMODELID},#{CREATETIME},#{UPDATETIME},#{CHECKSTATUS},#{ATTRIBUTES},#{VERSION})
+	</insert>
+	
 	<select id="getMetadataByMetaModelId" resultType="com.x8.mt.entity.Metadata">
 		select * from metadata where metamodelid=#{id} and collectjobid is NULL
 	</select>
@@ -58,5 +65,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		select * from metadata 
 		where metamodelid in (select id from metamodel_hierarchy where mountnode = 1)
 		and collectjobid is NULL
+	</select>
+	
+	<select id="getFileSourceMetadata" resultType="com.x8.mt.entity.Metadata">
+		select * from 
+		metadata , (select metadataid from metadata_relation where relatedmetadataid = #{id}) as t
+		where metadata.id = t.metadataid
 	</select>
 </mapper>

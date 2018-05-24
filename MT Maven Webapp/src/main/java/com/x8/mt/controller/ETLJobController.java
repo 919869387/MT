@@ -20,6 +20,7 @@ import org.apache.shiro.session.Session;
 import org.apache.shiro.subject.Subject;
 import org.pentaho.di.core.exception.KettleException;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -68,6 +69,7 @@ public class ETLJobController {
 	 */
 	@RequestMapping(value = "/insertETLJobBySelf",method=RequestMethod.POST)
 	@ResponseBody
+	@Transactional
 	@Log(operationType="ETLJob",operationDesc="插入新的ETLJob任务")
 	public JSONObject insertETLJobBySelf(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map) throws Exception{
 		JSONObject responsejson = new JSONObject();
@@ -98,8 +100,13 @@ public class ETLJobController {
 			ETLJob etlJob = new ETLJob();
 			etlJob.setMappingid(Integer.parseInt((String)map.get("target_table_id")));
 			etlJob.setMetadata_id(metadata.getID());
-			if(Integer.parseInt(map.get("createTable").toString()) == 1){
-				etlJobService.dynamicCreateTable(etlJob);
+			if(map.containsKey("createTable")){				
+				if(Integer.parseInt(map.get("createTable").toString()) == 1){
+					if(!etlJobService.dynamicCreateTable(etlJob)){
+						metaDataService.deleteMetadataById(metadata.getID());
+						responsejson.put("result", false);
+					}
+				}
 			}
 			if(map.containsKey("description")){			
 				etlJob.setDescription((String)map.get("description"));
@@ -111,7 +118,8 @@ public class ETLJobController {
 			etlJob.setJobtype(0);
 			if(etlJobService.saveJob(etlJob) && etlJobService.insertETLJob(etlJob)){
 				responsejson.put("result",true );
-			}else{				
+			}else{	
+				metaDataService.deleteMetadataById(metadata.getID());
 				responsejson.put("result", false);
 			}
 		}else{
@@ -131,6 +139,7 @@ public class ETLJobController {
 	 */
 	@RequestMapping(value = "/insertETLJobByMetaData",method=RequestMethod.POST)
 	@ResponseBody
+	@Transactional
 	@Log(operationType="ETLJob",operationDesc="通过ETL元数据建立ETL任务")
 	public JSONObject insertETLJobByMetaData(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map){
 		JSONObject responsejson = new JSONObject();
@@ -184,6 +193,7 @@ public class ETLJobController {
 	 */
 	@RequestMapping(value = "/insertETLJobSchedule",method=RequestMethod.POST)
 	@ResponseBody
+	@Transactional
 	@Log(operationType="ETLJob",operationDesc="插入新的ETLJob调度任务")
 	public JSONObject insertETLJobSchedule(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map) throws Exception{
 		JSONObject responsejson = new JSONObject();
@@ -256,6 +266,7 @@ public class ETLJobController {
 	 */
 	@RequestMapping(value = "/getETLJobToSchedule",method=RequestMethod.GET)
 	@ResponseBody
+	@Transactional
 	@Log(operationType="ETLJob",operationDesc="获取能够添加调度的作业")
 	public JSONObject getETLJobToSchedule(HttpServletRequest request,HttpServletResponse response) {
 		JSONObject responsejson = new JSONObject();
@@ -288,6 +299,7 @@ public class ETLJobController {
 	 */
 	@RequestMapping(value = "/executeETLJob",method=RequestMethod.POST)
 	@ResponseBody
+	@Transactional
 	@Log(operationType="ETLJob",operationDesc="执行ETLJob")
 	public JSONObject executeETLJob(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map) throws UnsupportedEncodingException, KettleException, IOException{
 		JSONObject responsejson = new JSONObject();
@@ -327,6 +339,7 @@ public class ETLJobController {
 	 */
 	@RequestMapping(value = "/executeETLSchedule",method=RequestMethod.POST)
 	@ResponseBody
+	@Transactional
 	@Log(operationType="ETLJob",operationDesc="执行ETL调度")
 	public JSONObject executeETLSchedule(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map) throws UnsupportedEncodingException, KettleException, IOException{
 		JSONObject responsejson = new JSONObject();
@@ -359,6 +372,7 @@ public class ETLJobController {
 	 */
 	@RequestMapping(value = "/deleteETLJob",method=RequestMethod.POST)
 	@ResponseBody
+	@Transactional
 	@Log(operationType="ETLJob",operationDesc="根据id删除一个ETL任务")
 	public JSONObject deleteETLJob(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map) {
 		JSONObject responsejson = new JSONObject();
@@ -403,6 +417,7 @@ public class ETLJobController {
 	 */
 	@RequestMapping(value = "/deleteETLJobs",method=RequestMethod.POST)
 	@ResponseBody
+	@Transactional
 	@Log(operationType="ETLJob",operationDesc="根据id字符串（逗号隔开）删除多条数据")
 	public JSONObject deleteETLJobs(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map) {
 		JSONObject responsejson = new JSONObject();
@@ -439,6 +454,7 @@ public class ETLJobController {
 	 */
 	@RequestMapping(value = "/queryTargetTableIdAndName",method=RequestMethod.GET)
 	@ResponseBody
+	@Transactional
 	@Log(operationType="ETLJob",operationDesc="返回字段映射元数据（目标表）")
 	public JSONObject queryTargetTableIdAndName(HttpServletRequest request,HttpServletResponse response) {
 		JSONObject responsejson = new JSONObject();
@@ -475,6 +491,7 @@ public class ETLJobController {
 	 */
 	@RequestMapping(value = "/stopETLJob",method=RequestMethod.POST)
 	@ResponseBody
+	@Transactional
 	@Log(operationType="ETLJob",operationDesc="停止作业执行")
 	public JSONObject stopETLJob(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map) {
 		JSONObject responsejson = new JSONObject();
@@ -511,6 +528,7 @@ public class ETLJobController {
 	 */
 	@RequestMapping(value = "/stopETLSchedule",method=RequestMethod.POST)
 	@ResponseBody
+	@Transactional
 	@Log(operationType="Dispatch",operationDesc="停止调度执行")
 	public JSONObject stopETLSchedule(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map) {
 		JSONObject responsejson = new JSONObject();
@@ -542,6 +560,7 @@ public class ETLJobController {
 	 */
 	@RequestMapping(value = "/deleteETLSchedule",method=RequestMethod.POST)
 	@ResponseBody
+	@Transactional
 	@Log(operationType="Dispatch",operationDesc="根据id删除一个ETL调度")
 	public JSONObject deleteETLSchedule(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map) {
 		JSONObject responsejson = new JSONObject();
@@ -583,6 +602,7 @@ public class ETLJobController {
 	 */
 	@RequestMapping(value = "/deleteETLSchedules",method=RequestMethod.POST)
 	@ResponseBody
+	@Transactional
 	@Log(operationType="Dispatch",operationDesc="根据id字符串（逗号隔开）删除多条数据")
 	public JSONObject deleteETLSchedules(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map) {
 		JSONObject responsejson = new JSONObject();
@@ -618,53 +638,54 @@ public class ETLJobController {
 		 * 作用:获取分页数据(数据按 createDate 倒叙排序，新添加的在最前面)
 		 * 参数:page(页码)、pageSize(每页多少行)
 		 */
-		@RequestMapping(value = "/getETLJobListByPage",method=RequestMethod.POST)
-		@ResponseBody
-		@Log(operationType="ETLJob",operationDesc="获取分页ETLJob数据")
-		public JSONObject getETLJobListByPage(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map){
-			JSONObject responsejson = new JSONObject();
-	
-	//		if(!GlobalMethodAndParams.checkLogin()){
-	//			responsejson.put("result", false);
-	//			responsejson.put("count",0);
-	//			return responsejson;
-	//		}
-			GlobalMethodAndParams.setHttpServletResponse(request, response);
-	
-			//检查传参是否正确
-			if(!(map.containsKey("page")&&
-					map.containsKey("pageSize"))){
-				responsejson.put("result", false);
-				responsejson.put("count",0);
-				return responsejson;
-			}
-	
-			String currPageStr = map.get("page").toString();
-			String pageSizeStr = map.get("pageSize").toString();
-			int currPage = 1;
-			int pageSize = 1;
-			int type = 0;
-			try {
-				currPage = Integer.parseInt(currPageStr);
-				pageSize = Integer.parseInt(pageSizeStr);
-			} catch (Exception e) {
-			}
-			//获取总记录数
-			int rowCount = etlJobService.getRowCount("");
-			//构造分页数据
-			PageParam pageParam = new PageParam();
-			pageParam.setPageSize(pageSize);
-			pageParam.setRowCount(rowCount);
-			if(pageParam.getTotalPage()<currPage){
-				currPage = pageParam.getTotalPage();
-			}
-			pageParam.setCurrPage(currPage);
-			pageParam = etlJobService.getETLJobListByPage(pageParam);
-			if(pageParam.getData()==null|| pageParam.getData().isEmpty()){
-				responsejson.put("result", false);
-				responsejson.put("message", "没有查询到任务");
-				return responsejson;
-			}else{
+	@RequestMapping(value = "/getETLJobListByPage",method=RequestMethod.POST)
+	@ResponseBody
+	@Transactional
+	@Log(operationType="ETLJob",operationDesc="获取分页ETLJob数据")
+	public JSONObject getETLJobListByPage(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map){
+		JSONObject responsejson = new JSONObject();
+
+		//		if(!GlobalMethodAndParams.checkLogin()){
+		//			responsejson.put("result", false);
+		//			responsejson.put("count",0);
+		//			return responsejson;
+		//		}
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
+
+		//检查传参是否正确
+		if(!(map.containsKey("page")&&
+				map.containsKey("pageSize"))){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}
+
+		String currPageStr = map.get("page").toString();
+		String pageSizeStr = map.get("pageSize").toString();
+		int currPage = 1;
+		int pageSize = 1;
+		int type = 0;
+		try {
+			currPage = Integer.parseInt(currPageStr);
+			pageSize = Integer.parseInt(pageSizeStr);
+		} catch (Exception e) {
+		}
+		//获取总记录数
+		int rowCount = etlJobService.getRowCount("");
+		//构造分页数据
+		PageParam pageParam = new PageParam();
+		pageParam.setPageSize(pageSize);
+		pageParam.setRowCount(rowCount);
+		if(pageParam.getTotalPage()<currPage){
+			currPage = pageParam.getTotalPage();
+		}
+		pageParam.setCurrPage(currPage);
+		pageParam = etlJobService.getETLJobListByPage(pageParam);
+		if(pageParam.getData()==null|| pageParam.getData().isEmpty()){
+			responsejson.put("result", false);
+			responsejson.put("message", "没有查询到任务");
+			return responsejson;
+		}else{
 			JSONArray data = new JSONArray();
 			@SuppressWarnings("unchecked")
 			List<ETLJob> ETLJobList=pageParam.getData();
@@ -722,8 +743,8 @@ public class ETLJobController {
 			responsejson.put("total", etlJobService.getRowCount(""));
 			responsejson.put("count",ETLJobList.size());
 			return responsejson;
-			}
 		}
+	}
 
 	/**
 	 * 
@@ -734,6 +755,7 @@ public class ETLJobController {
 	 */
 	@RequestMapping(value = "/getETLScheduleListByPage",method=RequestMethod.POST)
 	@ResponseBody
+	@Transactional
 	@Log(operationType="Dispatch",operationDesc="获取分页ETLJSchedule数据")
 	public JSONObject getETLScheduleListByPage(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map){
 		JSONObject responsejson = new JSONObject();
@@ -816,6 +838,7 @@ public class ETLJobController {
 	 */
 	@RequestMapping(value = "/getETLScheduleListByDescription",method=RequestMethod.POST)
 	@ResponseBody
+	@Transactional
 	@Log(operationType="Dispatch",operationDesc="根据描述筛选，并获取分页ETLJSchedule数据")
 	public JSONObject getETLScheduleListByDescription(HttpServletRequest request,HttpServletResponse response,@RequestBody Map<String, Object> map){
 		JSONObject responsejson = new JSONObject();
