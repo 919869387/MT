@@ -611,7 +611,9 @@ public class Datasource_connectinfoController {
 			file_connectinfo.setPath(GlobalMethodAndParams.PATH_NAME);
 			file_connectinfo.setFilename(map.get("filename").toString());
 			file_connectinfo.setFiletype(Integer.parseInt(map.get("fileType").toString()));
-			//file_connectinfo.setSize(map.get("size").toString());
+			if(map.containsKey("size")){
+				file_connectinfo.setSize(map.get("size").toString());
+			}
 			file_connectinfo.setParentid(connectInfo.getId());
 			
 			boolean result = file_connectinfoService.insertFile_connectinfo(file_connectinfo);

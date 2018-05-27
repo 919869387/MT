@@ -369,7 +369,7 @@ public class ETLJobService {
 	@SuppressWarnings("unchecked")
 	public boolean saveJob(ETLJob etlJob) throws Exception{
 		ETLJobParam job= new ETLJobParam();
-		List<Metadata> metadatas = iMetaDataDao.getMetadataByMap("$.targettableid", etlJob.getMappingid());
+		List<Metadata> metadatas = iMetaDataDao.getMetadataByMap("$.targettableid", String.valueOf(etlJob.getMappingid()));
 		System.out.println(metadatas.size());
 		Map<String, Object> metadataMap = TransformMetadata.transformMetadataToMap(metadatas.get(0));
 		int srctableid = Integer.parseInt((String)metadataMap.get("sourcetableid"));
@@ -682,7 +682,7 @@ public class ETLJobService {
 			//2.创建statement类对象，用来执行SQL语句！！
 			Statement statement = con.createStatement();
 			//要执行的SQL语句			
-			List<Metadata> metadatas = iMetaDataDao.getMetadataByMap("$.targettableid",etlJob.getMappingid());
+			List<Metadata> metadatas = iMetaDataDao.getMetadataByMap("$.targettableid",String.valueOf(etlJob.getMappingid()));
 			List<Integer> fieldIds = new ArrayList<Integer>();
 			for(Metadata metadata : metadatas){
 				Map<String, Object> metadataMap = TransformMetadata.transformMetadataToMap(metadata);

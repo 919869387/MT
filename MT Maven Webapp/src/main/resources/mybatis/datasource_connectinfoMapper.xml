@@ -16,11 +16,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		useGeneratedKeys="true" keyProperty="id">
 		insert into
 		datasource_connectinfo(url, port, username,
-		password,databasename,databasetype,parentid)
+		password,databasename,databasetype,parentid,repositoryname,repositorypwd)
 		values(#{url}, #{port},
 		#{username},
 		#{password},
-		#{databasename},#{databasetype}, #{parentid})
+		#{databasename},#{databasetype}, #{parentid},#{repositoryname},#{repositorypwd})
 	</insert>
 	
 	<select id="getDatasource_connectinfoListByparentid" resultType="com.x8.mt.entity.Datasource_connectinfo">

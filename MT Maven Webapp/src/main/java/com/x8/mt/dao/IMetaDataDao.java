@@ -81,7 +81,7 @@ public interface IMetaDataDao {
 	 * 时间:2018年3月12日
 	 * 作用:根据Map获取一组Metadata记录
 	 */
-	List<Metadata> 	getMetadataByMap(@Param("key")String key,@Param("value")int value);
+	List<Metadata> 	getMetadataByMap(@Param("key")String key,@Param("value")String value);
 
 	/**
 	 * 

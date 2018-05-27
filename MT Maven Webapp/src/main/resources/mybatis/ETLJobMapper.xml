@@ -61,7 +61,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="queryTargetTableIdAndName" resultType="String">
 		select distinct json_extract(attributes,'$.targettableid') 
 		from metadata		
-		where json_extract(attributes,'$.targettableid') not in (SELECT mappingid from etljob)
+		where cast(json_extract(attributes,'$.targettableid') as UNSIGNED INTEGER) not in (SELECT mappingid from etljob)
 		and metamodelid = 100
 	</select>
 	

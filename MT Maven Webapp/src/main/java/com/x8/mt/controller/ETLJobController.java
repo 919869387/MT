@@ -472,6 +472,7 @@ public class ETLJobController {
 		for(String target_table_id:target_table_ids){
 			target_table_id = target_table_id.replace("\"","").replace("\"","");
 			JSONObject node = new JSONObject();
+			System.out.println(target_table_id);
 			node.put("target_table_id", target_table_id);	
 			node.put("target_table", metaDataService.getMetadataById(Integer.parseInt(target_table_id)).getNAME());	
 			data.add(node);
