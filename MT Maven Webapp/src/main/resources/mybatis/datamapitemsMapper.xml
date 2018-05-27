@@ -40,7 +40,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</update>
 	
 	<delete id="deleteAllDatamapitems">
-		delete * from datamapitems
+		delete from datamapitems
 	</delete>
 	
 </mapper>

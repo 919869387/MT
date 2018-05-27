@@ -232,13 +232,15 @@ public class DatamapitemsController {
 //				);
 				
 				JSONObject link = new JSONObject();
-				int sourceid = sourceDatamapitems.get(0).getId();
-				int targetid = targetDatamapitems.get(0).getId();
-				if(map.get(sourceid+""+targetid)==null){
-					map.put(sourceid+""+targetid, 1);
-					link.put("sourceid", sourceid);
-					link.put("targetid", targetid);
-					links.add(link);
+				if(sourceDatamapitems.size()!=0&&targetDatamapitems.size()!=0){
+					int sourceid = sourceDatamapitems.get(0).getId();
+					int targetid = targetDatamapitems.get(0).getId();
+					if(map.get(sourceid+""+targetid)==null){
+						map.put(sourceid+""+targetid, 1);
+						link.put("sourceid", sourceid);
+						link.put("targetid", targetid);
+						links.add(link);
+					}
 				}
 			}
 			
