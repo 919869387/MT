@@ -576,7 +576,7 @@ public class DatamapitemsController {
 	@RequestMapping(value = "/ReGetDatamapPosition", method = RequestMethod.GET)
 	@ResponseBody
 	@Log(operationType = "ReGetDatamapPosition", operationDesc = "删除数据地图图元")
-	public JSONObject modifyDatamapPosition(HttpServletRequest request,
+	public JSONObject ReGetDatamapPosition(HttpServletRequest request,
 			HttpServletResponse response) {
 		JSONObject responsejson = new JSONObject();
 
