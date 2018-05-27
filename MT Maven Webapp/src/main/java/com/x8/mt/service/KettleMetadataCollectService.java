@@ -556,6 +556,7 @@ public class KettleMetadataCollectService {
 					throw new RuntimeException("insertMetaDataTank Error");
 				}
 			}
+			System.out.println(metaData.getID());
 			return metaData.getID();
 		}catch(Exception e){
 			e.printStackTrace();
