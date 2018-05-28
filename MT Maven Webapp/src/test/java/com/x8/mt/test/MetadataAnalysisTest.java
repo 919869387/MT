@@ -26,7 +26,7 @@ public class MetadataAnalysisTest {
 		HttpServletResponse response = null;
 		
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("quanlianid", 83259);
+		map.put("quanlianid", 83515);
 		
 		System.out.println(metadataAnalysisController.fieldChain(request, response, map));
 	}
