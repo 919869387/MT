@@ -10,4 +10,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		metadata_view_node
 		where id=#{id};
 	</select>
+	
+	<insert id="insertMetadataViewNode" parameterType="com.x8.mt.entity.MetadataViewNode">
+		insert into metadata_view_node(viewid,name,type,childtype,childmetamodelid,level) values(
+		#{viewid},#{name},#{type},#{childtype},#{childmetamodelid},#{level}
+		)
+	</insert>
+	
 </mapper>

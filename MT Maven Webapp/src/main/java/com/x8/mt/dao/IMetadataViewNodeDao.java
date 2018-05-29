@@ -15,5 +15,12 @@ public interface IMetadataViewNodeDao {
 	 * @return 
 	 */
 	List<MetadataViewNode> getMetadataViewNode (String id);
+	
+	/**
+	 * itcoder
+	 * @param MetadataViewNode
+	 * @return 
+	 */
+	int insertMetadataViewNode (MetadataViewNode viewNode);
 
 }

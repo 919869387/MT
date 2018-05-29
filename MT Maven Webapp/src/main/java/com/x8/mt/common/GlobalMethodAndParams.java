@@ -39,6 +39,16 @@ public class GlobalMethodAndParams {
 	public static final String Public_Metamodel_ID= "ID";
 	
 	/**
+	 * 元数据视图节点类型type
+	 */
+	public static final String MetaDataViewNodeTypeCATEGORY= "'CATEGORY'";
+	
+	/**
+	 * 元数据视图节点类型type
+	 */
+	public static final String MetaDataViewNodeTypeMETAMODEL= "METAMODEL";
+	
+	/**
 	 * 私有元模型SQL字段名
 	 */
 	public static final String Attribute_metamodelid_Name= "attribute_metamodelid";

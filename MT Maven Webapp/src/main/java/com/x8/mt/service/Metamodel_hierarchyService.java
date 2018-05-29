@@ -8,10 +8,13 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.x8.mt.common.GlobalMethodAndParams;
+import com.x8.mt.dao.IMetadataViewNodeDao;
 import com.x8.mt.dao.IMetamodel_datatypeDao;
 import com.x8.mt.dao.IMetamodel_hierarchyDao;
+import com.x8.mt.entity.MetadataViewNode;
 import com.x8.mt.entity.Metamodel_hierarchy;
 
 @Service
@@ -21,6 +24,8 @@ public class Metamodel_hierarchyService {
 	IMetamodel_hierarchyDao iMetamodel_hierarchyDao;
 	@Resource
 	IMetamodel_datatypeDao iMetamodel_datatypeDao;
+	@Resource
+	IMetadataViewNodeDao iMetadataViewNodeDao;
 
 	/**
 	 * 
@@ -89,9 +94,24 @@ public class Metamodel_hierarchyService {
 	 * 时间:2017年11月16日
 	 * 作用:插入一条Metamodel_hierarchy记录
 	 */
+	@Transactional
 	public boolean insertMetamodel_hierarchy(Metamodel_hierarchy metamodel_hierarchy){
+		boolean flag1 = false;
+		boolean flag2 = true;
+		MetadataViewNode viewNode = new MetadataViewNode();
 		try {
-			return iMetamodel_hierarchyDao.insert(metamodel_hierarchy)>0 ? true:false;
+			flag1 = iMetamodel_hierarchyDao.insert(metamodel_hierarchy)>0 ? true:false;
+			if(metamodel_hierarchy.getType().equals("PACKAGE")){
+				viewNode.setName(metamodel_hierarchy.getName());
+				viewNode.setViewid(1);
+				viewNode.setType(GlobalMethodAndParams.MetaDataViewNodeTypeCATEGORY);
+				viewNode.setChildtype("METAMODEL");
+				viewNode.setLevel(0);
+				viewNode.setChildmetamodelid(metamodel_hierarchy.getId());
+				flag2 = iMetadataViewNodeDao.insertMetadataViewNode(viewNode)>0 ? true:false;
+			}
+				
+			return flag1 && flag2;
 		} catch (Exception e) {
 			return false;
 		}
