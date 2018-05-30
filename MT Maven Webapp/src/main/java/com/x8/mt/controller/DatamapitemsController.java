@@ -374,10 +374,13 @@ public class DatamapitemsController {
 				System.out.println(targettableid+"---"+sourcetablid);
 				
 				JSONObject link = new JSONObject();
-				link.put("sourceid", datamapitemsService.getDatamapitemsIDByMetadataId(sourcetablid).get(0).getId());
-				link.put("targetid", datamapitemsService.getDatamapitemsIDByMetadataId(targettableid).get(0).getId());
-				links.add(link);
-				
+				List<Datamapitems> sourceList = datamapitemsService.getDatamapitemsIDByMetadataId(sourcetablid);
+				List<Datamapitems> targetList = datamapitemsService.getDatamapitemsIDByMetadataId(targettableid);
+				if(sourceList.size()!=0&&targetList.size()!=0){
+					link.put("sourceid", sourceList.get(0).getId());
+					link.put("targetid", targetList.get(0).getId());
+					links.add(link);
+				}
 			}
 		}
 		responsejson.put("nodes", data);
@@ -508,9 +511,13 @@ public class DatamapitemsController {
 				System.out.println(targettableid+"---"+sourcetablid);
 				
 				JSONObject link = new JSONObject();
-				link.put("sourceid", datamapitemsService.getDatamapitemsIDByMetadataId(sourcetablid).get(0).getId());
-				link.put("targetid", datamapitemsService.getDatamapitemsIDByMetadataId(targettableid).get(0).getId());
-				links.add(link);
+				List<Datamapitems> sourceList = datamapitemsService.getDatamapitemsIDByMetadataId(sourcetablid);
+				List<Datamapitems> targetList = datamapitemsService.getDatamapitemsIDByMetadataId(targettableid);
+				if(sourceList.size()!=0&&targetList.size()!=0){
+					link.put("sourceid", sourceList.get(0).getId());
+					link.put("targetid", targetList.get(0).getId());
+					links.add(link);
+				}
 				
 			}
 		}
