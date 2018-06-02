@@ -15,12 +15,4 @@ public interface IMetadataTankDao {
 	 */
 	int insertMetaDataTank(MetadataTank metadataTank);
 
-	/**
-	 * 
-	 * 作者:allen
-	 * 时间:2018年3月24日
-	 * 作用:修改MetaDataTank记录的Attributes属性
-	 */
-	int updateMetaDataTankAttributes(MetadataTank metadataTank);
-
 }

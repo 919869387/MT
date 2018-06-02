@@ -14,14 +14,9 @@ import javax.annotation.Resource;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -180,19 +175,19 @@ public class MetadataManagementService {
 	 * 作用:查找元数据
 	 */
 	public PageParam searchMetadata(String key,int currPage,int pageSize) {
-		
+
 		PageParam pageParam = null;
-		
+
 		int rowCount=imetadataManagementDao.searchMetadataCount(key);//总记录数
 		if(rowCount!=0){
 			List<Map<String, Object>> searchMetadataList = new ArrayList<Map<String, Object>>();
 			int startIndex = (currPage-1)*pageSize;
-			
+
 			Map<String,Object> param = new HashMap<String,Object>();
 			param.put("key", key);
 			param.put("startIndex", startIndex);
 			param.put("pageSize", pageSize);
-			
+
 			List<Metadata> metadataList = imetadataManagementDao.searchMetadataPage(param);
 			Map<String, Object> map = null;
 			for(Metadata metadata : metadataList){
@@ -209,7 +204,7 @@ public class MetadataManagementService {
 
 				searchMetadataList.add(map);
 			}
-			
+
 			pageParam = new PageParam();
 			pageParam.setCurrPage(currPage);
 			pageParam.setPageSize(pageSize);
@@ -304,65 +299,39 @@ public class MetadataManagementService {
 	 * 
 	 * 作者:allen
 	 * 时间:2017年3月26日
-	 * 作用:修改元数据私有信息
-	 *  	1.将元数据在metadata表修改Attributes
-	 *  	2.再修改metadata_tank表Attributes
-	 */
-	@Transactional
-	public boolean updateMetadataInfoForPRIVATE(Map<String, Object> map) {
-
-		//1.将元数据在metadata表修改
-		String metaModelId = (map.get(GlobalMethodAndParams.Public_Metamodel_METAMODELID)).toString();
-
-		List<String> attributesField = imetadataManagementDao.getAttributesField(metaModelId);
-		JSONObject attributes = TransformMetadata.createAttributes(map, attributesField);
-
-		Metadata metadata = new Metadata();
-		metadata.setID(Integer.parseInt(map.get("ID").toString()));
-		metadata.setATTRIBUTES(attributes.toString());
-
-		if(!(imetadataManagementDao.updateMetadatAttributes(metadata)>0)){
-			throw new RuntimeException("updateMetadatAttributes Error");
-		}
-
-		//2.加入metadata_tank表
-		MetadataTank metadataTank = new MetadataTank();
-		metadataTank.setATTRIBUTES(metadata.getATTRIBUTES());
-		metadataTank.setID(Integer.parseInt(map.get("metadataTankid").toString()));
-
-		if(!(iMetadataTankDao.updateMetaDataTankAttributes(metadataTank)>0)){
-			throw new RuntimeException("updateMetaDataTankAttributes Error");
-		}
-
-		return true;
-	}
-
-	/**
-	 * 
-	 * 作者:allen
-	 * 时间:2017年3月24日
-	 * 作用:修改元数据信息
+	 * 作用:修改元数据
 	 *  	1.将元数据在metadata表修改
-	 *  	2.修改后的记录加入metadata_tank表
+	 *  	2.再修改metadata_tank表
 	 */
 	@Transactional
-	public int updateMetadataInfoForCommon(Map<String, Object> map) {
-
-		//1.将元数据在metadata表修改
+	public boolean updateMetadataInfo(Map<String, Object> map) {
 		Metadata metadata = iMetaDataDao.getMetadataById(Integer.parseInt(map.get("ID").toString()));
-
-		metadata.setNAME(map.get("NAME").toString());
-		metadata.setDESCRIPTION(map.get("DESCRIPTION").toString());
-
 		Date updateDataTime = new Date();
-		metadata.setUPDATETIME(updateDataTime);
+		
+		if(map.get("type").equals("PRIVATE")){
+			String metaModelId = (map.get(GlobalMethodAndParams.Public_Metamodel_METAMODELID)).toString();
 
-		metadata.setVERSION(metadata.getVERSION()+1);
-
-		if(!(imetadataManagementDao.updateMetadata(metadata)>0)){
-			throw new RuntimeException("updateMetadata Error");
+			List<String> attributesField = imetadataManagementDao.getAttributesField(metaModelId);
+			JSONObject attributes = TransformMetadata.createAttributes(map, attributesField);
+	
+			metadata.setUPDATETIME(updateDataTime);
+			metadata.setVERSION(metadata.getVERSION()+1);
+			metadata.setATTRIBUTES(attributes.toString());
+			
+			if(!(imetadataManagementDao.updateMetadatAttributes(metadata)>0)){
+				throw new RuntimeException("updateMetadatAttributes Error");
+			}
+		}else{
+			metadata.setNAME(map.get("NAME").toString());
+			metadata.setDESCRIPTION(map.get("DESCRIPTION").toString());
+			metadata.setUPDATETIME(updateDataTime);
+			metadata.setVERSION(metadata.getVERSION()+1);
+			
+			if(!(imetadataManagementDao.updateMetadata(metadata)>0)){
+				throw new RuntimeException("updateMetadata Error");
+			}
 		}
-
+		
 		//2.加入metadata_tank表
 		MetadataTank metadataTank = new MetadataTank();
 		metadataTank.setCHECKSTATUS(metadata.getCHECKSTATUS());
@@ -382,12 +351,11 @@ public class MetadataManagementService {
 		metadataTank.setVERSION(metadata.getVERSION());
 		metadataTank.setCOLLECTJOBID(metadata.getCOLLECTJOBID());
 		metadataTank.setATTRIBUTES(metadata.getATTRIBUTES());
-		
+
 		if(!(iMetadataTankDao.insertMetaDataTank(metadataTank)>0)){
 			throw new RuntimeException("insertMetaDataTank Error");
 		}
-
-		return metadataTank.getID();
+		return true;
 	}
 
 	/**
@@ -565,8 +533,8 @@ public class MetadataManagementService {
 	/**
 	 * 
 	 * 作者:allen
-	 * 时间:2017年3月19日
-	 * 作用:根据元数据id,获取某一个元数据
+	 * 时间:2018年3月19日
+	 * 作用:根据元数据id,获取某一个元数据map
 	 */
 	public Map<String, Object> getMetadata(String metadataId) {
 		Metadata metadata= imetadataManagementDao.getMetadata(metadataId);
@@ -694,7 +662,7 @@ public class MetadataManagementService {
 			for (Entry<String, Object> entry : map.entrySet()) {//将数据改为String  
 				map.put(entry.getKey(), entry.getValue().toString());
 			}  
-			
+
 			if(addMetadata(map)<=0){
 				throw new RuntimeException("addTableFieldMappingMetadata Error");
 			}

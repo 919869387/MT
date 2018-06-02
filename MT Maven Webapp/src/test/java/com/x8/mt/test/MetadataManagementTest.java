@@ -1,7 +1,6 @@
 package com.x8.mt.test;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,13 +80,13 @@ public class MetadataManagementTest {
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("metamodelId", 99);
-		map.put("parentMetadataId", 0);
-		map.put("NAME", "表映射元数据1");
-		map.put("DESCRIPTION", "表映射元数据测试");
-		map.put("mappingtype", "DIRECT");
-		map.put("sourcetableid", 83238);
-		map.put("targettableid", 83251);
+//		map.put("metamodelId", 99);
+//		map.put("parentMetadataId", 0);
+//		map.put("NAME", "表映射元数据1");
+//		map.put("DESCRIPTION", "表映射元数据测试");
+//		map.put("mappingtype", "DIRECT");
+//		map.put("sourcetableid", 83238);
+//		map.put("targettableid", 83251);
 		
 		System.out.println(metadataManagementController.addMetadataStepThree(request, response, map));
 	}
@@ -199,7 +198,7 @@ public class MetadataManagementTest {
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("ID", 2004);
+		map.put("ID", 711);
 		
 		System.out.println(metadataManagementController.daleteMetadataInfo(request, response, map));
 	}
@@ -209,18 +208,16 @@ public class MetadataManagementTest {
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
 		Map<String, Object> map = new HashMap<String, Object>();
-//		map.put("type","COMMON");
-//		map.put("ID", 1282);
-//		map.put("METAMODELID", 31);
-//		map.put("NAME", "mountnode");
-//		map.put("DESCRIPTION", "AAAAA");
-//		map.put("tablename", "mountnode");
-		
-		map.put("type","PRIVATE");
-		map.put("ID", 1282);
+		map.put("type","COMMON");
+		map.put("ID", 17);
 		map.put("METAMODELID", 31);
-		map.put("metadataTankid", "170");
-		map.put("tablename", "mountnode");
+		map.put("NAME", "mountnode");
+		map.put("DESCRIPTION", "AAAAA");
+		
+//		map.put("type","PRIVATE");
+//		map.put("ID", 17);
+//		map.put("METAMODELID", 31);
+//		map.put("tablename", "shippers_tmp1");
 	
 		System.out.println(metadataManagementController.updateMetadataInfoStepTwo(request, response, map));
 	}

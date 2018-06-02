@@ -133,5 +133,25 @@ public class MetadataAnalysisService {
 			nodesList.add(mapNode);//添加节点
 		}
 	}
+	
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年5月4日
+	 * 作用:通过relatedmetadataid,找到关系为COMPOSITION的元数据
+	 */
+	public Metadata getCompositionMetadata(String relatedmetadataid){
+		return iMetadataAnalysisDao.getCompositionMetadata(relatedmetadataid);
+	}
+	
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年5月4日
+	 * 作用:根据id获取一条Metadata记录
+	 */
+	public Metadata getMetadataById(String id){
+		return iMetadataAnalysisDao.getMetadataById(id);
+	}
 
 }

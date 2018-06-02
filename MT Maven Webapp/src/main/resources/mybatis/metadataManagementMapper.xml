@@ -6,8 +6,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 	<select id="getSonMetadata" resultType="com.x8.mt.entity.Metadata">
 		select * from
-		metadata where id in (select relatedmetadataid from metadata_relation
-		where metadataid=#{metadataid} and type='COMPOSITION')
+		metadata
+		where id in (select relatedmetadataid from metadata_relation
+		where
+		metadataid=#{metadataid} and type='COMPOSITION')
 	</select>
 
 	<select id="getMetamodelByMetadataid" resultType="com.x8.mt.entity.Metamodel_hierarchy">
@@ -111,13 +113,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</select>
 
 	<select id="searchMetadataCount" resultType="Integer">
-		select count(*) from metadata
+		select count(*) from
+		metadata
 		where name like "%"#{key}"%" or description like "%"#{key}"%";
 	</select>
-	
+
 	<select id="searchMetadataPage" resultType="com.x8.mt.entity.Metadata">
-		select * from metadata
-		where name like "%"#{key}"%" or description like "%"#{key}"%" order by id limit #{startIndex},#{pageSize};
+		select * from
+		metadata
+		where name like "%"#{key}"%" or description like "%"#{key}"%"
+		order by id limit #{startIndex},#{pageSize};
 	</select>
 
 	<select id="getMetadataList" parameterType="Map" resultType="java.util.Map">
@@ -145,9 +150,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</delete>
 
 	<update id="updateMetadatAttributes" parameterType="com.x8.mt.entity.Metadata">
-		UPDATE
-		metadata
-		SET attributes=#{ATTRIBUTES}
+		UPDATE metadata
+		SET
+		updatetime=#{UPDATETIME},
+		version=#{VERSION},
+		attributes=#{ATTRIBUTES}
 		WHERE id = #{ID};
 	</update>
 
