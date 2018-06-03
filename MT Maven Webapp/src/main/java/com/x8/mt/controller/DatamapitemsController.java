@@ -116,7 +116,7 @@ public class DatamapitemsController {
 						node.put("name", metadata.getNAME());
 						node.put("bgcolor", "rgba(48, 208, 198, 0.5)");
 						node.put("fontcolor", "#fff");
-						node.put("width", 100);
+						node.put("width", 200);
 						node.put("height", 100);
 						node.put("flag", "db");
 						data.add(node);
@@ -126,7 +126,7 @@ public class DatamapitemsController {
 						datamapitems.setMetadataid(metadata.getID());
 						datamapitems.setPosx(800);
 						datamapitems.setPosy(110 * count);
-						datamapitems.setWidth(100);;
+						datamapitems.setWidth(200);;
 						datamapitems.setHeight(100);;
 						datamapitems.setBackgroundcolor("rgba(48, 208, 198, 0.5)");;
 						datamapitems.setFontcolor("#fff");;
@@ -147,7 +147,7 @@ public class DatamapitemsController {
 					node.put("name", metadata.getNAME());
 					node.put("bgcolor", "rgba(48, 208, 198, 0.5)");
 					node.put("fontcolor", "#fff");
-					node.put("width", 100);
+					node.put("width", 200);
 					node.put("height", 100);
 					node.put("flag", "sys");
 					data.add(node);
@@ -157,7 +157,7 @@ public class DatamapitemsController {
 					datamapitems.setMetadataid(metadata.getID());
 					datamapitems.setPosx(400);
 					datamapitems.setPosy(110 * num);
-					datamapitems.setWidth(100);
+					datamapitems.setWidth(200);
 					datamapitems.setHeight(100);
 					datamapitems.setBackgroundcolor("rgba(48, 208, 198, 0.5)");
 					datamapitems.setFontcolor("#fff");
@@ -304,7 +304,7 @@ public class DatamapitemsController {
 				datamapitems.setMetadataid(tableMetadata.getID());
 				datamapitems.setPosx(400);
 				datamapitems.setPosy(110 * num++);
-				datamapitems.setWidth(100);
+				datamapitems.setWidth(200);
 				datamapitems.setHeight(70);
 				datamapitems.setBackgroundcolor("rgba(48, 208, 198, 0.5)");
 				datamapitems.setFontcolor("#fff");
@@ -337,7 +337,7 @@ public class DatamapitemsController {
 				datamapitems.setMetadataid(tableMetadata.getID());
 				datamapitems.setPosx(800);
 				datamapitems.setPosy(110 * num++);
-				datamapitems.setWidth(100);
+				datamapitems.setWidth(200);
 				datamapitems.setHeight(70);
 				datamapitems.setBackgroundcolor("rgba(48, 208, 198, 0.5)");
 				datamapitems.setFontcolor("#fff");
@@ -441,8 +441,8 @@ public class DatamapitemsController {
 				datamapitems.setMetadataid(tableMetadata.getID());
 				datamapitems.setPosx(400);
 				datamapitems.setPosy(110 * num++);
-				datamapitems.setWidth(100);
-				datamapitems.setHeight(100);
+				datamapitems.setWidth(200);
+				datamapitems.setHeight(70);
 				datamapitems.setBackgroundcolor("rgba(48, 208, 198, 0.5)");
 				datamapitems.setFontcolor("#fff");
 				datamapitemsService.insertDatamapitems(datamapitems);
@@ -474,7 +474,7 @@ public class DatamapitemsController {
 				datamapitems.setMetadataid(tableMetadata.getID());
 				datamapitems.setPosx(800);
 				datamapitems.setPosy(110 * num++);
-				datamapitems.setWidth(100);
+				datamapitems.setWidth(200);
 				datamapitems.setHeight(70);
 				datamapitems.setBackgroundcolor("rgba(48, 208, 198, 0.5)");
 				datamapitems.setFontcolor("#fff");
