@@ -6,6 +6,12 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 
 public class GlobalMethodAndParams {
+	
+	/*
+	 * 打开wsdlService通知
+	 */
+	public static final String wsdlServiceSwitch_CLOSE= "CLOSE";
+	
 	/**
 	 * 通信协议操作类型
 	 */

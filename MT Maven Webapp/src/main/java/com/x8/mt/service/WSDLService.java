@@ -15,17 +15,23 @@ import org.springframework.stereotype.Service;
 
 import com.x8.mt.common.GlobalMethodAndParams;
 import com.x8.mt.entity.Metadata;
+import com.x8.mt.entity.WsdlServiceInfo;
 
 @Service
 public class WSDLService {
 
 	@Autowired  
-	private ThreadPoolTaskExecutor threadPoolTaskExecutor; 
-	
+	ThreadPoolTaskExecutor threadPoolTaskExecutor; 
 	@Resource
 	MetadataAnalysisService metadataAnalysisService;
+	@Autowired
+	WsdlServiceInfo wsdlServiceInfo;
 	
 	public void protocolOperationWebService(int metamodelid,String metadataid,String operationType,Metadata inputProtocolMetadata){
+		if(wsdlServiceInfo.getSwitch().equals(GlobalMethodAndParams.wsdlServiceSwitch_CLOSE)){//说明不需要发送wsdlservice
+			return;
+		}
+		
 		if(metamodelid!=GlobalMethodAndParams.protocolMetamodelID&&
 				metamodelid!=GlobalMethodAndParams.protocolParamArrayMetamodelID&&
 						metamodelid!=GlobalMethodAndParams.protocolParamMetamodelID){
@@ -35,6 +41,7 @@ public class WSDLService {
 		if(operationType==GlobalMethodAndParams.protocolOperationType_DELATE){//对删除操作传入已经删除的元数据
 			if(metamodelid==GlobalMethodAndParams.protocolMetamodelID){
 				JSONObject attributes = JSONObject.fromObject(inputProtocolMetadata.getATTRIBUTES());
+
 				doThreadPoolTaskExecutor(GlobalMethodAndParams.protocolOperationType_DELATE,attributes.get(GlobalMethodAndParams.protocolType).toString(),
 						attributes.get(GlobalMethodAndParams.protocolName).toString(),
 						attributes.get(GlobalMethodAndParams.protocolId).toString());
@@ -85,15 +92,41 @@ public class WSDLService {
 	/**
 	 * 
 	 * 作者:allen
+	 * 时间:2018年6月2日
+	 * 作用:利用线程池执行
+	 */
+	void doThreadPoolTaskExecutor(String operationType,String protocolType,String protocolName,
+			String protocolId){
+		final String finalOperationType = operationType;
+		final String finalProtocolType = protocolType;
+		final String finalProtocolName = protocolName;
+		final String finalProtocolId = protocolId;
+		
+		final String url = wsdlServiceInfo.getUrl();//wsdl地址 
+		final String tns = wsdlServiceInfo.getTns();//命名空间
+		final String method = wsdlServiceInfo.getMethod();
+
+		threadPoolTaskExecutor.execute(new Runnable() {  
+			@Override  
+			public void run() {
+				sendWebService(url,tns,method,finalOperationType,finalProtocolType,finalProtocolName,finalProtocolId);
+			}  
+		}); 
+	}
+	
+	/**
+	 * 
+	 * 作者:allen
 	 * 时间:2018年6月1日
 	 * 作用:发送webservice
 	 */
-	void sendWebService(String operationType,String protocolType,String protocolName,
-			String protocolId) {
-		String url="http://192.168.1.103/webservice/protocolservice/protocolManagerService?wsdl"; //wsdl地址 
-		String tns = "/method";  						  //命名空间
+	void sendWebService(String url1,String tns1,String method1,
+			String operationType,String protocolType,String protocolName,String protocolId) {
+		//线程外部传参不可以
+		String url="http://localhost:1008/webservice/protocolservice/protocolManagerService?wsdl"; //wsdl地址 
+		String tns = "/method";  									   //命名空间
 		String method="notify";	
-
+		
 		try {
 			RPCServiceClient serviceClient = new RPCServiceClient();
 			Options options = serviceClient.getOptions();
@@ -113,26 +146,5 @@ public class WSDLService {
 		} catch (AxisFault e) {
 			System.out.println("webservice出错");
 		}
-	}
-	
-	/**
-	 * 
-	 * 作者:allen
-	 * 时间:2018年6月2日
-	 * 作用:利用线程池执行
-	 */
-	void doThreadPoolTaskExecutor(String operationType,String protocolType,String protocolName,
-			String protocolId){
-		final String finalOperationType = operationType;
-		final String finalProtocolType = protocolType;
-		final String finalProtocolName = protocolName;
-		final String finalProtocolId = protocolId;
-		
-		threadPoolTaskExecutor.execute(new Runnable() {  
-			@Override  
-			public void run() {
-				sendWebService(finalOperationType,finalProtocolType,finalProtocolName,finalProtocolId);
-			}  
-		}); 
 	}
 }

@@ -198,7 +198,7 @@ public class MetadataManagementTest {
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("ID", 711);
+		map.put("ID", 723);
 		
 		System.out.println(metadataManagementController.daleteMetadataInfo(request, response, map));
 	}
