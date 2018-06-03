@@ -150,6 +150,7 @@ public class MetadataAnalysisController {
 		
 		metadataAnalysisService.fieldAnalysis(quanlianidStr,nodesList,linksList,false);//false时为影响分析
 		metadataAnalysisService.fieldAnalysis(quanlianidStr,nodesList,linksList,true);//为true时为血统分析
+		metadataAnalysisService.addTableAndDatabaseInfoForfieldChain(quanlianidStr, nodesList, linksList);//为全连分析添加源节点的表和数据库
 		
 		if(nodesList.size()==0){//说明传入的元数据id不存在
 			responsejson.put("result", false);

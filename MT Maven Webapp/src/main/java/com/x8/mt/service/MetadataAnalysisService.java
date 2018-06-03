@@ -23,6 +23,35 @@ public class MetadataAnalysisService {
 	/**
 	 * 
 	 * 作者:allen
+	 * 时间:2018年6月3日
+	 * 作用:为全连分析添加目标节点的表和数据库
+	 */
+	public void addTableAndDatabaseInfoForfieldChain(String fieldid,List<Map<String, String>> nodesList,
+			List<Map<String, String>> linksList){
+		Metadata tableMetadata = iMetadataAnalysisDao.getCompositionMetadata(fieldid);
+
+		Map<String, String> mapLinktoTable=new HashMap<String, String>();
+		mapLinktoTable.put("sourceid", fieldid);
+		mapLinktoTable.put("targetid", tableMetadata.getID()+"");
+		if(!linksList.contains(mapLinktoTable)){
+			linksList.add(mapLinktoTable);//添加字段到表连线
+			addNode(tableMetadata, nodesList);//添加表节点
+		}
+
+		Metadata databaseMetadata = iMetadataAnalysisDao.getCompositionMetadata(tableMetadata.getID()+"");
+
+		Map<String, String> mapLinktoDatabase=new HashMap<String, String>();
+		mapLinktoDatabase.put("sourceid", tableMetadata.getID()+"");
+		mapLinktoDatabase.put("targetid", databaseMetadata.getID()+"");
+		if(!linksList.contains(mapLinktoDatabase)){
+			linksList.add(mapLinktoDatabase);//添加字段到表连线
+			addNode(databaseMetadata, nodesList);//添加表节点
+		}
+	}
+
+	/**
+	 * 
+	 * 作者:allen
 	 * 时间:2018年5月3日
 	 * 作用:字段影响分析
 	 * 
@@ -31,11 +60,11 @@ public class MetadataAnalysisService {
 	 */
 	public void fieldAnalysis(String fieldid,List<Map<String, String>> nodesList,
 			List<Map<String, String>> linksList,boolean type) {
-		
+
 		Metadata sourceFieldMetadata = iMetadataAnalysisDao.getMetadataById(fieldid);
-		
+
 		addNode(sourceFieldMetadata, nodesList);//添加源表字段节点
-		
+
 		Map<String,String> paramMap = new HashMap<String, String>();
 		if(!type){
 			paramMap.put("key", GlobalMethodAndParams.JSONKey_sourcefieldid);
@@ -43,9 +72,9 @@ public class MetadataAnalysisService {
 			paramMap.put("key", GlobalMethodAndParams.JSONKey_targetfieldid);
 		}
 		paramMap.put("value", fieldid);
-		
+
 		List<Metadata> metadataLists = iMetadataAnalysisDao.getMetadataByJson(paramMap);//查找到字段元数据
-		
+
 		if(metadataLists.size()==0){
 			//说明分析在没有目标字段，终止递归
 			return;
@@ -73,28 +102,28 @@ public class MetadataAnalysisService {
 					linksList.add(mapLinktoTargetField);//添加源表字段到目标表字段的连线
 
 					Metadata targetFieldMetadata = iMetadataAnalysisDao.getMetadataById(targetFieldid);
-					
+
 					addNode(targetFieldMetadata, nodesList);//添加目标表字段节点
-					
+
 					Map<String, String> mapLinktoTargetTable=new HashMap<String, String>();
 					mapLinktoTargetTable.put("sourceid", targetFieldid);
 					mapLinktoTargetTable.put("targetid", targetTableid);
 					if(!linksList.contains(mapLinktoTargetTable)){
 						linksList.add(mapLinktoTargetTable);//添加字段到表的连线
-						
+
 						Metadata targetTableMetadata = iMetadataAnalysisDao.getMetadataById(targetTableid);
-						
+
 						addNode(targetTableMetadata, nodesList);//添加表节点
-						
+
 						Metadata targetDatabaseMetadata = iMetadataAnalysisDao.getCompositionMetadata(targetTableid);
-						
+
 						Map<String, String> mapLinktoTargetDatabase=new HashMap<String, String>();
 						mapLinktoTargetDatabase.put("sourceid", targetTableid);
 						mapLinktoTargetDatabase.put("targetid", targetDatabaseMetadata.getID()+"");
-						
+
 						if(!linksList.contains(mapLinktoTargetDatabase)){
 							linksList.add(mapLinktoTargetDatabase);//添加表到数据库连线
-							
+
 							addNode(targetDatabaseMetadata, nodesList);//添加数据库节点
 						}
 					}
@@ -133,7 +162,7 @@ public class MetadataAnalysisService {
 			nodesList.add(mapNode);//添加节点
 		}
 	}
-	
+
 	/**
 	 * 
 	 * 作者:allen
@@ -143,7 +172,7 @@ public class MetadataAnalysisService {
 	public Metadata getCompositionMetadata(String relatedmetadataid){
 		return iMetadataAnalysisDao.getCompositionMetadata(relatedmetadataid);
 	}
-	
+
 	/**
 	 * 
 	 * 作者:allen
