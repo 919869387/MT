@@ -408,6 +408,8 @@ public class KettleMetadataCollectController {
 			Metadata metadata = metaDataService.getMetadataById(connectinfo.getMountMetaDataId());
 			int mountmodelid = metadata.getMETAMODELID();
 			
+			long startTime = System.currentTimeMillis(); 
+			
 			if(connectinfo.getType().equals("file")){
 				File_connectinfo file_connectinfo = file_connectinfoService.getFile_connectinfoListByparentid(id);
 				String filename = file_connectinfo.getFilename();
@@ -469,9 +471,11 @@ public class KettleMetadataCollectController {
 				}
 			}
 			
+			long endTime = System.currentTimeMillis(); 
 			responsejson.put("collectionId",newCollectJob.getId());	
 			responsejson.put("result", true);
 			responsejson.put("data",data);
+			responsejson.put("time",endTime-startTime);
 			responsejson.put("count",data.size());
 
 		} catch (Exception e) {
