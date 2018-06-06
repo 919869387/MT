@@ -201,4 +201,12 @@ public interface IMetadataManagementDao {
 	 * 作用:根据父元数据id得到儿子元数据
 	 */
 	List<Metadata> getSonMetadata(String metadataid);
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年6月6日
+	 * 作用:查询所有元数据记录个数
+	 */
+	int searchTotalMetadataCount();
 }

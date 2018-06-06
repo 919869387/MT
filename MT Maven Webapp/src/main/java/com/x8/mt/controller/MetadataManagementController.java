@@ -21,7 +21,10 @@ import javax.servlet.http.HttpServletResponse;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
+import org.apache.axis2.AxisFault;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,12 +35,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.x8.mt.common.GlobalMethodAndParams;
 import com.x8.mt.common.Log;
 import com.x8.mt.common.PageParam;
+import com.x8.mt.entity.Metadata;
 import com.x8.mt.entity.MetadataViewNode;
 import com.x8.mt.entity.Metamodel_hierarchy;
+import com.x8.mt.service.MetadataAnalysisService;
 import com.x8.mt.service.MetadataManagementService;
 import com.x8.mt.service.MetadataViewNodeService;
 import com.x8.mt.service.Metamodel_hierarchyService;
 import com.x8.mt.service.SystemLogService;
+import com.x8.mt.service.WSDLService;
 /**
  * 作者： allen
  * 时间：2018年3月15日
@@ -47,6 +53,7 @@ import com.x8.mt.service.SystemLogService;
 @Controller
 @RequestMapping(value = "/metadataManagement")
 public class MetadataManagementController {
+
 	@Resource
 	MetadataManagementService metadataManagementService;
 	@Resource
@@ -55,6 +62,10 @@ public class MetadataManagementController {
 	MetadataViewNodeService metadataViewNodeService;
 	@Resource
 	SystemLogService systemLogService;
+	@Resource
+	WSDLService wSDLService;
+	@Resource
+	MetadataAnalysisService metadataAnalysisService;
 
 	/**
 	 * 
@@ -84,7 +95,7 @@ public class MetadataManagementController {
 			response.reset();
 			response.setContentType("application/vnd.ms-excel;charset=utf-8");
 			response.setHeader("Content-Disposition", "attachment;filename="+ new String((filename + ".xls").getBytes("utf-8"), "utf-8"));
-			
+
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
 			wb.write(os);
 
@@ -93,14 +104,14 @@ public class MetadataManagementController {
 			ServletOutputStream out = response.getOutputStream();
 			bis = new BufferedInputStream(is);
 			bos = new BufferedOutputStream(out);
-			
+
 			byte[] buff = new byte[2048];
 			int bytesRead;
 
 			while (-1 != (bytesRead = bis.read(buff, 0, buff.length))) {
 				bos.write(buff, 0, bytesRead);
 			}
-			
+
 			responsejson.put("result", true);
 			responsejson.put("count",1);
 		}catch (IOException e) {
@@ -440,7 +451,7 @@ public class MetadataManagementController {
 		int pageSize = Integer.parseInt(map.get("pageSize").toString());
 
 		PageParam pageParam = metadataManagementService.searchMetadata(key,currPage,pageSize);
-		
+
 		if(pageParam==null){
 			responsejson.put("result", false);
 			responsejson.put("count",0);
@@ -550,8 +561,6 @@ public class MetadataManagementController {
 			HttpServletResponse response,@RequestBody Map<String, Object> map){
 		JSONObject responsejson = new JSONObject();
 
-		//GlobalMethodAndParams.setHttpServletResponse(request, response);
-
 		//检查传参是否正确
 		if(!map.containsKey("ID")){
 			responsejson.put("result", false);
@@ -567,10 +576,30 @@ public class MetadataManagementController {
 			return responsejson;
 		}
 
+		//找出最上层的协议元数据
+		Metadata deletemetadata = metadataAnalysisService.getMetadataById(metadataId);
+		Metadata protocolMetadata = null;
+		if(deletemetadata.getMETAMODELID()==GlobalMethodAndParams.protocolMetamodelID){//对某一协议操作
+			protocolMetadata = deletemetadata;
+		}else if(deletemetadata.getMETAMODELID()==GlobalMethodAndParams.protocolParamArrayMetamodelID){//对协议参数组操作
+			protocolMetadata = metadataAnalysisService.getCompositionMetadata(metadataId);
+		}else if(deletemetadata.getMETAMODELID()==GlobalMethodAndParams.protocolParamMetamodelID){//对协议参数操作
+			Metadata fatherMetadata = metadataAnalysisService.getCompositionMetadata(metadataId);
+			if(fatherMetadata.getMETAMODELID()==GlobalMethodAndParams.protocolMetamodelID){//父元数据为协议
+				protocolMetadata = fatherMetadata;
+			}else{//父元数据为协议参数组
+				protocolMetadata = metadataAnalysisService.getCompositionMetadata(fatherMetadata.getID()+"");
+			}
+		}
+		
 		List<Object> count = new ArrayList<Object>();
 		if(metadataManagementService.daleteMetadataInfo(metadataId,count)){
 			responsejson.put("result", true);
 			responsejson.put("count", count.size());
+
+			//多线程，线程池发送webservice
+			wSDLService.protocolOperationWebService(deletemetadata.getMETAMODELID(),metadataId,GlobalMethodAndParams.protocolOperationType_DELATE,protocolMetadata);
+
 		}else{
 			responsejson.put("result", false);
 			responsejson.put("count", count.size());
@@ -595,8 +624,7 @@ public class MetadataManagementController {
 		"tablename": "metadata",
 		"METAMODELID": 31,
 		"NAME": "metadata",
-		 "type":"COMMON",
-		 "metadataTankid":1212
+		"type":"COMMON",
 		}
 	 */
 	@RequestMapping(value = "/updateMetadataInfoStepTwo", method = RequestMethod.POST)
@@ -606,34 +634,23 @@ public class MetadataManagementController {
 			HttpServletResponse response,@RequestBody Map<String, Object> map){
 		JSONObject responsejson = new JSONObject();
 
-		//GlobalMethodAndParams.setHttpServletResponse(request, response);
-
 		//检查传参是否正确
-		if(!(map.containsKey("ID")&&map.containsKey("METAMODELID"))){
+		if(!map.containsKey("ID")||!map.containsKey("METAMODELID")||!map.containsKey("type")){
 			responsejson.put("result", false);
 			responsejson.put("count",0);
 			return responsejson;
 		}
 
-		if(map.containsKey("metadataTankid")){
-			//说明是更新私有属性
-			if(metadataManagementService.updateMetadataInfoForPRIVATE(map)){
-				responsejson.put("result", true);
-				responsejson.put("count", 1);
-			}else{
-				responsejson.put("result", false);
-				responsejson.put("count", 0);
-			}
+		if(metadataManagementService.updateMetadataInfo(map)){
+			responsejson.put("result", true);
+			responsejson.put("count", 1);
+
+			//多线程，线程池发送webservice
+			wSDLService.protocolOperationWebService(Integer.parseInt(map.get("METAMODELID").toString()),map.get("ID").toString(), GlobalMethodAndParams.protocolOperationType_UPDATE,null);
+
 		}else{
-			int metadataTankid = metadataManagementService.updateMetadataInfoForCommon(map);
-			if(metadataTankid>0){
-				responsejson.put("result", true);
-				responsejson.put("metadataTankid", metadataTankid);
-				responsejson.put("count", 1);
-			}else{
-				responsejson.put("result", false);
-				responsejson.put("count", 0);
-			}
+			responsejson.put("result", false);
+			responsejson.put("count", 0);
 		}
 		return responsejson;
 	}
@@ -750,20 +767,24 @@ public class MetadataManagementController {
 			HttpServletResponse response,@RequestBody Map<String, Object> map){
 		JSONObject responsejson = new JSONObject();
 
-		//GlobalMethodAndParams.setHttpServletResponse(request, response);
-
 		//检查传参是否正确
 		if(!(map.containsKey("metamodelId")&&map.containsKey("parentMetadataId"))){
 			responsejson.put("result", false);
 			responsejson.put("count",0);
 			return responsejson;
 		}
-
+		
+		int metamodelId = Integer.parseInt(map.get("metamodelId").toString());
+		
 		int metadataId = metadataManagementService.addMetadata(map);
 		if(metadataId>0){
 			responsejson.put("result", true);
 			responsejson.put("metadataId", metadataId);
 			responsejson.put("count", 1);
+			
+			//多线程，线程池发送webservice
+			wSDLService.protocolOperationWebService(metamodelId,metadataId+"", GlobalMethodAndParams.protocolOperationType_INSERT,null);
+
 		}else{
 			responsejson.put("result", false);
 			responsejson.put("count", 0);

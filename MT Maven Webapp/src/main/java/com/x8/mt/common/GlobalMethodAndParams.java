@@ -2,13 +2,33 @@ package com.x8.mt.common;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 
 public class GlobalMethodAndParams {
 	
+	/*
+	 * 打开wsdlService通知
+	 */
+	public static final String wsdlServiceSwitch_CLOSE= "CLOSE";
+	
+	/**
+	 * 通信协议操作类型
+	 */
+	public static final String protocolOperationType_DELATE= "DELATE";
+	public static final String protocolOperationType_UPDATE= "UPDATE";
+	public static final String protocolOperationType_INSERT= "INSERT";
+	
+	/**
+	 * 通信协议私有属性名称
+	 */
+	public static final String protocolId= "protocolId";
+	public static final String protocolName= "protocolName";
+	public static final String protocolType= "protocolType";
+	
+	public static final int protocolMetamodelID= 1001;
 	public static final int protocolParamArrayMetamodelID= 1002;
+	public static final int protocolParamMetamodelID= 1003;
 
 	public static final String JSONKey_protocolType= "$.protocolType";
 	public static final String JSONKey_protocolId= "$.protocolId";

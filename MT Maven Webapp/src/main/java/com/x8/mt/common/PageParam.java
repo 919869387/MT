@@ -14,6 +14,25 @@ public class PageParam {
 	private int rowCount;//总记录数
 	private int pageSize;//页大小
 	private List data;//数据
+	private int totalMetadataCount;//总元数据记录数
+	private String queryTime;//查询时间-秒为单位
+	
+	
+	public int getTotalMetadataCount() {
+		return totalMetadataCount;
+	}
+	public void setTotalMetadataCount(int totalMetadataCount) {
+		this.totalMetadataCount = totalMetadataCount;
+	}
+	public String getQueryTime() {
+		return queryTime;
+	}
+	public void setQueryTime(String queryTime) {
+		this.queryTime = queryTime;
+	}
+	public void setData(List data) {
+		this.data = data;
+	}
 	public int getCurrPage() {
 		return currPage;
 	}

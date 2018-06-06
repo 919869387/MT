@@ -116,7 +116,7 @@ public class DatamapitemsController {
 						node.put("name", metadata.getNAME());
 						node.put("bgcolor", "rgba(48, 208, 198, 0.5)");
 						node.put("fontcolor", "#fff");
-						node.put("width", 100);
+						node.put("width", 200);
 						node.put("height", 100);
 						node.put("flag", "db");
 						data.add(node);
@@ -126,7 +126,7 @@ public class DatamapitemsController {
 						datamapitems.setMetadataid(metadata.getID());
 						datamapitems.setPosx(800);
 						datamapitems.setPosy(110 * count);
-						datamapitems.setWidth(100);;
+						datamapitems.setWidth(200);;
 						datamapitems.setHeight(100);;
 						datamapitems.setBackgroundcolor("rgba(48, 208, 198, 0.5)");;
 						datamapitems.setFontcolor("#fff");;
@@ -147,7 +147,7 @@ public class DatamapitemsController {
 					node.put("name", metadata.getNAME());
 					node.put("bgcolor", "rgba(48, 208, 198, 0.5)");
 					node.put("fontcolor", "#fff");
-					node.put("width", 100);
+					node.put("width", 200);
 					node.put("height", 100);
 					node.put("flag", "sys");
 					data.add(node);
@@ -157,7 +157,7 @@ public class DatamapitemsController {
 					datamapitems.setMetadataid(metadata.getID());
 					datamapitems.setPosx(400);
 					datamapitems.setPosy(110 * num);
-					datamapitems.setWidth(100);
+					datamapitems.setWidth(200);
 					datamapitems.setHeight(100);
 					datamapitems.setBackgroundcolor("rgba(48, 208, 198, 0.5)");
 					datamapitems.setFontcolor("#fff");
@@ -256,7 +256,7 @@ public class DatamapitemsController {
 	 * 作者:itcoder 
 	 * 时间:2018年4月18日 
 	 * 作用:获取第二层数据地图
-	 * 参数：sourceid，targetid,sourcename,targetname
+	 * 参数：sourceid，targetid
 	 */
 	@RequestMapping(value = "/getSecondDatamap", method = RequestMethod.POST)
 	@ResponseBody
@@ -281,8 +281,8 @@ public class DatamapitemsController {
 			return responsejson;
 		}
 		
-		String sourceName = map.get("sourcename").toString();
-		String targetName = map.get("targetname").toString();
+//		String sourceName = map.get("sourcename").toString();
+//		String targetName = map.get("targetname").toString();
 		
 		String sourceidStr = map.get("sourceid").toString();
 		int sourceid = Integer.parseInt(sourceidStr);
@@ -291,6 +291,9 @@ public class DatamapitemsController {
 		//根据图元表的id，获得元数据id
 		int sourceMetadataid = datamapitemsService.getDatamapitemsMetadataidById(sourceid);
 		int targetMetadataid = datamapitemsService.getDatamapitemsMetadataidById(targetid);
+		//通过元数据id，获取元数据名称
+		String sourceName = metaDataService.getMetadataById(sourceMetadataid).getNAME();
+		String targetName = metaDataService.getMetadataById(targetMetadataid).getNAME();
 		//获取数据库下的表id列表
 		List<String> sonMetadataList = metaDataRelationService.getMetadata_relationByMetadataid(sourceMetadataid);
 		List<String> sonTargetMetadataList = metaDataRelationService.getMetadata_relationByMetadataid(targetMetadataid);
@@ -304,7 +307,7 @@ public class DatamapitemsController {
 				datamapitems.setMetadataid(tableMetadata.getID());
 				datamapitems.setPosx(400);
 				datamapitems.setPosy(110 * num++);
-				datamapitems.setWidth(100);
+				datamapitems.setWidth(200);
 				datamapitems.setHeight(70);
 				datamapitems.setBackgroundcolor("rgba(48, 208, 198, 0.5)");
 				datamapitems.setFontcolor("#fff");
@@ -337,7 +340,7 @@ public class DatamapitemsController {
 				datamapitems.setMetadataid(tableMetadata.getID());
 				datamapitems.setPosx(800);
 				datamapitems.setPosy(110 * num++);
-				datamapitems.setWidth(100);
+				datamapitems.setWidth(200);
 				datamapitems.setHeight(70);
 				datamapitems.setBackgroundcolor("rgba(48, 208, 198, 0.5)");
 				datamapitems.setFontcolor("#fff");
@@ -393,7 +396,7 @@ public class DatamapitemsController {
 	 * 作者:itcoder 
 	 * 时间:2018年5月8日 
 	 * 作用:获取第三层数据地图
-	 * 参数：sourceid，targetid,sourcename,targetname
+	 * 参数：sourceid，targetid
 	 */
 	@RequestMapping(value = "/getThreeDatamap", method = RequestMethod.POST)
 	@ResponseBody
@@ -418,8 +421,8 @@ public class DatamapitemsController {
 			return responsejson;
 		}
 		
-		String sourceName = map.get("sourcename").toString();
-		String targetName = map.get("targetname").toString();
+//		String sourceName = map.get("sourcename").toString();
+//		String targetName = map.get("targetname").toString();
 		
 		String sourceidStr = map.get("sourceid").toString();
 		int sourceid = Integer.parseInt(sourceidStr);
@@ -428,6 +431,9 @@ public class DatamapitemsController {
 		//根据图元表的id，获得元数据id
 		int sourceMetadataid = datamapitemsService.getDatamapitemsMetadataidById(sourceid);
 		int targetMetadataid = datamapitemsService.getDatamapitemsMetadataidById(targetid);
+		//通过元数据id，获取元数据名称
+		String sourceName = metaDataService.getMetadataById(sourceMetadataid).getNAME();
+		String targetName = metaDataService.getMetadataById(targetMetadataid).getNAME();
 		//获取表下的字段id列表
 		List<String> sonMetadataList = metaDataRelationService.getMetadata_relationByMetadataid(sourceMetadataid);
 		List<String> sonTargetMetadataList = metaDataRelationService.getMetadata_relationByMetadataid(targetMetadataid);
@@ -441,8 +447,8 @@ public class DatamapitemsController {
 				datamapitems.setMetadataid(tableMetadata.getID());
 				datamapitems.setPosx(400);
 				datamapitems.setPosy(110 * num++);
-				datamapitems.setWidth(100);
-				datamapitems.setHeight(100);
+				datamapitems.setWidth(200);
+				datamapitems.setHeight(70);
 				datamapitems.setBackgroundcolor("rgba(48, 208, 198, 0.5)");
 				datamapitems.setFontcolor("#fff");
 				datamapitemsService.insertDatamapitems(datamapitems);
@@ -474,7 +480,7 @@ public class DatamapitemsController {
 				datamapitems.setMetadataid(tableMetadata.getID());
 				datamapitems.setPosx(800);
 				datamapitems.setPosy(110 * num++);
-				datamapitems.setWidth(100);
+				datamapitems.setWidth(200);
 				datamapitems.setHeight(70);
 				datamapitems.setBackgroundcolor("rgba(48, 208, 198, 0.5)");
 				datamapitems.setFontcolor("#fff");
