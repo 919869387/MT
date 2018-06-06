@@ -528,7 +528,7 @@ public class KettleMetadataCollectController {
 		try {
 			for(Connectinfo connect : connectinfoList){
 				List<CollectJob> collectJob = collectJobService.getCollectJobByConnectinfoId(connect.getId());
-				if(collectJob.size() > 1){
+				if(collectJob.size() >= 1){
 					responsejson.put("result", false);
 					responsejson.put("flag",0);
 					responsejson.put("desciption","数据源已经采集");
