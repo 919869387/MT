@@ -14,6 +14,7 @@ import javax.annotation.Resource;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -175,7 +176,9 @@ public class MetadataManagementService {
 	 * 作用:查找元数据
 	 */
 	public PageParam searchMetadata(String key,int currPage,int pageSize) {
-
+		
+		Date queryStart = new Date();
+		
 		PageParam pageParam = null;
 
 		int rowCount=imetadataManagementDao.searchMetadataCount(key);//总记录数
@@ -210,6 +213,14 @@ public class MetadataManagementService {
 			pageParam.setPageSize(pageSize);
 			pageParam.setRowCount(rowCount);
 			pageParam.setDate(searchMetadataList);
+			
+			int totalMetadataCount = imetadataManagementDao.searchTotalMetadataCount();//总元数据记录数
+			pageParam.setTotalMetadataCount(totalMetadataCount);
+			
+			Date endStart = new Date();
+			double timeGap = (endStart.getTime() - queryStart.getTime())*0.001;
+			String timeGapStr = (timeGap+"").substring(0, 5);
+			pageParam.setQueryTime(timeGapStr);
 		}
 		return pageParam;
 	}

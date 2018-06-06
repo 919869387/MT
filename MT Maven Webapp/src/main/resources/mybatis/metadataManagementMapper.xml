@@ -4,6 +4,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.x8.mt.dao.IMetadataManagementDao">
 
+	<select id="searchTotalMetadataCount" resultType="Integer">
+		select count(*) from
+		metadata
+	</select>
+
 	<select id="getSonMetadata" resultType="com.x8.mt.entity.Metadata">
 		select * from
 		metadata
@@ -150,7 +155,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</delete>
 
 	<update id="updateMetadatAttributes" parameterType="com.x8.mt.entity.Metadata">
-		UPDATE metadata
+		UPDATE
+		metadata
 		SET
 		updatetime=#{UPDATETIME},
 		version=#{VERSION},

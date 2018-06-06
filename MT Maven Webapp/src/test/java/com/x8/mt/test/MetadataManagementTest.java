@@ -1,6 +1,7 @@
 package com.x8.mt.test;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +30,22 @@ public class MetadataManagementTest {
 	MetadataManagementService metadataManagementService;
 	@Autowired
 	MetadataManagementController metadataManagementController;
-	
+
+	@Test
+	public void dataTimeGAP(){
+		try {
+			Date a = new Date();
+			Thread.sleep(3333);
+			Date b = new Date();
+
+			double interval = (b.getTime() - a.getTime())*0.001;
+			String intervalStr = (interval+"").substring(0, 5);
+			System.out.println("两个时间相差"+intervalStr+"秒");//会打印出相差3秒
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
 	@Test
 	public void exportMetadataToExcel(){
 		HttpServletRequest request = null;
@@ -37,10 +53,10 @@ public class MetadataManagementTest {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("metadataid", 100);
 		map.put("filename", "表字段映射元数据1");
-		
+
 		//System.out.println(metadataManagementController.exportMetadataToExcel(request, response,map));
 	}
-	
+
 	@Test
 	public void addTableFieldMappingMetadata(){
 		HttpServletRequest request = null;
@@ -57,40 +73,40 @@ public class MetadataManagementTest {
 		map1.put("sourcefieldid", 83259);
 		map1.put("targettableid", 83237);
 		map1.put("targetfieldid", 83239);
-		
-//		Map<String, Object> map2 = new HashMap<String, Object>();
-//		map2.put("metamodelId", 100);
-//		map2.put("parentMetadataId", 83328);
-//		map2.put("NAME", "表字段映射元数据2");
-//		map2.put("DESCRIPTION", "表字段映射元数据测试");
-//		map2.put("mappingtype", "DIRECT");
-//		map2.put("sourcetableid", 83237);
-//		map2.put("sourcefieldid", 83240);
-//		map2.put("targettableid", 83250);
-//		map2.put("targetfieldid", 83260);
-		
+
+		//		Map<String, Object> map2 = new HashMap<String, Object>();
+		//		map2.put("metamodelId", 100);
+		//		map2.put("parentMetadataId", 83328);
+		//		map2.put("NAME", "表字段映射元数据2");
+		//		map2.put("DESCRIPTION", "表字段映射元数据测试");
+		//		map2.put("mappingtype", "DIRECT");
+		//		map2.put("sourcetableid", 83237);
+		//		map2.put("sourcefieldid", 83240);
+		//		map2.put("targettableid", 83250);
+		//		map2.put("targetfieldid", 83260);
+
 		list.add(map1);
 		//list.add(map2);
-		
+
 		System.out.println(metadataManagementController.addTableFieldMappingMetadata(request, response, list));
 	}
-	
+
 	@Test
 	public void addTableMappingMetadata(){
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
 		Map<String, Object> map = new HashMap<String, Object>();
-//		map.put("metamodelId", 99);
-//		map.put("parentMetadataId", 0);
-//		map.put("NAME", "表映射元数据1");
-//		map.put("DESCRIPTION", "表映射元数据测试");
-//		map.put("mappingtype", "DIRECT");
-//		map.put("sourcetableid", 83238);
-//		map.put("targettableid", 83251);
-		
+		//		map.put("metamodelId", 99);
+		//		map.put("parentMetadataId", 0);
+		//		map.put("NAME", "表映射元数据1");
+		//		map.put("DESCRIPTION", "表映射元数据测试");
+		//		map.put("mappingtype", "DIRECT");
+		//		map.put("sourcetableid", 83238);
+		//		map.put("targettableid", 83251);
+
 		System.out.println(metadataManagementController.addMetadataStepThree(request, response, map));
 	}
-	
+
 	@Test
 	public void getHistoryMetadataPrivateInfo(){
 		HttpServletRequest request = null;
@@ -98,40 +114,40 @@ public class MetadataManagementTest {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("tankid", 80932);
 		map.put("metamodelid", 10);
-		
+
 		System.out.println(metadataManagementController.getHistoryMetadataPrivateInfo(request, response, map));
 	}
-	
+
 	@Test
 	public void getHistoryMetadataCommonInfo(){
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("metadataid", 82836);
-		
+
 		System.out.println(metadataManagementController.getHistoryMetadataCommonInfo(request, response, map));
 	}
-	
+
 	@Test
 	public void deleteMetadataDepend(){
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("relationid", 82417);
-		
+
 		System.out.println(metadataManagementController.deleteMetadataDepend(request, response, map));
 	}
-	
+
 	@Test
 	public void showMetadataDepend(){
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("metadataid", 2070);
-		
+
 		System.out.println(metadataManagementController.showMetadataDepend(request, response, map));
 	}
-	
+
 	@Test
 	public void addMetadataDepend(){
 		HttpServletRequest request = null;
@@ -139,20 +155,20 @@ public class MetadataManagementTest {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("sourcemetadataid", 2070);
 		map.put("targetmetadataid", 22742);
-		
+
 		System.out.println(metadataManagementController.addMetadataDepend(request, response, map));
 	}
-	
+
 	@Test
 	public void getDependMetadata(){
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("metadataid", 2070);
-		
+
 		System.out.println(metadataManagementController.getDependMetadata(request, response, map));
 	}
-	
+
 	@Test
 	public void searchMetadata(){
 		HttpServletRequest request = null;
@@ -161,48 +177,48 @@ public class MetadataManagementTest {
 		map.put("key", "ID");
 		map.put("currPage", "1");
 		map.put("pageSize", "10");
-		
+
 		System.out.println(metadataManagementController.searchMetadata(request, response, map));
 	}
-	
+
 	@Test
 	public void getFieldMetadataList(){
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("metadataid", 39125);
-		
+
 		System.out.println(metadataManagementController.getFieldMetadataList(request, response, map));
 	}
-	
+
 	@Test
 	public void getTableMetadataList(){
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("metadataid", 39124);
-		
+
 		System.out.println(metadataManagementController.getTableMetadataList(request, response, map));
 	}
-	
+
 	@Test
 	public void getDatabaseMetadataList(){
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
-		
+
 		System.out.println(metadataManagementController.getDatabaseMetadataList(request, response));
 	}
-	
+
 	@Test
 	public void daleteMetadataInfo(){
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("ID", 723);
-		
+
 		System.out.println(metadataManagementController.daleteMetadataInfo(request, response, map));
 	}
-	
+
 	@Test
 	public void updateMetadataInfoStepTwo(){
 		HttpServletRequest request = null;
@@ -213,15 +229,15 @@ public class MetadataManagementTest {
 		map.put("METAMODELID", 31);
 		map.put("NAME", "mountnode");
 		map.put("DESCRIPTION", "AAAAA");
-		
-//		map.put("type","PRIVATE");
-//		map.put("ID", 17);
-//		map.put("METAMODELID", 31);
-//		map.put("tablename", "shippers_tmp1");
-	
+
+		//		map.put("type","PRIVATE");
+		//		map.put("ID", 17);
+		//		map.put("METAMODELID", 31);
+		//		map.put("tablename", "shippers_tmp1");
+
 		System.out.println(metadataManagementController.updateMetadataInfoStepTwo(request, response, map));
 	}
-	
+
 	@Test
 	public void updateMetadataInfoStepOne(){
 		HttpServletRequest request = null;
@@ -231,10 +247,10 @@ public class MetadataManagementTest {
 		map.put("metamodelId", 31);
 		//map.put("type", "COMMON");
 		map.put("type", "PRIVATE");
-		
+
 		System.out.println(metadataManagementController.updateMetadataInfoStepOne(request, response, map));
 	}
-	
+
 	@Test
 	public void addMetadataStepThree(){
 		HttpServletRequest request = null;
@@ -247,7 +263,7 @@ public class MetadataManagementTest {
 		map.put("tablename", "table111");
 		System.out.println(metadataManagementController.addMetadataStepThree(request, response, map));
 	}
-	
+
 	@Test
 	public void addMetadataStepTwo(){
 		HttpServletRequest request = null;
@@ -256,7 +272,7 @@ public class MetadataManagementTest {
 		map.put("metamodelId", 31);
 		System.out.println(metadataManagementController.addMetadataStepTwo(request, response, map));
 	}
-	
+
 	@Test
 	public void addMetadataStepOne(){
 		HttpServletRequest request = null;
@@ -266,8 +282,8 @@ public class MetadataManagementTest {
 		map.put("id", 2);
 		System.out.println(metadataManagementController.addMetadataStepOne(request, response, map));
 	}
-	
-	
+
+
 	@Test
 	public void getMetadataInfo(){
 		HttpServletRequest request = null;
@@ -277,7 +293,7 @@ public class MetadataManagementTest {
 		map.put("metamodelId", 32);
 		System.out.println(metadataManagementController.getMetadataInfo(request,response,map));
 	}
-	
+
 	@Test
 	public void getFieldMetadata(){
 		HttpServletRequest request = null;
@@ -298,10 +314,10 @@ public class MetadataManagementTest {
 		//map.put("viewid", 1);
 		//map.put("id", 2);
 		map.put("metadataid", 83236);
-		
+
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
 		System.out.println(metadataManagementController.getMetadataViewTreeNode(request,response,map));
-		
+
 	}
 }
