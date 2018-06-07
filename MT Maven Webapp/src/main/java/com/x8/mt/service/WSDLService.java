@@ -161,7 +161,7 @@ public class WSDLService {
 	 * 时间:2018年6月7日
 	 * 作用:和为提供-发送webservice
 	 */
-	String sendWebService_HEWEI(String operationType,String protocolType,String protocolName,String protocolId) {
+	void sendWebService_HEWEI(String operationType,String protocolType,String protocolName,String protocolId) {
 		String endpoint = "http://localhost:8080/webservice/protocolservice/ProtocolManagerService";
 		String result = "no result!";
 		Service service = new Service();
@@ -185,12 +185,11 @@ public class WSDLService {
 			call.addParameter("protocolId", // 参数名
 					XMLType.XSD_STRING,// 参数类型:String
 					ParameterMode.IN);// 参数模式：'IN' or 'OUT'			
-			result = (String) call.invoke(object);// 远程调用
+			call.invoke(object);// 远程调用
 		} catch (ServiceException e) {
-			System.out.println("wsdl服务error1");
+			System.out.println("wsdl服务Error-ServiceException");
 		} catch (RemoteException e) {
-			System.out.println("wsdl服务error2");
+			System.out.println("wsdl服务Error-RemoteException");
 		}
-		return result;
 	}
 }
