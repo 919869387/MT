@@ -411,7 +411,7 @@ public class Metamodel_hierarchyController {
 	 * 作者:itcoder
 	 * 时间:2017年12月4日
 	 * 作用:插入一条Metamodel记录[只有元模型名字不能为null，入参id不能为null]
-	 * 参数：name、id、describe[describe可选]
+	 * 参数：name、id、describe[describe可选],type
 	 * 		
 	 */
 	@RequestMapping(value = "/insertMetamodel",method=RequestMethod.POST)
@@ -429,14 +429,15 @@ public class Metamodel_hierarchyController {
 		
 		//检查传参是否正确
 		if(!(map.containsKey("id")&&
-				map.containsKey("name"))){
+				map.containsKey("name")&&
+				map.containsKey("type"))){
 			responsejson.put("result", false);
 			responsejson.put("count",0);
 			return responsejson;
 		}
 
 		//检查传参是否为null
-		if (!(map.get("id")!=null&&map.get("name")!=null)) {
+		if (!(map.get("id")!=null&&map.get("name")!=null&&map.get("type")!=null)) {
 			responsejson.put("result", false);
 			responsejson.put("count", 0);
 			return responsejson;
@@ -446,6 +447,18 @@ public class Metamodel_hierarchyController {
 		Metamodel_hierarchy metamodel_hierarchy = new Metamodel_hierarchy();
 		String name = map.get("name").toString();//获取传入的元模型名称
 		int id = Integer.parseInt(map.get("id").toString());
+		if(map.get("type").toString().equals(GlobalMethodAndParams.metamodel_hierarchy_PACKAGE)){
+			metamodel_hierarchy.setType(map.get("type").toString());
+			metamodel_hierarchy.setParentid(Integer.parseInt(map.get("id").toString()));
+		}else if(map.get("type").toString().equals(GlobalMethodAndParams.metamodel_hierarchy_METAMODEL)){
+			metamodel_hierarchy.setType(map.get("type").toString());
+			metamodel_hierarchy.setParentid(Integer.parseInt(map.get("id").toString()));
+		}else{//type枚举类型不合法
+			System.out.println("mdzz,xz");
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}
 		List<Metamodel_hierarchy> metamodelList = metamodel_hierarchyService.getSonMetamodel_hierarchy(id);
 		for (Metamodel_hierarchy metamodel : metamodelList) {
 			if(name.equals(metamodel.getName())){
@@ -459,17 +472,16 @@ public class Metamodel_hierarchyController {
 		metamodel_hierarchy.setName(name);
 		metamodel_hierarchy.setParentid(id);
 		metamodel_hierarchy.setMountnode(0);
-		metamodel_hierarchy.setType(GlobalMethodAndParams.metamodel_hierarchy_METAMODEL);
 		if(map.containsKey("desribe")){
 			metamodel_hierarchy.setDesribe(map.get("desribe").toString());
 		}
 		
 		boolean result = metamodel_hierarchyService.insertMetamodel_hierarchy(metamodel_hierarchy);
 		responsejson.put("result", result);
-		if(result){
-			responsejson.put("count",1);
-		}else{
+		if(!result){
 			responsejson.put("count",0);
+		}else{
+			responsejson.put("count",1);
 		}
 		return responsejson;
 	}

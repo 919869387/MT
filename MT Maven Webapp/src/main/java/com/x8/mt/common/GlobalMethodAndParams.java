@@ -61,7 +61,7 @@ public class GlobalMethodAndParams {
 	/**
 	 * 元数据视图节点类型type
 	 */
-	public static final String MetaDataViewNodeTypeCATEGORY= "'CATEGORY'";
+	public static final String MetaDataViewNodeTypeCATEGORY= "CATEGORY";
 	
 	/**
 	 * 元数据视图节点类型type

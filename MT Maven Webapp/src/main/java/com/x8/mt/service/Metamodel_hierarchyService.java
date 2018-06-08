@@ -110,9 +110,9 @@ public class Metamodel_hierarchyService {
 				viewNode.setChildmetamodelid(metamodel_hierarchy.getId());
 				flag2 = iMetadataViewNodeDao.insertMetadataViewNode(viewNode)>0 ? true:false;
 			}
-				
-			return flag1 && flag2;
+			return flag1 & flag2;
 		} catch (Exception e) {
+			System.out.println(e.getMessage());
 			return false;
 		}
 	}
