@@ -209,4 +209,20 @@ public interface IMetadataManagementDao {
 	 * 作用:查询所有元数据记录个数
 	 */
 	int searchTotalMetadataCount();
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年6月13日
+	 * 作用:协议元数据中参数总个数
+	 */
+	int protocolParamMetadataCount(String fatherProtocolMetadataId);
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年6月13日
+	 * 作用:分页查询协议元数据中参数
+	 */
+	List<Metadata> protocolParamMetadataPage(Map<String, Object> param);
 }

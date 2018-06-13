@@ -162,7 +162,7 @@ public class WSDLService {
 	 * 作用:和为提供-发送webservice
 	 */
 	void sendWebService_HEWEI(String operationType,String protocolType,String protocolName,String protocolId) {
-		String endpoint = "http://localhost:8080/webservice/protocolservice/ProtocolManagerService";
+		String endpoint = "http://192.168.0.108:8082/webservice/ProtocolManagerService";
 		String result = "no result!";
 		Service service = new Service();
 		Call call;

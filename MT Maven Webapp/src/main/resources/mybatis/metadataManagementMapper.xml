@@ -4,8 +4,28 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.x8.mt.dao.IMetadataManagementDao">
 
+	<select id="protocolParamMetadataPage" resultType="com.x8.mt.entity.Metadata">
+		select * from
+		metadata
+		where id in (select relatedmetadataid from metadata_relation
+		where
+		metadataid=#{fatherProtocolMetadataId} and type='COMPOSITION')
+		ORDER BY CAST(JSON_EXTRACT(attributes,'$.Index') AS UNSIGNED)
+		limit #{startIndex},#{pageSize}
+	</select>
+
+	<select id="protocolParamMetadataCount" resultType="Integer">
+		select
+		count(*) from metadata_relation
+		where
+		metadataid=#{metadataid}
+		and
+		type='COMPOSITION'
+	</select>
+
 	<select id="searchTotalMetadataCount" resultType="Integer">
-		select count(*) from
+		select count(*)
+		from
 		metadata
 	</select>
 
@@ -68,7 +88,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 	<select id="getMetamodelPrivateInfo" resultType="com.x8.mt.entity.Metamodel_datatype">
 		select * from
-		metamodel_datatype where metamodelid=#{metamodelidStr}
+		metamodel_datatype where metamodelid=#{metamodelidStr} ORDER BY id asc
 	</select>
 
 	<select id="getHistoryMetadataPrivateInfo" resultType="java.lang.String">

@@ -7,7 +7,14 @@ import org.apache.shiro.subject.Subject;
 
 public class GlobalMethodAndParams {
 	
-	/*
+	/**
+	 * 读取excel定量
+	 */
+	public static final int excel_TypeTag_CellNum= 8;
+	public static final String excel_TypeTag_Array= "Array";
+	public static final String excel_TypeTag_Param= "Param";
+	
+	/**
 	 * 打开wsdlService通知
 	 */
 	public static final String wsdlServiceSwitch_CLOSE= "CLOSE";

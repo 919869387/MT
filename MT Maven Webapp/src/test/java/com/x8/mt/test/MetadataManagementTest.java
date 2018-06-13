@@ -32,6 +32,16 @@ public class MetadataManagementTest {
 	MetadataManagementController metadataManagementController;
 
 	@Test
+	public void getProtocolMetadataPage(){
+		Map<String,String> map = new HashMap<String,String>();
+		map.put("protocolId", "753");
+		map.put("currPage", "2");
+		map.put("pageSize", "5");
+
+		System.out.println(metadataManagementController.getProtocolMetadataPage(map));
+	}
+	
+	@Test
 	public void dataTimeGAP(){
 		try {
 			Date a = new Date();
@@ -243,10 +253,9 @@ public class MetadataManagementTest {
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("metadataId", 1282);
-		map.put("metamodelId", 31);
-		//map.put("type", "COMMON");
-		map.put("type", "PRIVATE");
+		map.put("metadataId", 770);
+		map.put("metamodelId", 1003);
+		map.put("updateType", "PRIVATE");
 
 		System.out.println(metadataManagementController.updateMetadataInfoStepOne(request, response, map));
 	}

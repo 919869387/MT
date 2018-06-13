@@ -19,6 +19,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -176,9 +177,9 @@ public class MetadataManagementService {
 	 * 作用:查找元数据
 	 */
 	public PageParam searchMetadata(String key,int currPage,int pageSize) {
-		
+
 		Date queryStart = new Date();
-		
+
 		PageParam pageParam = null;
 
 		int rowCount=imetadataManagementDao.searchMetadataCount(key);//总记录数
@@ -213,10 +214,10 @@ public class MetadataManagementService {
 			pageParam.setPageSize(pageSize);
 			pageParam.setRowCount(rowCount);
 			pageParam.setDate(searchMetadataList);
-			
+
 			int totalMetadataCount = imetadataManagementDao.searchTotalMetadataCount();//总元数据记录数
 			pageParam.setTotalMetadataCount(totalMetadataCount);
-			
+
 			Date endStart = new Date();
 			double timeGap = (endStart.getTime() - queryStart.getTime())*0.001;
 			String timeGapStr = (timeGap+"").substring(0, 5);
@@ -318,17 +319,17 @@ public class MetadataManagementService {
 	public boolean updateMetadataInfo(Map<String, Object> map) {
 		Metadata metadata = iMetaDataDao.getMetadataById(Integer.parseInt(map.get("ID").toString()));
 		Date updateDataTime = new Date();
-		
-		if(map.get("type").equals("PRIVATE")){
+
+		if(map.get("updateType").equals("PRIVATE")){
 			String metaModelId = (map.get(GlobalMethodAndParams.Public_Metamodel_METAMODELID)).toString();
 
 			List<String> attributesField = imetadataManagementDao.getAttributesField(metaModelId);
 			JSONObject attributes = TransformMetadata.createAttributes(map, attributesField);
-	
+
 			metadata.setUPDATETIME(updateDataTime);
 			metadata.setVERSION(metadata.getVERSION()+1);
 			metadata.setATTRIBUTES(attributes.toString());
-			
+
 			if(!(imetadataManagementDao.updateMetadatAttributes(metadata)>0)){
 				throw new RuntimeException("updateMetadatAttributes Error");
 			}
@@ -337,12 +338,12 @@ public class MetadataManagementService {
 			metadata.setDESCRIPTION(map.get("DESCRIPTION").toString());
 			metadata.setUPDATETIME(updateDataTime);
 			metadata.setVERSION(metadata.getVERSION()+1);
-			
+
 			if(!(imetadataManagementDao.updateMetadata(metadata)>0)){
 				throw new RuntimeException("updateMetadata Error");
 			}
 		}
-		
+
 		//2.加入metadata_tank表
 		MetadataTank metadataTank = new MetadataTank();
 		metadataTank.setCHECKSTATUS(metadata.getCHECKSTATUS());
@@ -725,4 +726,202 @@ public class MetadataManagementService {
 		return list;
 	}
 
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年6月11日
+	 * 作用:excel导入协议元数据
+	 * 参数:
+	 * @throws Exception 
+	 */
+	@Transactional
+	public void importExcelFileProtocolMetadata(XSSFSheet sheet,String protocolId) throws Exception {
+		int rowNum = 1;
+		while((rowNum<=sheet.getLastRowNum())
+				&&(sheet.getRow(rowNum).getCell(GlobalMethodAndParams.excel_TypeTag_CellNum).toString().equals(GlobalMethodAndParams.excel_TypeTag_Array)
+						||sheet.getRow(rowNum).getCell(GlobalMethodAndParams.excel_TypeTag_CellNum).toString().equals(GlobalMethodAndParams.excel_TypeTag_Param))){
+			
+			Row row=sheet.getRow(rowNum);
+
+			if(row.getCell(GlobalMethodAndParams.excel_TypeTag_CellNum).toString().equals(GlobalMethodAndParams.excel_TypeTag_Array)){//参数组
+				int paramArrayMetadataId = addExcelParamArrayMetadata(row,protocolId);
+				if(paramArrayMetadataId<=0){
+					throw new Exception();
+				}
+				int paramArrayLen = Double.valueOf(row.getCell(9).toString()).intValue();
+				for(int i=1;i<=paramArrayLen;i++){
+					if(!sheet.getRow(rowNum+i).getCell(GlobalMethodAndParams.excel_TypeTag_CellNum).toString().equals(GlobalMethodAndParams.excel_TypeTag_Param)){
+						throw new Exception();
+					}
+					int paramMetadataId = addExcelParamMetadata(sheet.getRow(rowNum+i),paramArrayMetadataId+"");
+					if(paramMetadataId<=0){
+						throw new Exception();
+					}
+				}
+				rowNum = rowNum+1+paramArrayLen;
+			}else{//参数
+				int paramMetadataId = addExcelParamMetadata(row,protocolId);
+				if(paramMetadataId<=0){
+					throw new Exception();
+				}
+				rowNum++;
+			}
+		}
+	}
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年6月11日
+	 * 作用:添加excel参数组元数据
+	 * 参数:
+	 */
+	int addExcelParamArrayMetadata(Row row,String fatherMetadataId){
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("parentMetadataId", fatherMetadataId);
+		map.put("metamodelId", GlobalMethodAndParams.protocolParamArrayMetamodelID);
+
+		String cell0 = (row.getCell(0)==null||row.getCell(0).toString().equals(""))?"":Double.valueOf(row.getCell(0).toString()).intValue()+"";
+		String cell1 = row.getCell(1)==null?"":row.getCell(1).toString();
+		String cell2 = row.getCell(2)==null?"":row.getCell(2).toString();
+		String cell3 = (row.getCell(3)==null||row.getCell(3).toString().equals(""))?"":Double.valueOf(row.getCell(3).toString()).intValue()+"";
+		String cell4 = (row.getCell(4)==null||row.getCell(4).toString().equals(""))?"":Double.valueOf(row.getCell(4).toString()).intValue()+"";
+		String cell5 = (row.getCell(5)==null||row.getCell(5).toString().equals(""))?"":Double.valueOf(row.getCell(5).toString()).intValue()+"";
+		String cell6 = row.getCell(6)==null?"":row.getCell(6).toString();
+		String cell7 = row.getCell(7)==null?"":row.getCell(7).toString();
+		String cell8 = row.getCell(8)==null?"":row.getCell(8).toString();
+		String cell9 = (row.getCell(9)==null||row.getCell(9).toString().equals(""))?"":Double.valueOf(row.getCell(9).toString()).intValue()+"";
+		String cell10 = row.getCell(10)==null?"":row.getCell(10).toString();
+		String cell11 = row.getCell(11)==null?"":row.getCell(11).toString();
+
+		map.put("NAME", cell1);
+		map.put("DESCRIPTION", cell2);
+
+		map.put("Index", cell0);
+		map.put("ParamTag", cell1);
+		map.put("ParamNaming", cell2);
+		map.put("ParamPos", cell3);
+		map.put("ParamOffset", cell4);
+		map.put("ParamLen", cell5);
+		map.put("ParamLenMetric", cell6);
+		map.put("ParamValueType", cell7);
+		map.put("TypeTag", cell8);
+		map.put("ParamArrayLen", cell9);
+		map.put("ParamMeaning", cell10);
+		map.put("ParamRemark", cell11);
+
+		return addMetadata(map);
+	}
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年6月11日
+	 * 作用:添加excel参数组元数据
+	 * 参数:
+	 */
+	int addExcelParamMetadata(Row row,String fatherMetadataId){
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("parentMetadataId", fatherMetadataId);
+		map.put("metamodelId", GlobalMethodAndParams.protocolParamMetamodelID);
+
+		String cell0 = (row.getCell(0)==null||row.getCell(0).toString().equals(""))?"":Double.valueOf(row.getCell(0).toString()).intValue()+"";
+		String cell1 = row.getCell(1)==null?"":row.getCell(1).toString();
+		String cell2 = row.getCell(2)==null?"":row.getCell(2).toString();
+		String cell3 = (row.getCell(3)==null||row.getCell(3).toString().equals(""))?"":Double.valueOf(row.getCell(3).toString()).intValue()+"";
+		String cell4 = (row.getCell(4)==null||row.getCell(4).toString().equals(""))?"":Double.valueOf(row.getCell(4).toString()).intValue()+"";
+		String cell5 = (row.getCell(5)==null||row.getCell(5).toString().equals(""))?"":Double.valueOf(row.getCell(5).toString()).intValue()+"";
+		String cell6 = row.getCell(6)==null?"":row.getCell(6).toString();
+		String cell7 = row.getCell(7)==null?"":row.getCell(7).toString();
+		String cell8 = row.getCell(8)==null?"":row.getCell(8).toString();
+		String cell10 = row.getCell(10)==null?"":row.getCell(10).toString();
+		String cell11 = row.getCell(11)==null?"":row.getCell(11).toString();
+		String cell12 = (row.getCell(12)==null||row.getCell(12).toString().equals(""))?"":Double.valueOf(row.getCell(12).toString()).intValue()+"";
+
+		map.put("NAME", cell1);
+		map.put("DESCRIPTION", cell2);
+
+		map.put("Index", cell0);
+		map.put("ParamTag", cell1);
+		map.put("ParamNaming", cell2);
+		map.put("ParamPos", cell3);
+		map.put("ParamOffset", cell4);
+		map.put("ParamLen", cell5);
+		map.put("ParamLenMetric", cell6);
+		map.put("ParamValueType", cell7);
+		map.put("TypeTag", cell8);
+		map.put("ParamMeaning", cell10);
+		map.put("ParamRemark", cell11);
+		map.put("ParamMultiple", cell12);
+
+		return addMetadata(map);
+	}
+	
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年6月13日
+	 * 作用:分页查询协议元数据参数
+	 */
+	public PageParam protocolMetadataPage(String fatherProtocolMetadataId,int currPage,int pageSize) {
+
+		PageParam pageParam = null;
+
+		int rowCount=imetadataManagementDao.protocolParamMetadataCount(fatherProtocolMetadataId);//总记录数
+		if(rowCount!=0){
+			List<Map<String, Object>> searchMetadataList = new ArrayList<Map<String, Object>>();
+			int startIndex = (currPage-1)*pageSize;
+
+			Map<String,Object> param = new HashMap<String,Object>();
+			param.put("fatherProtocolMetadataId", fatherProtocolMetadataId);
+			param.put("startIndex", startIndex);
+			param.put("pageSize", pageSize);
+
+			List<Metadata> metadataList = imetadataManagementDao.protocolParamMetadataPage(param);
+			Map<String, Object> map = null;
+			for(Metadata metadata : metadataList){
+				map = new HashMap<String, Object>();
+				map.put("ID", metadata.getID());
+				map.put("METAMODELID", metadata.getMETAMODELID());
+				
+				JSONObject attributes = JSONObject.fromObject(metadata.getATTRIBUTES());
+				if(attributes.get("TypeTag").equals(GlobalMethodAndParams.excel_TypeTag_Array)){
+					map.put("Index", attributes.get("Index"));
+					map.put("ParamTag", attributes.get("ParamTag"));
+					map.put("ParamNaming", attributes.get("ParamNaming"));
+					map.put("ParamPos",attributes.get("ParamPos"));
+					map.put("ParamOffset", attributes.get("ParamOffset"));
+					map.put("ParamLen", attributes.get("ParamLen"));
+					map.put("ParamLenMetric", attributes.get("ParamLenMetric"));
+					map.put("ParamValueType", attributes.get("ParamValueType"));
+					map.put("TypeTag", attributes.get("TypeTag"));
+					map.put("ParamArrayLen", attributes.get("ParamArrayLen"));
+					map.put("ParamMeaning", attributes.get("ParamMeaning"));
+					map.put("ParamRemark", attributes.get("ParamRemark"));
+				}else{
+					map.put("Index", attributes.get("Index"));
+					map.put("ParamTag", attributes.get("ParamTag"));
+					map.put("ParamNaming", attributes.get("ParamNaming"));
+					map.put("ParamPos",attributes.get("ParamPos"));
+					map.put("ParamOffset", attributes.get("ParamOffset"));
+					map.put("ParamLen", attributes.get("ParamLen"));
+					map.put("ParamLenMetric", attributes.get("ParamLenMetric"));
+					map.put("ParamValueType", attributes.get("ParamValueType"));
+					map.put("TypeTag", attributes.get("TypeTag"));
+					map.put("ParamMeaning", attributes.get("ParamMeaning"));
+					map.put("ParamRemark", attributes.get("ParamRemark"));
+					map.put("ParamMultiple", attributes.get("ParamMultiple"));
+				}
+
+				searchMetadataList.add(map);
+			}
+
+			pageParam = new PageParam();
+			pageParam.setCurrPage(currPage);
+			pageParam.setPageSize(pageSize);
+			pageParam.setRowCount(rowCount);
+			pageParam.setDate(searchMetadataList);
+		}
+		return pageParam;
+	}
 }

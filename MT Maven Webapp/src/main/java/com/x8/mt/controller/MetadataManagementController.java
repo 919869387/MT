@@ -21,16 +21,17 @@ import javax.servlet.http.HttpServletResponse;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
-import org.apache.axis2.AxisFault;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.x8.mt.common.GlobalMethodAndParams;
 import com.x8.mt.common.Log;
@@ -66,6 +67,91 @@ public class MetadataManagementController {
 	WSDLService wSDLService;
 	@Resource
 	MetadataAnalysisService metadataAnalysisService;
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年6月13日
+	 * 作用:协议参数元数据分页
+	 * 参数:protocolId、currPage、pageSize
+	 */
+	@RequestMapping(value = "/getProtocolParamMetadataPage",method = RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="metadata",operationDesc="协议参数元数据分页")
+	public JSONObject getProtocolMetadataPage(@RequestBody Map<String,String> map) {
+		JSONObject responsejson = new JSONObject();
+
+		//检测参数是否正确
+		if(!map.containsKey("protocolId")||!map.containsKey("currPage")||!map.containsKey("pageSize")){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}
+
+		PageParam pageParam = metadataManagementService.protocolMetadataPage(map.get("protocolId").toString(),
+				Integer.parseInt(map.get("currPage").toString()),Integer.parseInt(map.get("pageSize").toString()));
+
+		if(pageParam==null){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+		}else{
+			responsejson.put("result", true);
+			responsejson.put("data", pageParam);
+			responsejson.put("count",1);
+		}
+		return responsejson;
+	}
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年6月11日
+	 * 作用:excel导入协议元数据
+	 * 参数:
+	 */
+	@RequestMapping(value = "/importExcelFileProtocolMetadata",method = RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="metadata",operationDesc="导入协议元数据excel")
+	public JSONObject uploadProtocolMetadataExcelFile(@RequestParam("file") MultipartFile file,
+			@RequestParam("protocolId") String protocolId,
+			@RequestParam("pageSize") String pageSize) {
+		JSONObject responsejson = new JSONObject();
+
+		//检测参数是否正确
+		if(file.isEmpty()||protocolId.trim().equals("")){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}
+
+		//excel导入
+		XSSFWorkbook xsswb = null;
+		try {
+			xsswb = new XSSFWorkbook(file.getInputStream());
+			XSSFSheet sheet = xsswb.getSheetAt(0);
+			metadataManagementService.importExcelFileProtocolMetadata(sheet,protocolId);
+		} catch (Exception e) {
+			//e.printStackTrace();
+			System.out.println("协议元数据导入失败");
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}
+		System.out.println("协议元数据导入成功");
+
+		//分页查询-初始第1页
+		PageParam pageParam = metadataManagementService.protocolMetadataPage(protocolId,1,Integer.parseInt(pageSize));
+
+		if(pageParam==null){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+		}else{
+			responsejson.put("result", true);
+			responsejson.put("data", pageParam);
+			responsejson.put("count",1);
+		}
+		return responsejson;
+	}
 
 	/**
 	 * 
@@ -591,7 +677,7 @@ public class MetadataManagementController {
 				protocolMetadata = metadataAnalysisService.getCompositionMetadata(fatherMetadata.getID()+"");
 			}
 		}
-		
+
 		List<Object> count = new ArrayList<Object>();
 		if(metadataManagementService.daleteMetadataInfo(metadataId,count)){
 			responsejson.put("result", true);
@@ -624,7 +710,7 @@ public class MetadataManagementController {
 		"tablename": "metadata",
 		"METAMODELID": 31,
 		"NAME": "metadata",
-		"type":"COMMON",
+		"updateType":"COMMON",
 		}
 	 */
 	@RequestMapping(value = "/updateMetadataInfoStepTwo", method = RequestMethod.POST)
@@ -635,7 +721,7 @@ public class MetadataManagementController {
 		JSONObject responsejson = new JSONObject();
 
 		//检查传参是否正确
-		if(!map.containsKey("ID")||!map.containsKey("METAMODELID")||!map.containsKey("type")){
+		if(!map.containsKey("ID")||!map.containsKey("METAMODELID")||!map.containsKey("updateType")){
 			responsejson.put("result", false);
 			responsejson.put("count",0);
 			return responsejson;
@@ -663,7 +749,7 @@ public class MetadataManagementController {
 	 *  
 	 * 参数： metadataId[元数据id]
 	 * 		metamodelId[元模型id]
-	 * 		type[请求类型信息]
+	 * 		updateType[请求类型信息]
 	 */
 	@RequestMapping(value = "/updateMetadataInfoStepOne", method = RequestMethod.POST)
 	@ResponseBody
@@ -673,13 +759,13 @@ public class MetadataManagementController {
 		JSONObject responsejson = new JSONObject();
 
 		//检查传参是否正确
-		if(!(map.containsKey("metadataId")&&map.containsKey("metamodelId")&&map.containsKey("type"))){
+		if(!(map.containsKey("metadataId")&&map.containsKey("metamodelId")&&map.containsKey("updateType"))){
 			responsejson.put("result", false);
 			responsejson.put("count",0);
 			return responsejson;
 		}
 
-		String type = map.get("type").toString();
+		String type = map.get("updateType").toString();
 		//GlobalMethodAndParams.setHttpServletResponse(request, response);
 
 		//不可更新的字段
@@ -773,15 +859,15 @@ public class MetadataManagementController {
 			responsejson.put("count",0);
 			return responsejson;
 		}
-		
+
 		int metamodelId = Integer.parseInt(map.get("metamodelId").toString());
-		
+
 		int metadataId = metadataManagementService.addMetadata(map);
 		if(metadataId>0){
 			responsejson.put("result", true);
 			responsejson.put("metadataId", metadataId);
 			responsejson.put("count", 1);
-			
+
 			//多线程，线程池发送webservice
 			wSDLService.protocolOperationWebService(metamodelId,metadataId+"", GlobalMethodAndParams.protocolOperationType_INSERT,null);
 
