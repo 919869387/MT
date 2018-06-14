@@ -44,6 +44,9 @@ public class ExternalInterfaceService {
 
 		JSONObject protocol = null;
 		for(Metadata metadata : protocolMetadatas){
+			if(metadata.getMETAMODELID()!=GlobalMethodAndParams.protocolMetamodelID){
+				continue;
+			}
 			protocol = new JSONObject();
 			protocol.putAll((Map)JSONObject.fromObject(metadata.getATTRIBUTES()));//添加私有属性
 			protocol.put("protocolParams", getProtocolParamArrayMetadataOrParamMetadata(metadata.getID()+""));

@@ -63,7 +63,7 @@ public class ExternallnterfaceTest {
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
 		Map<String, String> map = new HashMap<String, String>();
-		map.put("protocolId", "modbus1");
+		map.put("protocolId", "GFFH");
 		//map.put("protocolType", "opc");
 		
 		System.out.println(externalInterfaceController.getProtocolMetadataByprotocolId(request, response,map));

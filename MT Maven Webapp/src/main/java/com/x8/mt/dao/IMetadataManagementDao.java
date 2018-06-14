@@ -225,4 +225,12 @@ public interface IMetadataManagementDao {
 	 * 作用:分页查询协议元数据中参数
 	 */
 	List<Metadata> protocolParamMetadataPage(Map<String, Object> param);
+	
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年6月14日
+	 * 作用:得到协议参数组下面的参数元数据
+	 */
+	List<Metadata> getProtocolParamByParamArray(String metadataId);
 }

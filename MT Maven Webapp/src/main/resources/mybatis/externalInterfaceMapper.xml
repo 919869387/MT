@@ -10,7 +10,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		metadata_relation where
 		metadataid=#{metadataid} and
 		type='COMPOSITION') ORDER BY CAST(JSON_EXTRACT(attributes,
-		'$.index')
+		'$.Index')
 		AS UNSIGNED);
 	</select>
 

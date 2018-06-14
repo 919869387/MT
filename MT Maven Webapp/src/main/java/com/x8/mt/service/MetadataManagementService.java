@@ -74,9 +74,106 @@ public class MetadataManagementService {
 			Row row = sheet.createRow(1);
 			setExcelCellContent(row,null,metadata);
 
-			exportSonMetadataToExcel(wb,metadata);
+			if(metadata.getMETAMODELID()==GlobalMethodAndParams.protocolMetamodelID){//对于协议元数据的导出单独处理
+				exportProtocolParamSheet(wb,metadata);
+			}else{
+				exportSonMetadataToExcel(wb,metadata);
+			}
 		}
 		return wb;  
+	}
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年5月16日
+	 * 作用:导出协议参数元数据到excel
+	 */
+	private void exportProtocolParamSheet(HSSFWorkbook wb, Metadata metadata) {
+		Sheet sheet = wb.createSheet("通信协议参数");
+
+		Row row = sheet.createRow(0);//表头
+		Cell cell = null;
+		cell= row.createCell(0);
+		cell.setCellValue("参数序号");
+		cell = row.createCell(1);  
+		cell.setCellValue("参数标签");
+		cell = row.createCell(2);  
+		cell.setCellValue("参数名称");
+		cell = row.createCell(3);  
+		cell.setCellValue("参数地址位");
+		cell = row.createCell(4);  
+		cell.setCellValue("参数偏移位");
+		cell = row.createCell(5);  
+		cell.setCellValue("参数长度");
+		cell = row.createCell(6);  
+		cell.setCellValue("参数长度单位");
+		cell = row.createCell(7);  
+		cell.setCellValue("参数值类型");
+		cell = row.createCell(8);  
+		cell.setCellValue("类型标识");
+		cell = row.createCell(9);  
+		cell.setCellValue("参数数组长度");
+		cell = row.createCell(10);  
+		cell.setCellValue("参数数值含义");
+		cell = row.createCell(11);  
+		cell.setCellValue("参数说明");
+		cell = row.createCell(12);  
+		cell.setCellValue("倍数关系");
+
+		List<Metadata> metadataList = imetadataManagementDao.getProtocolParamByParamArray(metadata.getID()+"");
+		int rowNum = 1;//全局定行数
+		for(Metadata protocolParamMetadata:metadataList){
+			JSONObject attributes = JSONObject.fromObject(protocolParamMetadata.getATTRIBUTES());
+
+			setprotocolParamCell(sheet, rowNum, attributes, protocolParamMetadata.getMETAMODELID());
+			rowNum++;
+
+			if(protocolParamMetadata.getMETAMODELID()==GlobalMethodAndParams.protocolParamArrayMetamodelID){//参数组
+				List<Metadata> arrayProtocolParamMetadataList = imetadataManagementDao.getProtocolParamByParamArray(protocolParamMetadata.getID()+"");
+				for(Metadata arrayProtocolParamMetadata:arrayProtocolParamMetadataList){
+					JSONObject arrayProtocolParamAttributes = JSONObject.fromObject(arrayProtocolParamMetadata.getATTRIBUTES());
+					
+					setprotocolParamCell(sheet,rowNum,arrayProtocolParamAttributes,arrayProtocolParamMetadata.getMETAMODELID());
+					rowNum++;
+				}
+			}
+		}
+	}
+	
+	private void setprotocolParamCell(Sheet sheet,int rowNum,JSONObject attributes,int metaModelId){
+		Row row = sheet.createRow(rowNum);
+		Cell cell = null;
+		cell= row.createCell(0);
+		cell.setCellValue(attributes.get("Index").toString());
+		cell = row.createCell(1);  
+		cell.setCellValue(attributes.get("ParamTag").toString());
+		cell = row.createCell(2);  
+		cell.setCellValue(attributes.get("ParamNaming").toString());
+		cell = row.createCell(3);  
+		cell.setCellValue(attributes.get("ParamPos").toString());
+		cell = row.createCell(4);  
+		cell.setCellValue(attributes.get("ParamOffset").toString());
+		cell = row.createCell(5);  
+		cell.setCellValue(attributes.get("ParamLen").toString());
+		cell = row.createCell(6);  
+		cell.setCellValue(attributes.get("ParamLenMetric").toString());
+		cell = row.createCell(7);  
+		cell.setCellValue(attributes.get("ParamValueType").toString());
+		cell = row.createCell(8);  
+		cell.setCellValue(attributes.get("TypeTag").toString());
+		cell = row.createCell(10);  
+		cell.setCellValue(attributes.get("ParamMeaning").toString());
+		cell = row.createCell(11);  
+		cell.setCellValue(attributes.get("ParamRemark").toString());
+		
+		if(metaModelId==GlobalMethodAndParams.protocolParamArrayMetamodelID){
+			cell = row.createCell(9);  
+			cell.setCellValue(attributes.get("ParamArrayLen").toString());
+		}else{
+			cell = row.createCell(12);  
+			cell.setCellValue(attributes.get("ParamMultiple").toString());
+		}
 	}
 
 	private void setExcelCellColor(HSSFWorkbook wb,Sheet sheet){
@@ -720,8 +817,13 @@ public class MetadataManagementService {
 	 */
 	private List<Map<String, Object>> TraverseBoolean(List<Map<String, Object>> list){
 		for(Map<String, Object> map : list){
-			boolean temp = map.get("leaf").equals("true")?true:false;
-			map.put("leaf", temp);
+			if(map.containsKey("metamodelid")
+					&&map.get("metamodelid").toString().equals(GlobalMethodAndParams.protocolMetamodelIDString)){
+				map.put("leaf", true);
+			}else{
+				boolean temp = map.get("leaf").equals("true")?true:false;
+				map.put("leaf", temp);
+			}
 		}
 		return list;
 	}
@@ -740,29 +842,29 @@ public class MetadataManagementService {
 		while((rowNum<=sheet.getLastRowNum())
 				&&(sheet.getRow(rowNum).getCell(GlobalMethodAndParams.excel_TypeTag_CellNum).toString().equals(GlobalMethodAndParams.excel_TypeTag_Array)
 						||sheet.getRow(rowNum).getCell(GlobalMethodAndParams.excel_TypeTag_CellNum).toString().equals(GlobalMethodAndParams.excel_TypeTag_Param))){
-			
+
 			Row row=sheet.getRow(rowNum);
 
 			if(row.getCell(GlobalMethodAndParams.excel_TypeTag_CellNum).toString().equals(GlobalMethodAndParams.excel_TypeTag_Array)){//参数组
 				int paramArrayMetadataId = addExcelParamArrayMetadata(row,protocolId);
 				if(paramArrayMetadataId<=0){
-					throw new Exception();
+					throw new RuntimeException("协议元数据插入数据库失败");
 				}
 				int paramArrayLen = Double.valueOf(row.getCell(9).toString()).intValue();
 				for(int i=1;i<=paramArrayLen;i++){
 					if(!sheet.getRow(rowNum+i).getCell(GlobalMethodAndParams.excel_TypeTag_CellNum).toString().equals(GlobalMethodAndParams.excel_TypeTag_Param)){
-						throw new Exception();
+						throw new RuntimeException("协议元数据Excel数据有误,参数组中参数问题");
 					}
 					int paramMetadataId = addExcelParamMetadata(sheet.getRow(rowNum+i),paramArrayMetadataId+"");
 					if(paramMetadataId<=0){
-						throw new Exception();
+						throw new RuntimeException("协议元数据插入数据库失败");
 					}
 				}
 				rowNum = rowNum+1+paramArrayLen;
 			}else{//参数
 				int paramMetadataId = addExcelParamMetadata(row,protocolId);
 				if(paramMetadataId<=0){
-					throw new Exception();
+					throw new RuntimeException("协议元数据插入数据库失败");
 				}
 				rowNum++;
 			}
@@ -856,7 +958,7 @@ public class MetadataManagementService {
 
 		return addMetadata(map);
 	}
-	
+
 	/**
 	 * 
 	 * 作者:allen
@@ -883,7 +985,7 @@ public class MetadataManagementService {
 				map = new HashMap<String, Object>();
 				map.put("ID", metadata.getID());
 				map.put("METAMODELID", metadata.getMETAMODELID());
-				
+
 				JSONObject attributes = JSONObject.fromObject(metadata.getATTRIBUTES());
 				if(attributes.get("TypeTag").equals(GlobalMethodAndParams.excel_TypeTag_Array)){
 					map.put("Index", attributes.get("Index"));
@@ -923,5 +1025,41 @@ public class MetadataManagementService {
 			pageParam.setDate(searchMetadataList);
 		}
 		return pageParam;
+	}
+
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年6月14日
+	 * 作用:得到协议参数组下面的参数元数据
+	 */
+	public List<Map<String, Object>> getProtocolParamByParamArray(String metadataId) {
+		List<Metadata> metadataList = imetadataManagementDao.getProtocolParamByParamArray(metadataId);
+
+		List<Map<String, Object>> searchMetadataList = new ArrayList<Map<String, Object>>();
+
+		Map<String, Object> map = null;
+		for(Metadata metadata : metadataList){
+			map = new HashMap<String, Object>();
+			map.put("ID", metadata.getID());
+			map.put("METAMODELID", metadata.getMETAMODELID());
+
+			JSONObject attributes = JSONObject.fromObject(metadata.getATTRIBUTES());
+			map.put("Index", attributes.get("Index"));
+			map.put("ParamTag", attributes.get("ParamTag"));
+			map.put("ParamNaming", attributes.get("ParamNaming"));
+			map.put("ParamPos",attributes.get("ParamPos"));
+			map.put("ParamOffset", attributes.get("ParamOffset"));
+			map.put("ParamLen", attributes.get("ParamLen"));
+			map.put("ParamLenMetric", attributes.get("ParamLenMetric"));
+			map.put("ParamValueType", attributes.get("ParamValueType"));
+			map.put("TypeTag", attributes.get("TypeTag"));
+			map.put("ParamMeaning", attributes.get("ParamMeaning"));
+			map.put("ParamRemark", attributes.get("ParamRemark"));
+			map.put("ParamMultiple", attributes.get("ParamMultiple"));
+
+			searchMetadataList.add(map);
+		}
+		return searchMetadataList;
 	}
 }

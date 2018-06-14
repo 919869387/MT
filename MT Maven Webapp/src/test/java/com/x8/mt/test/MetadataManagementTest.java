@@ -32,6 +32,14 @@ public class MetadataManagementTest {
 	MetadataManagementController metadataManagementController;
 
 	@Test
+	public void getProtocolParamByParamArray(){
+		Map<String,String> map = new HashMap<String,String>();
+		map.put("metadataId", "819");
+
+		System.out.println(metadataManagementController.getProtocolParamByParamArray(map));
+	}
+	
+	@Test
 	public void getProtocolMetadataPage(){
 		Map<String,String> map = new HashMap<String,String>();
 		map.put("protocolId", "753");

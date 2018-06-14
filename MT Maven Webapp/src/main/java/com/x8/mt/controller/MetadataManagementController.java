@@ -71,6 +71,40 @@ public class MetadataManagementController {
 	/**
 	 * 
 	 * 作者:allen
+	 * 时间:2018年6月14日
+	 * 作用:得到协议参数组下面的参数元数据
+	 * 参数:metadataId-参数组元数据id
+	 */
+	@RequestMapping(value = "/getProtocolParamByParamArray",method = RequestMethod.POST)
+	@ResponseBody
+	@Log(operationType="metadata",operationDesc="得到协议参数组下面的参数元数据")
+	public JSONObject getProtocolParamByParamArray(@RequestBody Map<String,String> map) {
+		JSONObject responsejson = new JSONObject();
+
+		//检测参数是否正确
+		if(!map.containsKey("metadataId")){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}
+
+		List<Map<String, Object>> protocolParams= metadataManagementService.getProtocolParamByParamArray(map.get("metadataId").toString());
+		
+		if(protocolParams.size()>0){
+			responsejson.put("result", true);
+			responsejson.put("data", protocolParams);
+			responsejson.put("count",protocolParams.size());
+		}else{
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+		}
+
+		return responsejson;
+	}
+
+	/**
+	 * 
+	 * 作者:allen
 	 * 时间:2018年6月13日
 	 * 作用:协议参数元数据分页
 	 * 参数:protocolId、currPage、pageSize
@@ -112,11 +146,17 @@ public class MetadataManagementController {
 	@RequestMapping(value = "/importExcelFileProtocolMetadata",method = RequestMethod.POST)
 	@ResponseBody
 	@Log(operationType="metadata",operationDesc="导入协议元数据excel")
-	public JSONObject uploadProtocolMetadataExcelFile(@RequestParam("file") MultipartFile file,
+	public JSONObject importExcelFileProtocolMetadata(
+			HttpServletRequest request,
+			HttpServletResponse response,
+			@RequestParam("file") MultipartFile file,
 			@RequestParam("protocolId") String protocolId,
 			@RequestParam("pageSize") String pageSize) {
+
 		JSONObject responsejson = new JSONObject();
 
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
+		
 		//检测参数是否正确
 		if(file.isEmpty()||protocolId.trim().equals("")){
 			responsejson.put("result", false);
@@ -131,13 +171,17 @@ public class MetadataManagementController {
 			XSSFSheet sheet = xsswb.getSheetAt(0);
 			metadataManagementService.importExcelFileProtocolMetadata(sheet,protocolId);
 		} catch (Exception e) {
-			//e.printStackTrace();
-			System.out.println("协议元数据导入失败");
+			System.out.println("协议元数据Excel数据有误");
+			e.printStackTrace();
+			
 			responsejson.put("result", false);
 			responsejson.put("count",0);
 			return responsejson;
 		}
 		System.out.println("协议元数据导入成功");
+		
+		//多线程，线程池发送webservice
+		wSDLService.protocolOperationWebService(GlobalMethodAndParams.protocolMetamodelID,protocolId, GlobalMethodAndParams.protocolOperationType_INSERT,null);
 
 		//分页查询-初始第1页
 		PageParam pageParam = metadataManagementService.protocolMetadataPage(protocolId,1,Integer.parseInt(pageSize));
@@ -869,8 +913,11 @@ public class MetadataManagementController {
 			responsejson.put("count", 1);
 
 			//多线程，线程池发送webservice
-			wSDLService.protocolOperationWebService(metamodelId,metadataId+"", GlobalMethodAndParams.protocolOperationType_INSERT,null);
-
+			if(metamodelId==GlobalMethodAndParams.protocolParamMetamodelID||
+					metamodelId==GlobalMethodAndParams.protocolParamArrayMetamodelID){
+				wSDLService.protocolOperationWebService(metamodelId,metadataId+"", GlobalMethodAndParams.protocolOperationType_INSERT,null);
+			}
+			
 		}else{
 			responsejson.put("result", false);
 			responsejson.put("count", 0);

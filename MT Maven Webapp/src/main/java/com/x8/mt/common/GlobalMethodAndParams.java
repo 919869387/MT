@@ -33,6 +33,7 @@ public class GlobalMethodAndParams {
 	public static final String protocolName= "protocolName";
 	public static final String protocolType= "protocolType";
 	
+	public static final String protocolMetamodelIDString= "1001";
 	public static final int protocolMetamodelID= 1001;
 	public static final int protocolParamArrayMetamodelID= 1002;
 	public static final int protocolParamMetamodelID= 1003;

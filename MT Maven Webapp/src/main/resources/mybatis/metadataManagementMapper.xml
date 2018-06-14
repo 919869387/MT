@@ -3,7 +3,16 @@
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.x8.mt.dao.IMetadataManagementDao">
-
+	
+	<select id="getProtocolParamByParamArray" resultType="com.x8.mt.entity.Metadata">
+		select * from
+		metadata
+		where id in (select relatedmetadataid from metadata_relation
+		where
+		metadataid=#{metadataId} and type='COMPOSITION')
+		ORDER BY CAST(JSON_EXTRACT(attributes,'$.Index') AS UNSIGNED)
+	</select>
+	
 	<select id="protocolParamMetadataPage" resultType="com.x8.mt.entity.Metadata">
 		select * from
 		metadata
