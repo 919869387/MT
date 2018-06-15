@@ -116,7 +116,7 @@ public class WSDLService {
 			@Override  
 			public void run() {
 				//sendWebService(url,tns,method,finalOperationType,finalProtocolType,finalProtocolName,finalProtocolId);
-				sendWebService_HEWEI(finalOperationType,finalProtocolType,finalProtocolName,finalProtocolId);//和为提供的方法
+				sendWebService_HEWEI(finalOperationType,finalProtocolType,finalProtocolName,finalProtocolId,wsdlServiceInfo.getUrl(),wsdlServiceInfo.getTns());//和为提供的方法
 			}  
 		}); 
 	}
@@ -161,8 +161,9 @@ public class WSDLService {
 	 * 时间:2018年6月7日
 	 * 作用:和为提供-发送webservice
 	 */
-	void sendWebService_HEWEI(String operationType,String protocolType,String protocolName,String protocolId) {
-		String endpoint = "http://192.168.0.108:8082/webservice/ProtocolManagerService";
+	void sendWebService_HEWEI(String operationType,String protocolType,String protocolName,String protocolId,String IP,String PORT) {
+		String endpoint = "http://"+IP+":"+PORT+"/webservice/ProtocolManagerService";
+		System.out.println(endpoint);
 		String result = "no result!";
 		Service service = new Service();
 		Call call;
