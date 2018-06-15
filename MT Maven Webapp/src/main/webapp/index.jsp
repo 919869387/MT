@@ -1,14 +1,14 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+
 <!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <title>测试导出</title>
-    <!-- <script src="./src/components/DataMapManagement/shapes.js"></script> -->
     <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
   </head>
   <body>
-    <div id="add" style="width:130px;height:40px;background-color: blue;"></div>
     <script>
         $("#add").click(function(){
             console.log("==============");
@@ -40,13 +40,18 @@
         form.append($("<input></input>").attr("metadataid", 2070).attr("filename", "测试aaa"));
         form.appendTo('body').submit();
     }
-	
+    
+	function downloadJSONFile() {
+    	var url = 'http://localhost:8080/MT/metadataManagement/exportProtocolMetadataToJSONFile?protocolId=jojio&filename=测试';
+    	window.location.href = url;
+	}
     </script>
 	
 	<div>
     <a href="<%=request.getContextPath()%>/ajaxDownloadServlet.do?fileName=testAjaxDownload.txt">同步下载文件</a><br />
     <a href="#" onclick="downloadFilebyAjax()">ajax下载文件</a> <br />
-    <a href="#" onclick="downloadFileByForm()">模拟表单提交下载文件</a>
+    <a href="#" onclick="downloadFileByForm()">模拟表单提交下载文件</a><br />
+    <a href="#" onclick="downloadJSONFile()">downloadJSONFile</a>
 </div>
 
   </body>

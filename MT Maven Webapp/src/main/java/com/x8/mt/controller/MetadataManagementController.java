@@ -39,6 +39,7 @@ import com.x8.mt.common.PageParam;
 import com.x8.mt.entity.Metadata;
 import com.x8.mt.entity.MetadataViewNode;
 import com.x8.mt.entity.Metamodel_hierarchy;
+import com.x8.mt.service.ExternalInterfaceService;
 import com.x8.mt.service.MetadataAnalysisService;
 import com.x8.mt.service.MetadataManagementService;
 import com.x8.mt.service.MetadataViewNodeService;
@@ -67,6 +68,8 @@ public class MetadataManagementController {
 	WSDLService wSDLService;
 	@Resource
 	MetadataAnalysisService metadataAnalysisService;
+	@Resource
+	ExternalInterfaceService externalInterfaceService;
 
 	/**
 	 * 
@@ -196,7 +199,63 @@ public class MetadataManagementController {
 		}
 		return responsejson;
 	}
+	
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年5月16日
+	 * 作用:导出协议元数据到json文件
+	 * 参数：protocolId、filename
+	 */
+	@RequestMapping(value = "/exportProtocolMetadataToJSONFile",method = RequestMethod.GET)
+	@ResponseBody
+	@Log(operationType="metadata",operationDesc="导出协议元数据到json文件")
+	public JSONObject exportProtocolMetadataToJSONFile(HttpServletRequest request, HttpServletResponse response) throws IOException{
+		JSONObject responsejson = new JSONObject();
 
+		GlobalMethodAndParams.setHttpServletResponse(request, response);
+
+		String protocolId = request.getParameter("protocolId");
+		String filename =request.getParameter("filename");
+
+		JSONObject protocolMetadata = externalInterfaceService.getProtocolMetadataByprotocolId(protocolId);
+		
+		BufferedInputStream bis = null;
+		BufferedOutputStream bos = null;
+
+		try  
+		{
+			response.reset();
+			response.setContentType("application/octet-stream;charset=utf-8");
+			response.setHeader("Content-Disposition", "attachment;filename="+ new String((filename + ".json").getBytes("utf-8"), "utf-8"));
+
+			byte[] content = protocolMetadata.toString().getBytes();
+			InputStream is = new ByteArrayInputStream(content);
+			ServletOutputStream out = response.getOutputStream();
+			bis = new BufferedInputStream(is);
+			bos = new BufferedOutputStream(out);
+
+			byte[] buff = new byte[2048];
+			int bytesRead;
+
+			while (-1 != (bytesRead = bis.read(buff, 0, buff.length))) {
+				bos.write(buff, 0, bytesRead);
+			}
+
+			responsejson.put("result", true);
+			responsejson.put("count",1);
+		}catch (IOException e) {
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+		}finally{
+			if (bis != null)
+				bis.close();
+			if (bos != null)
+				bos.close();
+		}
+		return responsejson;
+	}
+	
 	/**
 	 * 
 	 * 作者:allen
