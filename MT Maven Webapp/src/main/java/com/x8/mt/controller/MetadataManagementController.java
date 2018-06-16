@@ -216,9 +216,18 @@ public class MetadataManagementController {
 		GlobalMethodAndParams.setHttpServletResponse(request, response);
 
 		String protocolId = request.getParameter("protocolId");
+		protocolId = new String(protocolId.getBytes("iso8859-1"),"utf-8");
+		
 		String filename =request.getParameter("filename");
+		filename = new String(filename.getBytes("iso8859-1"),"utf-8");
 
 		JSONObject protocolMetadata = externalInterfaceService.getProtocolMetadataByprotocolId(protocolId);
+		
+		if(protocolMetadata==null){
+			responsejson.put("result", false);
+			responsejson.put("count",0);
+			return responsejson;
+		}
 		
 		BufferedInputStream bis = null;
 		BufferedOutputStream bos = null;
