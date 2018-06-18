@@ -38,7 +38,7 @@ public class MetadataManagementTest {
 
 		System.out.println(metadataManagementController.getProtocolParamByParamArray(map));
 	}
-	
+
 	@Test
 	public void getProtocolMetadataPage(){
 		Map<String,String> map = new HashMap<String,String>();
@@ -48,7 +48,7 @@ public class MetadataManagementTest {
 
 		System.out.println(metadataManagementController.getProtocolMetadataPage(map));
 	}
-	
+
 	@Test
 	public void dataTimeGAP(){
 		try {
@@ -269,15 +269,49 @@ public class MetadataManagementTest {
 	}
 
 	@Test
+	public void addMetadataStepThree_Bigdata(){
+		HttpServletRequest request = null;
+		HttpServletResponse response = null;
+		Map<String, Object> map = null;
+
+		for(int i=0;i<100000;i++){
+			map = new HashMap<String, Object>();
+			map.put("metamodelId", 31);
+			map.put("parentMetadataId", 3072);
+			map.put("NAME", "table111");
+			map.put("DESCRIPTION", "测试元数据添加");
+
+			String base = "SRcPGGSjLoNXJeLxOX3Kt9DpPh29f8wbQFLqZJLXciQObsGuhHwKZ10l8l6fLq9XZaqWyHrrCnVzOC71UVzjuKn4S3dT4lRGoIze";
+			StringBuffer content = new StringBuffer(base);
+			content.append(base);
+			content.append(base);
+			content.append(base);
+			content.append(base);
+			content.append(base);
+			content.append(base);
+			content.append(base);
+			content.append(base);
+			content.append(base);
+
+			map.put("tablename",content.toString());
+			metadataManagementController.addMetadataStepThree(request, response, map);
+			if(i%5000==0){
+				System.out.println(i);
+			}
+		}
+	}
+
+	@Test
 	public void addMetadataStepThree(){
 		HttpServletRequest request = null;
 		HttpServletResponse response = null;
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("metamodelId", 31);
-		map.put("parentMetadataId", 1542);
+		map.put("parentMetadataId", 3072);
 		map.put("NAME", "table111");
 		map.put("DESCRIPTION", "测试元数据添加");
-		map.put("tablename", "table111");
+		map.put("tablename","table11");
+
 		System.out.println(metadataManagementController.addMetadataStepThree(request, response, map));
 	}
 
