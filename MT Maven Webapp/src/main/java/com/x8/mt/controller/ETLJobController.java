@@ -672,7 +672,7 @@ public class ETLJobController {
 		} catch (Exception e) {
 		}
 		//获取总记录数
-		int rowCount = etlJobService.getRowCount("");
+		int rowCount = etlJobService.getRowCount(""，"");
 		//构造分页数据
 		PageParam pageParam = new PageParam();
 		pageParam.setPageSize(pageSize);
@@ -741,7 +741,7 @@ public class ETLJobController {
 			}
 			responsejson.put("result", true);
 			responsejson.put("data", data);
-			responsejson.put("total", etlJobService.getRowCount(""));
+			responsejson.put("total", etlJobService.getRowCount("",""));
 			responsejson.put("count",ETLJobList.size());
 			return responsejson;
 		}
@@ -957,6 +957,13 @@ public class ETLJobController {
 				description = null;
 			}
 		}
+		String status = null;
+		if(map.containsKey("status")){
+			status = map.get("status").toString();
+			if(status.isEmpty()){
+				status = null;
+			}
+		}
 		int currPage = 1;
 		int pageSize = 1;
 		try {
@@ -965,7 +972,7 @@ public class ETLJobController {
 		} catch (Exception e) {
 		}
 		//获取总记录数
-		int rowCount = etlJobService.getRowCount(description);
+		int rowCount = etlJobService.getRowCount(description,status);
 		//构造分页数据
 		PageParam pageParam = new PageParam();
 		pageParam.setPageSize(pageSize);
@@ -974,7 +981,7 @@ public class ETLJobController {
 			currPage = pageParam.getTotalPage();
 		}
 		pageParam.setCurrPage(currPage);
-		pageParam = etlJobService.getETLJobListByDescrption(pageParam,description);
+		pageParam = etlJobService.getETLJobListByDescrption(pageParam,description,status);
 		if(pageParam.getData()==null|| pageParam.getData().isEmpty()){
 			responsejson.put("result", false);
 			responsejson.put("message", "没有查询到任务");
@@ -1034,7 +1041,7 @@ public class ETLJobController {
 		}
 		responsejson.put("result", true);
 		responsejson.put("data", data);
-		responsejson.put("total", etlJobService.getRowCount(description));
+		responsejson.put("total", etlJobService.getRowCount(description,status));
 		responsejson.put("count",ETLJobList.size());
 		return responsejson;
 		}

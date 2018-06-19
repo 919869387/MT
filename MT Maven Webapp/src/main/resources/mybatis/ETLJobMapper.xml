@@ -28,6 +28,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="description != null">
                 binary description like "%"#{description}"%"
             </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
         </where>
 	</select>
 	
@@ -80,6 +83,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <where>
             <if test="description != null">
                 binary description like "%"#{description}"%"
+            </if>
+            <if test="status != null">
+                and status = #{status}
             </if>
         </where>
 		order by create_date desc
