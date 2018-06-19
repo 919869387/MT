@@ -124,8 +124,8 @@ public class ETLJobService {
 		return false;		
 	}
 
-	public int getRowCount(String description){
-		return eTLJobDao.getRowCount(description);
+	public int getRowCount(String description,String status){
+		return eTLJobDao.getRowCount(description,status);
 	}
 
 	public PageParam getETLJobListByPage(PageParam pageParam) {

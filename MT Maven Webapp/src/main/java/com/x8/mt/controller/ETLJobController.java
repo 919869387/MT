@@ -672,7 +672,7 @@ public class ETLJobController {
 		} catch (Exception e) {
 		}
 		//获取总记录数
-		int rowCount = etlJobService.getRowCount("");
+		int rowCount = etlJobService.getRowCount(""，"");
 		//构造分页数据
 		PageParam pageParam = new PageParam();
 		pageParam.setPageSize(pageSize);
@@ -741,7 +741,7 @@ public class ETLJobController {
 			}
 			responsejson.put("result", true);
 			responsejson.put("data", data);
-			responsejson.put("total", etlJobService.getRowCount(""));
+			responsejson.put("total", etlJobService.getRowCount("",""));
 			responsejson.put("count",ETLJobList.size());
 			return responsejson;
 		}
@@ -972,7 +972,7 @@ public class ETLJobController {
 		} catch (Exception e) {
 		}
 		//获取总记录数
-		int rowCount = etlJobService.getRowCount(description);
+		int rowCount = etlJobService.getRowCount(description,status);
 		//构造分页数据
 		PageParam pageParam = new PageParam();
 		pageParam.setPageSize(pageSize);
@@ -1041,7 +1041,7 @@ public class ETLJobController {
 		}
 		responsejson.put("result", true);
 		responsejson.put("data", data);
-		responsejson.put("total", etlJobService.getRowCount(description));
+		responsejson.put("total", etlJobService.getRowCount(description,status));
 		responsejson.put("count",ETLJobList.size());
 		return responsejson;
 		}

@@ -41,7 +41,7 @@ public interface IETLJobDao {
 	 * 时间:2018年4月25日 
 	 * 作用:获取作业数量
 	 */
-	int getRowCount(@Param("description")String description);
+	int getRowCount(@Param("description")String description,@Param("status")String status);
 	
 	
 	/**
