@@ -598,13 +598,13 @@ public class ETLJobService {
 	 * 时间:2018年5月17日 
 	 * 作用:分页获取调度信息
 	 */
-	public PageParam getETLJobListByDescrption(PageParam pageParam,String description) {
+	public PageParam getETLJobListByDescrption(PageParam pageParam,String description,String status) {
 		int currPage = pageParam.getCurrPage();
 		if(currPage>0){
 			int offset = (currPage-1)*pageParam.getPageSize();//计算出偏移量，起始位置
 			int size = pageParam.getPageSize();//一页的数量
 
-			List<ETLJob> ETLJobList = eTLJobDao.selectByDescription(description,offset,size);
+			List<ETLJob> ETLJobList = eTLJobDao.selectByDescription(description,status,offset,size);
 			pageParam.setDate(ETLJobList);
 
 			return pageParam;

@@ -957,6 +957,13 @@ public class ETLJobController {
 				description = null;
 			}
 		}
+		String status = null;
+		if(map.containsKey("status")){
+			status = map.get("status").toString();
+			if(status.isEmpty()){
+				status = null;
+			}
+		}
 		int currPage = 1;
 		int pageSize = 1;
 		try {
@@ -974,7 +981,7 @@ public class ETLJobController {
 			currPage = pageParam.getTotalPage();
 		}
 		pageParam.setCurrPage(currPage);
-		pageParam = etlJobService.getETLJobListByDescrption(pageParam,description);
+		pageParam = etlJobService.getETLJobListByDescrption(pageParam,description,status);
 		if(pageParam.getData()==null|| pageParam.getData().isEmpty()){
 			responsejson.put("result", false);
 			responsejson.put("message", "没有查询到任务");

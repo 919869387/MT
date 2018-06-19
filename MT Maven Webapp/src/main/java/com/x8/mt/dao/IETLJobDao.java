@@ -58,7 +58,7 @@ public interface IETLJobDao {
 	 * 时间:2018年5月9日 
 	 * 作用:根据描述筛选，并选取指定偏移量的一组etljob作业
 	 */
-	List<ETLJob> selectByDescription(@Param("description")String description,@Param("offset") int offset,@Param("size") int size);
+	List<ETLJob> selectByDescription(@Param("description")String description,@Param("status")String status,@Param("offset") int offset,@Param("size") int size);
 	
 	
 	/**
