@@ -24,6 +24,8 @@ import net.sf.json.JSONObject;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -70,6 +72,8 @@ public class MetadataManagementController {
 	MetadataAnalysisService metadataAnalysisService;
 	@Resource
 	ExternalInterfaceService externalInterfaceService;
+	@Autowired  
+	ThreadPoolTaskExecutor threadPoolTaskExecutor; 
 
 	/**
 	 * 
@@ -992,6 +996,113 @@ public class MetadataManagementController {
 		}
 
 		return responsejson;
+	}
+	
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年6月18日
+	 * 作用:批量导入元数据
+	 */
+	@RequestMapping(value = "/addMetadataBigdata", method = RequestMethod.GET)
+	@ResponseBody
+	@Log(operationType="metadata",operationDesc="addMetadataBigdata")
+	public void addMetadataBigdata(){
+		
+		threadPoolTaskExecutor.execute(new Runnable() {  
+			@Override  
+			public void run() {
+				Map<String, Object> map = null;
+				for(int i=0;i<300000;i++){
+					map = new HashMap<String, Object>();
+					map.put("metamodelId", 31);
+					map.put("parentMetadataId", 3072);
+					map.put("NAME", "table111");
+					map.put("DESCRIPTION", "测试元数据添加");
+
+					String base = "SRcPGGSjLoNXJeLxOX3Kt9DpPh29f8wbQFLqZJLXciQObsGuhHwKZ10l8l6fLq9XZaqWyHrrCnVzOC71UVzjuKn4S3dT4lRGoIze";
+					StringBuffer content = new StringBuffer(base);
+					content.append(base);
+					content.append(base);
+					content.append(base);
+					content.append(base);
+					content.append(base);
+					content.append(base);
+					content.append(base);
+					content.append(base);
+					content.append(base);
+
+					map.put("tablename",content.toString());
+					metadataManagementService.addMetadataForBigdata(map);
+					if(i%500==0){
+						System.out.println("线程一： "+i);
+					}
+				}
+			}  
+		}); 
+		threadPoolTaskExecutor.execute(new Runnable() {  
+			@Override  
+			public void run() {
+				Map<String, Object> map = null;
+				for(int i=0;i<300000;i++){
+					map = new HashMap<String, Object>();
+					map.put("metamodelId", 31);
+					map.put("parentMetadataId", 3072);
+					map.put("NAME", "table111");
+					map.put("DESCRIPTION", "测试元数据添加");
+
+					String base = "SRcPGGSjLoNXJeLxOX3Kt9DpPh29f8wbQFLqZJLXciQObsGuhHwKZ10l8l6fLq9XZaqWyHrrCnVzOC71UVzjuKn4S3dT4lRGoIze";
+					StringBuffer content = new StringBuffer(base);
+					content.append(base);
+					content.append(base);
+					content.append(base);
+					content.append(base);
+					content.append(base);
+					content.append(base);
+					content.append(base);
+					content.append(base);
+					content.append(base);
+
+					map.put("tablename",content.toString());
+					metadataManagementService.addMetadataForBigdata(map);
+					if(i%500==0){
+						System.out.println("线程二： "+i);
+					}
+				}
+			}  
+		}); 
+		threadPoolTaskExecutor.execute(new Runnable() {  
+			@Override  
+			public void run() {
+				Map<String, Object> map = null;
+				for(int i=0;i<300000;i++){
+					map = new HashMap<String, Object>();
+					map.put("metamodelId", 31);
+					map.put("parentMetadataId", 3072);
+					map.put("NAME", "table111");
+					map.put("DESCRIPTION", "测试元数据添加");
+
+					String base = "SRcPGGSjLoNXJeLxOX3Kt9DpPh29f8wbQFLqZJLXciQObsGuhHwKZ10l8l6fLq9XZaqWyHrrCnVzOC71UVzjuKn4S3dT4lRGoIze";
+					StringBuffer content = new StringBuffer(base);
+					content.append(base);
+					content.append(base);
+					content.append(base);
+					content.append(base);
+					content.append(base);
+					content.append(base);
+					content.append(base);
+					content.append(base);
+					content.append(base);
+
+					map.put("tablename",content.toString());
+					metadataManagementService.addMetadataForBigdata(map);
+					if(i%500==0){
+						System.out.println("线程三： "+i);
+					}
+				}
+			}  
+		}); 
+		System.out.println("开始插入元数据");
 	}
 
 	/**

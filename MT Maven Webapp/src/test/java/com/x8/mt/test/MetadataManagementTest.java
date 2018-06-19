@@ -274,7 +274,7 @@ public class MetadataManagementTest {
 		HttpServletResponse response = null;
 		Map<String, Object> map = null;
 
-		for(int i=0;i<100000;i++){
+		for(int i=0;i<900000;i++){
 			map = new HashMap<String, Object>();
 			map.put("metamodelId", 31);
 			map.put("parentMetadataId", 3072);
@@ -295,7 +295,7 @@ public class MetadataManagementTest {
 
 			map.put("tablename",content.toString());
 			metadataManagementController.addMetadataStepThree(request, response, map);
-			if(i%5000==0){
+			if(i%500==0){
 				System.out.println(i);
 			}
 		}

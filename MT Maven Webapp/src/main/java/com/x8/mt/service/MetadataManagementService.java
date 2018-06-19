@@ -538,6 +538,40 @@ public class MetadataManagementService {
 
 		return metadataId;
 	}
+	
+	/**
+	 * 
+	 * 作者:allen
+	 * 时间:2018年6月18日
+	 * 作用:批量导入元数据
+	 */
+	public void addMetadataForBigdata(Map<String,Object> map){
+
+		String parentMetadataIdStr = map.get("parentMetadataId").toString();
+		String metamodelIdStr = map.get("metamodelId").toString();
+		Date dataTime = new Date();
+
+		//1.将元数据加入到metadata表
+		Metadata metadata = new Metadata();
+		metadata.setMETAMODELID(Integer.parseInt(metamodelIdStr));
+		metadata.setNAME(map.get("NAME").toString());
+		metadata.setDESCRIPTION(map.get("DESCRIPTION").toString());
+		metadata.setCHECKSTATUS("1");
+		metadata.setCREATETIME(dataTime);
+		metadata.setUPDATETIME(dataTime);
+		metadata.setVERSION(1);
+
+		map.remove("metamodelId");
+		map.remove("NAME");
+		map.remove("DESCRIPTION");
+		map.remove("parentMetadataId");
+
+		metadata.setATTRIBUTES(JSONObject.fromObject(map).toString());
+
+		if(!(imetadataManagementDao.insertMetadata(metadata)>0)){
+			throw new RuntimeException("insertMetadata Error");
+		}
+	}
 
 	/**
 	 * 
@@ -839,12 +873,12 @@ public class MetadataManagementService {
 	@Transactional
 	public void importExcelFileProtocolMetadata(XSSFSheet sheet,String protocolId) throws Exception {
 		int rowNum = 1;
-		while((rowNum<=sheet.getLastRowNum())
+		while((sheet.getRow(rowNum).getCell(0)!=null)
+				&&(rowNum<=sheet.getLastRowNum())
 				&&(sheet.getRow(rowNum).getCell(GlobalMethodAndParams.excel_TypeTag_CellNum).toString().equals(GlobalMethodAndParams.excel_TypeTag_Array)
 						||sheet.getRow(rowNum).getCell(GlobalMethodAndParams.excel_TypeTag_CellNum).toString().equals(GlobalMethodAndParams.excel_TypeTag_Param))){
-
+			
 			Row row=sheet.getRow(rowNum);
-
 			if(row.getCell(GlobalMethodAndParams.excel_TypeTag_CellNum).toString().equals(GlobalMethodAndParams.excel_TypeTag_Array)){//参数组
 				int paramArrayMetadataId = addExcelParamArrayMetadata(row,protocolId);
 				if(paramArrayMetadataId<=0){

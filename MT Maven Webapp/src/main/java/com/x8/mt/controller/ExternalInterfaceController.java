@@ -92,9 +92,8 @@ public class ExternalInterfaceController {
 	@Log(operationType="metadata",operationDesc="外部接口-根据一个协议type获取该类型的全部协议元数据")
 	public JSONObject getProtocolMetadataByprotocolType(HttpServletRequest request,
 			HttpServletResponse response,@RequestBody Map<String,String> map){
+		
 		JSONObject responsejson = new JSONObject();
-
-		//GlobalMethodAndParams.setHttpServletResponse(request, response);
 
 		//检测参数是否正确
 		if(!map.containsKey("protocolType")){
@@ -134,9 +133,8 @@ public class ExternalInterfaceController {
 	@Log(operationType="metadata",operationDesc="外部接口-根据一个协议id获取该协议的元数据")
 	public JSONObject getProtocolMetadataByprotocolId(HttpServletRequest request,
 			HttpServletResponse response,@RequestBody Map<String,String> map){
+		
 		JSONObject responsejson = new JSONObject();
-
-		//GlobalMethodAndParams.setHttpServletResponse(request, response);
 
 		//检测参数是否正确
 		if(!map.containsKey("protocolId")){

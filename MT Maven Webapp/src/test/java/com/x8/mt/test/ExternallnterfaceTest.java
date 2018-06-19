@@ -55,7 +55,7 @@ public class ExternallnterfaceTest {
 		map.put("protocolType", "modbus");
 		//map.put("protocolType11", "aaa");
 		
-		System.out.println(externalInterfaceController.getProtocolMetadataByprotocolType(request, response,map));
+		//System.out.println(externalInterfaceController.getProtocolMetadataByprotocolType(request, response,map));
 	}
 	
 	@Test
@@ -66,7 +66,7 @@ public class ExternallnterfaceTest {
 		map.put("protocolId", "GFFH");
 		//map.put("protocolType", "opc");
 		
-		System.out.println(externalInterfaceController.getProtocolMetadataByprotocolId(request, response,map));
+		//System.out.println(externalInterfaceController.getProtocolMetadataByprotocolId(request, response,map));
 	}
 	
 	@Test
