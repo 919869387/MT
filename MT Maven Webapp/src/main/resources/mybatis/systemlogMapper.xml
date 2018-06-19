@@ -8,17 +8,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		select count(*) from
 		systemlog 
 		where operationtype in (
-		'METADATA_COLLECT',
-		'METADATA_CREATE',
-		'METADATA_UPDATE',
-		'METADATA_DELETE'
+		'metadata',
+		'collectjob'
 		) and 
 		startdatetime > (
 			select 
 			enddatetime 
 			from systemlog 
 			where 
-			systemusername = #{systemusername} order by startdatetime desc limit 1
+			systemusername = #{systemusername} and operationdesc like '%用户登出%' order by startdatetime desc limit 1
 		)
 	</select>
 
