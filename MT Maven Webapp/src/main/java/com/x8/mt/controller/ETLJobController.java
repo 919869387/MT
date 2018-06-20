@@ -672,7 +672,7 @@ public class ETLJobController {
 		} catch (Exception e) {
 		}
 		//获取总记录数
-		int rowCount = etlJobService.getRowCount(""，"");
+		int rowCount = etlJobService.getRowCount("","");
 		//构造分页数据
 		PageParam pageParam = new PageParam();
 		pageParam.setPageSize(pageSize);
