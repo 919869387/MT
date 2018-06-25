@@ -6,6 +6,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -220,11 +221,9 @@ public class MetadataManagementController {
 		GlobalMethodAndParams.setHttpServletResponse(request, response);
 
 		String protocolId = request.getParameter("protocolId");
-		protocolId = new String(protocolId.getBytes("iso8859-1"),"utf-8");
 		
 		String filename =request.getParameter("filename");
-		filename = new String(filename.getBytes("iso8859-1"),"utf-8");
-
+		
 		JSONObject protocolMetadata = externalInterfaceService.getProtocolMetadataByprotocolId(protocolId);
 		
 		if(protocolMetadata==null){

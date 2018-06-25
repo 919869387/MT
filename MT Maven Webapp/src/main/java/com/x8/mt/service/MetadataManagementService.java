@@ -873,11 +873,13 @@ public class MetadataManagementService {
 	@Transactional
 	public void importExcelFileProtocolMetadata(XSSFSheet sheet,String protocolId) throws Exception {
 		int rowNum = 1;
-		while((sheet.getRow(rowNum).getCell(0)!=null)
+
+		while((sheet.getRow(rowNum)!=null)
+				&&(sheet.getRow(rowNum).getCell(0)!=null)
 				&&(rowNum<=sheet.getLastRowNum())
 				&&(sheet.getRow(rowNum).getCell(GlobalMethodAndParams.excel_TypeTag_CellNum).toString().equals(GlobalMethodAndParams.excel_TypeTag_Array)
 						||sheet.getRow(rowNum).getCell(GlobalMethodAndParams.excel_TypeTag_CellNum).toString().equals(GlobalMethodAndParams.excel_TypeTag_Param))){
-			
+			//System.out.println(rowNum);
 			Row row=sheet.getRow(rowNum);
 			if(row.getCell(GlobalMethodAndParams.excel_TypeTag_CellNum).toString().equals(GlobalMethodAndParams.excel_TypeTag_Array)){//参数组
 				int paramArrayMetadataId = addExcelParamArrayMetadata(row,protocolId);
